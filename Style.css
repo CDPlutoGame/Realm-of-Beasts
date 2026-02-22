@@ -1,239 +1,169 @@
+/* style.css — Mobile + Desktop (PWA friendly) */
+
 :root{
-  --text:#f1f1f1;
-  --muted:#cfcfcf;
-  --border:rgba(255,255,255,0.18);
-  --card:rgba(0,0,0,0.65);
-  --shadow:0 18px 45px rgba(0,0,0,0.55);
-  --radius:18px;
+  --bg:#0b0b0b;
+  --panel:rgba(0,0,0,.55);
+  --border:rgba(255,255,255,.12);
+  --text:#fff;
+  --muted:rgba(255,255,255,.75);
+  --gap:12px;
 }
 
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
-
 body{
   margin:0;
-  font-family: system-ui, Arial;
+  background:var(--bg);
   color:var(--text);
-
-  background-image: url("images/dungeon.png"); /* <-- Pfad prüfen! */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  overflow-x:hidden;
 }
 
-/* dunkler Overlay drüber */
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.65);
-  z-index:-1;
+h1{
+  margin:12px 12px 0;
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:.2px;
 }
-
-h1{ text-align:center; margin:18px 0 8px; }
 
 #app{
+  padding:12px;
+  width:100%;
   max-width:1100px;
   margin:0 auto;
-  padding:14px;
 }
 
-/* obere & untere Leiste */
-#uiRow1,#uiRow2{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  align-items:center;
-  justify-content:center
-}
-#uiRow2{margin-bottom:12px}
-#uiRow1{margin-top:14px;margin-bottom:12px}
-
-button,input{
-  padding:10px 12px;
+/* Panels */
+#statusPanel, #rightCol, #fightPanel, #hud, #shop, #leaderboard, #log{
+  background:var(--panel);
+  border:1px solid var(--border);
   border-radius:14px;
+  backdrop-filter: blur(6px);
+}
+
+/* Desktop layout (wird in game.js gesetzt) – wir sorgen nur für Optik */
+#statusPanel{ padding:10px; }
+#hud{ padding:10px; background:transparent; border:none; }
+#rightCol{ padding:10px; background:transparent; border:none; }
+
+#uiRow1{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:8px 0 10px;
+}
+
+#uiRow1 button{
+  flex:1 1 auto;
+  padding:10px 12px;
+  border-radius:12px;
   border:1px solid var(--border);
   background:rgba(255,255,255,.08);
-  color:inherit;
+  color:var(--text);
+  font-weight:800;
+  cursor:pointer;
 }
-button{cursor:pointer;font-weight:900}
-button:disabled{opacity:.45;cursor:not-allowed}
+#uiRow1 button:disabled{ opacity:.45; cursor:not-allowed; }
 
-/* Kampf + Board nebeneinander */
 #mainArea{
-  display:grid;
-  grid-template-columns:260px 1fr;
-  gap:16px;
-  align-items:start;
-}
-
-/* ✅ linke Spalte: Fight + Log */
-#leftCol{
   display:flex;
-  flex-direction:column;
-  gap:12px;
+  gap:var(--gap);
+  align-items:flex-start;
 }
 
-/* Kampf-Fenster */
+#leftCol{ flex:1; min-width:320px; }
+
 #fightPanel{
-  width:260px;
-  aspect-ratio: 1 / 1;
-  background:rgba(0,0,0,.55);
-  border:1px solid rgba(255,255,255,.18);
-  border-radius:18px;
-  padding:14px;
-  overflow:hidden;
+  padding:10px;
+  min-height:260px;
 }
 
-/* ✅ Log direkt darunter */
 #log{
-  margin:0;
+  margin-top:10px;
+  padding:10px;
   white-space:pre-wrap;
   color:var(--muted);
-  background:rgba(0,0,0,.55);
-  border:1px solid rgba(255,255,255,.18);
-  border-radius:18px;
-  padding:12px;
-  max-height:180px;
-  overflow:auto;
+  font-size:12px;
+  min-height:64px;
 }
 
-/* Board */
-#board{
-  display:grid;
-  grid-template-columns:repeat(6, 70px);
-  justify-content:center;
-  gap:10px;
+#shop{
+  padding:10px;
 }
-.tile{
-  position:relative;
-  width:70px;
-  height:70px;
+
+#shop button{
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.08);
+  color:var(--text);
+  font-weight:800;
+  cursor:pointer;
+}
+#shop button:disabled{ opacity:.45; cursor:not-allowed; }
+
+#leaderboard{
+  padding:10px;
+}
+
+#board{
   display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-content:flex-start;
+}
+
+/* Tiles */
+.tile{
+  width:52px;
+  height:52px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.06);
+  display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.18);
-  background:rgba(0,0,0,.55);
-  font-weight:900;
-  box-shadow:var(--shadow);
+  position:relative;
+  overflow:hidden;
 }
 .tileNum{
   position:absolute;
-  top:6px;
-  left:8px;
-  font-size:12px;
-  font-weight:900;
-  color:#fff;
-  text-shadow:0 2px 6px rgba(0,0,0,.9);
+  top:4px;
+  left:6px;
+  font-size:10px;
+  opacity:.75;
 }
-.tileIcon{ font-size:20px; }
-.player{
-  outline:3px solid rgba(255,140,40,.5);
-  box-shadow:0 0 14px rgba(255,120,0,.45);
+.tileIcon{
+  font-size:20px;
+  line-height:1;
 }
-
-/* HUD + Shop */
-#hudWrapper{
-  display:flex;
-  gap:14px;
-  margin-top:16px
-}
-#hud,#shop,#leaderboard{
-  border-radius:18px;
-  border:1px solid rgba(255,255,255,.18);
-  background:rgba(0,0,0,.55);
-  padding:14px;
-  box-shadow:var(--shadow);
-}
-#hud,#shop{ flex:1; }
-#leaderboard{ margin-top:12px; }
-
-/* responsive */
-@media(max-width:1050px){
-  #mainArea{ grid-template-columns:1fr; }
-  #fightPanel{ width:100%; aspect-ratio:auto; min-height:240px; }
-}
-@media(max-width:720px){
-  #board{ grid-template-columns: repeat(5, 60px); gap:8px; }
-  .tile{ width:60px; height:60px; }
-  button, input{ flex:1; min-width:0; }
-}
-@media(max-width:900px){
-  #hudWrapper{ flex-direction:column; }
-}
-#soundBtn{
-  position:fixed;
-  top:12px;
-  right:12px;
-  z-index:9999;
-  padding:10px 12px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.18);
-  background:rgba(0,0,0,.55);
-  color:#fff;
-  cursor:pointer;
-  font-weight:900;
-}
-#volumeWrap{
-  position:fixed;
-  top:12px;
-  right:64px;
-  z-index:9999;
-  padding:10px 12px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.18);
-  background:rgba(0,0,0,.55);
-}
-#volumeSlider{ width:120px; }
-/* ===== Buttons Rot-Orange Style ===== */
-button{
-  padding:10px 16px;
-  border-radius:14px;
-  border:none;
-  cursor:pointer;
-  font-weight:800;
-  color:#fff;
-
-  background:linear-gradient(135deg,#ff7a18,#ff4d6d);
-  box-shadow:0 4px 12px rgba(255,80,0,0.4);
-
-  transition:all 0.2s ease;
+.tile.player{
+  outline:2px solid rgba(124,252,154,.7);
+  background:rgba(124,252,154,.10);
 }
 
-button:hover{
-  transform:translateY(-2px);
-  box-shadow:0 6px 18px rgba(255,80,0,0.6);
+/* ===== MOBILE ===== */
+@media (max-width: 920px){
+  #app{ max-width:100%; }
+  #mainArea{ flex-direction:column; }
+  #leftCol{ min-width:0; width:100%; }
+  #board{ width:100%; }
 }
 
-button:active{
-  transform:scale(0.96);
-}
-
-button:disabled{
-  opacity:0.4;
-  cursor:not-allowed;
-  box-shadow:none;
-
-}
-/* ===== Mobile Fix ===== */
-html, body { margin:0; padding:0; max-width:100%; overflow-x:hidden; }
-#app { box-sizing:border-box; max-width:100%; }
-
-/* Status + Spiel untereinander auf Handy */
 @media (max-width: 820px){
-  #app { display:block !important; padding:10px; }
-  #statusPanel, #rightCol, #mainArea, #leftCol, #board { width:100% !important; min-width:0 !important; }
-  #mainArea { display:block !important; }
-  #uiRow1 { display:flex; flex-wrap:wrap; gap:8px; }
-  #uiRow1 button { flex:1 1 auto; }
+  /* game.js setzt #app als flex – auf Handy erzwingen wir Stack */
+  #app{ display:block !important; }
+  #statusPanel{ width:100% !important; min-width:0 !important; margin-bottom:10px; }
+  #rightCol{ width:100% !important; min-width:0 !important; }
+  #mainArea{ display:block !important; }
 }
 
-/* Board Tiles kleiner, damit es passt */
+/* sehr kleine Handys */
 @media (max-width: 480px){
-  #board { gap:6px; }
-  .tile { width:44px; height:44px; }
-  .tileNum { font-size:10px; }
-  .tileIcon { font-size:18px; }
+  h1{ font-size:16px; }
+  #board{ gap:6px; }
+  .tile{ width:44px; height:44px; border-radius:10px; }
+  .tileIcon{ font-size:18px; }
+  #uiRow1 button{ padding:10px 10px; font-size:14px; }
 }
