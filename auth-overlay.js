@@ -1,6 +1,7 @@
 // auth-overlay.js — FINAL (Register/Login Overlay + Status/Logout oben rechts)
-// ✅ funktioniert ohne nameInput/nameConfirmButton (game.js v12)
-// ✅ hält Overlay-State immer korrekt
+// ✅ Mobile-friendly (safe-area, kein Zoom, Buttons untereinander)
+// ✅ arbeitet mit ranking-online.js (window.__ONLINE_AUTH__)
+// ✅ schreibt nameKey nach localStorage für game.js
 (function () {
   function removeNewGameAndReloadOnly() {
     document.getElementById("newGameButton")?.remove();
@@ -15,19 +16,70 @@
     const s = document.createElement("style");
     s.id = "authOverlayStyle";
     s.textContent = `
-      #authOverlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;z-index:9999}
-      #authCard{width:min(520px,92vw);background:#121212;color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:18px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;box-shadow:0 18px 60px rgba(0,0,0,.5)}
-      #authCard h2{margin:0 0 10px 0;font-size:20px}
+      :root{ --safeTop: env(safe-area-inset-top, 0px); --safeBottom: env(safe-area-inset-bottom, 0px); }
+
+      #authOverlay{
+        position:fixed; inset:0;
+        background:rgba(0,0,0,.72);
+        display:flex; align-items:center; justify-content:center;
+        z-index:9999;
+        padding: calc(12px + var(--safeTop)) 12px calc(12px + var(--safeBottom));
+        box-sizing:border-box;
+      }
+
+      #authCard{
+        width:min(420px, 92vw);
+        background:#121212; color:#fff;
+        border:1px solid rgba(255,255,255,.12);
+        border-radius:14px;
+        padding:16px;
+        font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+        box-shadow:0 18px 60px rgba(0,0,0,.5);
+        box-sizing:border-box;
+      }
+
+      #authCard h2{margin:0 0 10px 0;font-size:18px}
       #authCard .row{display:flex;gap:10px;margin:10px 0}
-      #authCard input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#1b1b1b;color:#fff;outline:none}
-      #authCard button{padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+      #authCard input{
+        flex:1;
+        padding:12px 12px;
+        border-radius:12px;
+        border:1px solid rgba(255,255,255,.18);
+        background:#1b1b1b; color:#fff; outline:none;
+        font-size:16px; /* iPhone: verhindert Zoom */
+      }
+      #authCard button{padding:12px 12px;border-radius:12px;border:none;cursor:pointer;font-weight:800;font-size:15px}
       #btnRegister{background:#2b8a3e;color:#fff}
       #btnLogin{background:#1f6feb;color:#fff}
       #authMsg{min-height:18px;opacity:.95;font-size:13px}
 
-      #authTopRight{position:fixed;right:12px;top:12px;z-index:10000;display:flex;gap:8px;align-items:center}
-      #authStatus{background:rgba(0,0,0,.55);color:#fff;padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.12);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;font-size:12px}
-      #authLogout{display:none;background:#b42318;color:#fff;padding:8px 10px;border-radius:10px;border:none;cursor:pointer;font-weight:800}
+      #authTopRight{
+        position:fixed;
+        right:10px;
+        top: calc(10px + var(--safeTop));
+        z-index:10000;
+        display:flex; gap:8px; align-items:center;
+      }
+      #authStatus{
+        background:rgba(0,0,0,.55); color:#fff;
+        padding:8px 10px; border-radius:10px;
+        border:1px solid rgba(255,255,255,.12);
+        font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+        font-size:12px;
+        max-width: 62vw;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      #authLogout{display:none;background:#b42318;color:#fff;padding:8px 10px;border-radius:10px;border:none;cursor:pointer;font-weight:900}
+
+      /* Handy: Buttons untereinander statt gequetscht */
+      @media (max-width: 420px){
+        #authCard{width: 96vw; padding:14px}
+        #authCard .row{flex-direction:column}
+        #authTopRight{left:10px; right:10px; justify-content:space-between}
+        #authStatus{max-width: 60vw}
+      }
     `;
     document.head.appendChild(s);
   }
@@ -41,7 +93,6 @@
   }
 
   function setNameIntoGame(nameKey) {
-    // game.js v12 liest nur localStorage + polling -> reicht völlig
     try { localStorage.setItem("mbr_current_name_online_v10", String(nameKey || "")); } catch {}
   }
 
@@ -158,7 +209,7 @@
       }
     };
 
-    // ✅ Initialer Zustand (wartet bis ranking-online.js da ist)
+    // ✅ Initial
     (async () => {
       const ok = await waitAuthLoaded();
       if (!ok) return setMsg("❌ Online-Login nicht geladen (ranking-online.js).", false);
@@ -168,11 +219,10 @@
       else showLoggedOut();
     })();
 
-    // ✅ Overlay-State immer korrekt halten (JETZT im richtigen Scope)
+    // ✅ State sync
     setInterval(() => {
       const st = window.__ONLINE_AUTH__?.status;
       if (!st) return;
-
       if (st.loggedIn) showLoggedIn(st.nameKey || "");
       else showLoggedOut();
     }, 300);
