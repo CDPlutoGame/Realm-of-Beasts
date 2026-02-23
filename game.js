@@ -1,4 +1,4 @@
-// ===== Monster Browser Game (ONLINE) - stable + mobile score upload =====
+// ===== Monster Browser Game (ONLINE) - stable + SOUND + mobile safe =====
 (() => {
   if (window.__MBR_LOADED__) return;
   window.__MBR_LOADED__ = true;
@@ -49,99 +49,6 @@
     return el;
   }
   function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
-  function safeLog(msg) { logEl.textContent = String(msg ?? ""); }
-
-// ---------------- SOUND (tap-to-start, mobile safe) ----------------
-const MUSIC_LIST = ["sounds/music/bg1.mp3","sounds/music/bg2.mp3","sounds/music/bg3.mp3"];
-const SFX_ATTACK_SRC = "sounds/attack.mp3";
-const SFX_HIT_SRC    = "sounds/hit.mp3";
-
-const bgMusic = new Audio();
-bgMusic.preload = "auto";
-bgMusic.loop = false;
-
-let soundMuted = true;
-let baseVolume = 0.4;
-let currentMusicIndex = -1;
-
-function pickNextRandomIndex(){
-  if (MUSIC_LIST.length === 0) return -1;
-  if (MUSIC_LIST.length === 1) return 0;
-  let idx;
-  do { idx = Math.floor(Math.random() * MUSIC_LIST.length); }
-  while (idx === currentMusicIndex);
-  return idx;
-}
-
-function playRandomMusic(){
-  if (soundMuted) return;
-  const idx = pickNextRandomIndex();
-  if (idx < 0) return;
-  currentMusicIndex = idx;
-  bgMusic.src = MUSIC_LIST[idx];
-  bgMusic.currentTime = 0;
-  bgMusic.volume = baseVolume;
-  bgMusic.muted = false;
-  bgMusic.play().catch(()=>{});
-}
-
-bgMusic.addEventListener("ended", () => playRandomMusic());
-
-function playSfx(src, extra = 0.25) {
-  if (soundMuted) return;
-  const a = new Audio(src);
-  a.volume = Math.min(1, baseVolume + extra);
-  a.play().catch(()=>{});
-}
-
-// Button + Slider
-const audioBox = document.createElement("div");
-audioBox.style.position = "fixed";
-audioBox.style.left = "6px";
-audioBox.style.top = "6px";
-audioBox.style.zIndex = "10001";
-audioBox.style.background = "rgba(0,0,0,0.45)";
-audioBox.style.padding = "3px 5px";
-audioBox.style.borderRadius = "6px";
-audioBox.style.display = "flex";
-audioBox.style.alignItems = "center";
-audioBox.style.gap = "6px";
-audioBox.style.border = "1px solid rgba(255,255,255,0.1)";
-
-const soundBtn = document.createElement("button");
-soundBtn.type = "button";
-soundBtn.textContent = "🔇";
-soundBtn.style.padding = "2px 6px";
-soundBtn.style.borderRadius = "6px";
-
-const volumeSlider = document.createElement("input");
-volumeSlider.type = "range";
-volumeSlider.min = "0";
-volumeSlider.max = "1";
-volumeSlider.step = "0.01";
-volumeSlider.value = String(baseVolume);
-volumeSlider.style.width = "70px";
-
-audioBox.appendChild(soundBtn);
-audioBox.appendChild(volumeSlider);
-document.body.appendChild(audioBox);
-
-soundBtn.onclick = () => {
-  soundMuted = !soundMuted;
-  soundBtn.textContent = soundMuted ? "🔇" : "🔊";
-  if (!soundMuted) playRandomMusic();
-  else bgMusic.pause();
-};
-
-volumeSlider.addEventListener("input", () => {
-  baseVolume = parseFloat(volumeSlider.value);
-  bgMusic.volume = baseVolume;
-});
-
-// iOS/Android: Audio startet erst nach User-Tap
-document.addEventListener("pointerdown", () => {
-  if (!soundMuted && bgMusic.paused) playRandomMusic();
-}, { once: true });
 
   // ---------------- STORAGE ----------------
   function loadProfiles() {
@@ -158,21 +65,22 @@ document.addEventListener("pointerdown", () => {
     all[name] = { ...meta };
     saveProfiles(all);
   }
-
   function loadAnyName() {
     return (
       (localStorage.getItem(CURRENT_NAME_KEY) || "").trim() ||
       (localStorage.getItem("mobileUser") || "").trim() ||
-      (localStorage.getItem("pcUser") || "").trim()
+      (localStorage.getItem("pcUser") || "").trim() ||
+      (localStorage.getItem("playerName") || "").trim()
     );
   }
-
   function persistIfNamed() {
     if (playerName) saveProfile(playerName, meta);
   }
 
-  // ---------------- UI ----------------
-  const app = ensureEl("app", "div");
+  // ---------------- UI ROOT ----------------
+  // Damit wirklich was sichtbar ist, bauen wir #app immer neu in den Body.
+  const app = ensureEl("app", "div", document.body);
+
   const statusPanel = ensureEl("statusPanel", "div", app);
   const rightCol = ensureEl("rightCol", "div", app);
 
@@ -198,9 +106,105 @@ document.addEventListener("pointerdown", () => {
   const shopEl = ensureEl("shop", "div", hudWrapper);
   const leaderboardEl = ensureEl("leaderboard", "div", rightCol);
 
+  function safeLog(msg) { logEl.textContent = String(msg ?? ""); }
+
+  // ---------------- SOUND (tap-to-start, mobile safe) ----------------
+  const MUSIC_LIST = ["sounds/music/bg1.mp3","sounds/music/bg2.mp3","sounds/music/bg3.mp3"];
+  const SFX_HIT_SRC = "sounds/hit.mp3";
+
+  const bgMusic = new Audio();
+  bgMusic.preload = "auto";
+  bgMusic.loop = false;
+
+  let soundMuted = true;     // 🔇 start stumm (Button schaltet auf 🔊)
+  let baseVolume = 0.4;
+  let currentMusicIndex = -1;
+
+  function pickNextRandomIndex(){
+    if (MUSIC_LIST.length === 0) return -1;
+    if (MUSIC_LIST.length === 1) return 0;
+    let idx;
+    do { idx = Math.floor(Math.random() * MUSIC_LIST.length); }
+    while (idx === currentMusicIndex);
+    return idx;
+  }
+
+  function playRandomMusic(){
+    if (soundMuted) return;
+    const idx = pickNextRandomIndex();
+    if (idx < 0) return;
+    currentMusicIndex = idx;
+    bgMusic.src = MUSIC_LIST[idx];
+    bgMusic.currentTime = 0;
+    bgMusic.volume = baseVolume;
+    bgMusic.muted = false;
+    bgMusic.play().catch(()=>{});
+  }
+
+  bgMusic.addEventListener("ended", () => playRandomMusic());
+
+  // Stabiler Hit-Sound (re-use)
+  const hitAudio = new Audio(SFX_HIT_SRC);
+  hitAudio.preload = "auto";
+
+  function playHit(extra = 0.25){
+    if (soundMuted) return;
+    hitAudio.currentTime = 0;
+    hitAudio.volume = Math.min(1, baseVolume + extra);
+    hitAudio.play().catch(()=>{});
+  }
+
+  // Button + Slider
+  const audioBox = document.createElement("div");
+  audioBox.style.position = "fixed";
+  audioBox.style.left = "6px";
+  audioBox.style.top = "6px";
+  audioBox.style.zIndex = "10001";
+  audioBox.style.background = "rgba(0,0,0,0.45)";
+  audioBox.style.padding = "3px 5px";
+  audioBox.style.borderRadius = "6px";
+  audioBox.style.display = "flex";
+  audioBox.style.alignItems = "center";
+  audioBox.style.gap = "6px";
+  audioBox.style.border = "1px solid rgba(255,255,255,0.1)";
+
+  const soundBtn = document.createElement("button");
+  soundBtn.type = "button";
+  soundBtn.textContent = "🔇";
+  soundBtn.style.padding = "2px 6px";
+  soundBtn.style.borderRadius = "6px";
+
+  const volumeSlider = document.createElement("input");
+  volumeSlider.type = "range";
+  volumeSlider.min = "0";
+  volumeSlider.max = "1";
+  volumeSlider.step = "0.01";
+  volumeSlider.value = String(baseVolume);
+  volumeSlider.style.width = "70px";
+
+  audioBox.appendChild(soundBtn);
+  audioBox.appendChild(volumeSlider);
+  document.body.appendChild(audioBox);
+
+  soundBtn.onclick = () => {
+    soundMuted = !soundMuted;
+    soundBtn.textContent = soundMuted ? "🔇" : "🔊";
+    if (!soundMuted) playRandomMusic();
+    else bgMusic.pause();
+  };
+
+  volumeSlider.addEventListener("input", () => {
+    baseVolume = parseFloat(volumeSlider.value);
+    bgMusic.volume = baseVolume;
+  });
+
+  // iOS/Android: Audio startet erst nach User-Tap
+  document.addEventListener("pointerdown", () => {
+    if (!soundMuted && bgMusic.paused) playRandomMusic();
+  }, { once: true });
+
   // ---------------- ONLINE RANKING ----------------
   let __rankTries = 0;
-
   async function renderLeaderboard() {
     if (!window.__ONLINE_RANKING__) {
       __rankTries++;
@@ -306,6 +310,7 @@ document.addEventListener("pointerdown", () => {
       const tile = document.createElement("div");
       tile.className = "tile";
       const t = tiles[i];
+
       let icon = "";
       if (t === "monster_easy") icon = "🐸";
       else if (t === "monster_medium") icon = "🐺";
@@ -450,6 +455,7 @@ document.addEventListener("pointerdown", () => {
     if (type === "monster_easy") base = { kind:"mob", name:"Froschling", hp:10, atk:3, icon:"🐸" };
     else if (type === "monster_medium") base = { kind:"mob", name:"Wolfsjäger", hp:18, atk:5, icon:"🐺" };
     else base = { kind:"mob", name:"Bärenwächter", hp:30, atk:8, icon:"🐻" };
+
     const hp = base.hp + lvl * ENEMY_HP_BUFF;
     const atk = base.atk + lvl * ENEMY_ATK_BUFF;
     return { ...base, hp, maxHp: hp, atk };
@@ -510,7 +516,6 @@ document.addEventListener("pointerdown", () => {
 
     if (monster?.kind === "boss") meta.bossesDefeated += 1;
     meta.gold += reward;
-
     persistIfNamed();
 
     if (tiles[playerPos] && String(tiles[playerPos]).startsWith("monster_")) {
@@ -545,10 +550,8 @@ document.addEventListener("pointerdown", () => {
       bossesKilled
     };
 
-    // ✅ Handy-safe: erst lokal speichern
     localStorage.setItem("mbr_pending_score", JSON.stringify(payload));
 
-    // ✅ dann retry bis es klappt
     const t = setInterval(() => {
       if (!window.__ONLINE_RANKING__) return;
       window.__ONLINE_RANKING__.submitScore(payload)
@@ -567,36 +570,47 @@ document.addEventListener("pointerdown", () => {
     safeLog("💀 Game Over! Shop ist aktiv.");
   }
 
+  // ✅ FIXED attack()
   function attack() {
-  if (!inFight || !monster) return;
+    if (!inFight || !monster) return;
 
-  const playerDmg = Math.max(1, meta.attackPower + (Math.floor(Math.random() * 5) - 2));
+    const playerDmg = Math.max(1, meta.attackPower + (Math.floor(Math.random() * 5) - 2));
 
-  // ✅ Gegner bekommt Schaden
-  monster.hp -= playerDmg;
+    // Gegner bekommt Schaden
+    monster.hp -= playerDmg;
 
-  // ✅ Hit-Sound beim Treffer
-  playSfx(SFX_HIT_SRC, 0.25);
+    // Hit-Sound
+    playHit(0.25);
 
-  // ✅ UI updaten
-  renderFightPanel();
+    // UI updaten
+    renderFightPanel();
 
-  // ✅ Gegner tot?
-  if (monster.hp <= 0) return endFightWin();
+    // Gegner tot?
+    if (monster.hp <= 0) return endFightWin();
 
-  // Gegner schlägt zurück
-  const enemyDmg = Math.floor(Math.random() * monster.atk) + 1;
-  playerHp -= enemyDmg;
+    // Gegner schlägt zurück
+    const enemyDmg = Math.floor(Math.random() * monster.atk) + 1;
+    playerHp -= enemyDmg;
 
-  if (playerHp <= 0) {
-    playerHp = 0;
-    updateHud();
-    return gameOver();
+    if (playerHp <= 0) {
+      playerHp = 0;
+      updateHud();
+      return gameOver();
+    }
+
+    updateHud(); renderShop(); refreshUsePotionButton();
+    safeLog(`⚔️ Du machst ${playerDmg} Schaden.\n💀 Gegner macht ${enemyDmg} Schaden.`);
   }
 
-  updateHud(); renderShop(); refreshUsePotionButton();
-  safeLog(`⚔️ Du machst ${playerDmg} Schaden.\n💀 Gegner macht ${enemyDmg} Schaden.`);
-}
+  function usePotion() {
+    if (meta.potions <= 0) return;
+    if (playerHp >= meta.maxHpBase) return safeLog("❤️ Schon voll.");
+    meta.potions -= 1;
+    playerHp = Math.min(meta.maxHpBase, playerHp + POTION_HEAL);
+    persistIfNamed();
+    updateHud(); renderShop(); refreshUsePotionButton();
+    safeLog(`🧪 Trank genutzt: +5 HP. Übrig: ${meta.potions}`);
+  }
 
   // ---------------- SPIN ----------------
   function spin() {
@@ -632,13 +646,13 @@ document.addEventListener("pointerdown", () => {
     }
 
     if (t === "loot") {
-      const gold = Math.floor(Math.random() * 11) + 5;
-      meta.gold += gold;
+      const g = Math.floor(Math.random() * 11) + 5;
+      meta.gold += g;
       tiles[playerPos] = "normal";
       persistIfNamed();
       renderBoard();
       updateHud(); renderShop(); refreshUsePotionButton();
-      return safeLog(`💰 Loot! +${gold} Gold. Runde ${rounds}`);
+      return safeLog(`💰 Loot! +${g} Gold. Runde ${rounds}`);
     }
 
     renderBoard();
