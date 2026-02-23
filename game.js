@@ -210,34 +210,49 @@
   }, { once: true });
 
   // ---------------- ONLINE RANKING ----------------
-  let __rankTries = 0;
-  async function renderLeaderboard() {
-    if (!window.__ONLINE_RANKING__) {
-      __rankTries++;
-      leaderboardEl.innerHTML =
-        `<b>🏆 Bestenliste (Top 10 – Online)</b><br>` +
-        `⏳ Online Ranking startet... (${__rankTries})`;
-      if (__rankTries < 60) setTimeout(renderLeaderboard, 250);
-      else leaderboardEl.innerHTML =
-        `<b>🏆 Bestenliste (Top 10 – Online)</b><br>` +
-        `❌ Online Ranking nicht geladen.`;
-      return;
-    }
+let __rankTries = 0;
+async function renderLeaderboard() {
+  // Scrollbar + Höhe (damit man mehr als Platz 1 sehen kann)
+  leaderboardEl.style.maxHeight = "260px";
+  leaderboardEl.style.overflowY = "auto";
+  leaderboardEl.style.padding = "10px";
+  leaderboardEl.style.borderRadius = "10px";
+  leaderboardEl.style.background = "rgba(0,0,0,0.35)";
+  leaderboardEl.style.border = "1px solid rgba(255,255,255,0.15)";
 
-    let arr = [];
-    try { arr = await window.__ONLINE_RANKING__.top10(); } catch { arr = []; }
+  const TITLE = "🏆 Bestenliste (Top 3 – Online)";
 
-    let html = `<b>🏆 Bestenliste (Top 10 – Online)</b><br>`;
-    if (!arr.length) html += `Noch keine Einträge.`;
-    else {
-      html += `<ol style="margin:10px 0 0 18px;padding:0;">`;
-      for (const e of arr) {
-        html += `<li><b>${e.name}</b> — Runden: <b>${e.rounds}</b> | Monster: <b>${e.monstersKilled || 0}</b> | Bosse: <b>${e.bossesKilled || 0}</b></li>`;
-      }
-      html += `</ol>`;
-    }
-    leaderboardEl.innerHTML = html;
+  if (!window.__ONLINE_RANKING__) {
+    __rankTries++;
+    leaderboardEl.innerHTML =
+      `<b>${TITLE}</b><br>` +
+      `⏳ Online Ranking startet... (${__rankTries})`;
+    if (__rankTries < 60) setTimeout(renderLeaderboard, 250);
+    else leaderboardEl.innerHTML =
+      `<b>${TITLE}</b><br>` +
+      `❌ Online Ranking nicht geladen.`;
+    return;
   }
+
+  let arr = [];
+  try { arr = await window.__ONLINE_RANKING__.top10(); } catch { arr = []; }
+
+  // Sicherheit: falls ranking.js doch mehr liefert, hier auf Top 3 kürzen
+  arr = (arr || []).slice(0, 3);
+
+  let html = `<b>${TITLE}</b><br>`;
+  if (!arr.length) {
+    html += `Noch keine Einträge.`;
+  } else {
+    html += `<ol style="margin:10px 0 0 18px;padding:0;">`;
+    for (const e of arr) {
+      html += `<li><b>${e.name}</b> — Runden: <b>${e.rounds}</b> | Monster: <b>${e.monstersKilled || 0}</b> | Bosse: <b>${e.bossesKilled || 0}</b></li>`;
+    }
+    html += `</ol>`;
+  }
+
+  leaderboardEl.innerHTML = html;
+}
 
   // ---------------- GAME STATE ----------------
   let playerName = "";
