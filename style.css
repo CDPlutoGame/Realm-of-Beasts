@@ -61,14 +61,25 @@
 }
 
 /* BOARD */
-#board {
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
+/* BOARD FIX: wieder als Kasten/GRID */
+#board{
+  display: grid !important;
+  grid-template-columns: repeat(10, minmax(0, 1fr)) !important;
   gap: 8px;
   padding: 12px;
+
   background: #111;
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.08);
+
+  width: 100%;
+  max-width: 720px;   /* optional: macht “Kasten” */
+}
+
+/* Tiles dürfen NICHT 100% breit erzwingen */
+.tile{
+  width: auto !important;
+}
 }
 
 /* LEADERBOARD */
