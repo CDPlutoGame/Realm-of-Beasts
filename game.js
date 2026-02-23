@@ -1,13 +1,11 @@
-// ===== Monster Browser Game (ONLINE v12 - FIXED) =====
+// ===== Monster Browser Game (ONLINE) - stable + mobile score upload =====
 (() => {
-  if (window.__MBR_LOADED_V12__) {
-    console.warn("MBR v12: game.js wurde schon geladen – zweites Laden ignoriert.");
-    return;
-  }
-  window.__MBR_LOADED_V12__ = true;
+  if (window.__MBR_LOADED__) return;
+  window.__MBR_LOADED__ = true;
 
   // ---------------- SETTINGS ----------------
   const boardSize = 30;
+
   const ENEMY_BUFF_EVERY = 2;
   const ENEMY_HP_BUFF = 5;
   const ENEMY_ATK_BUFF = 2;
@@ -50,8 +48,8 @@
     }
     return el;
   }
-
   function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+  function safeLog(msg) { logEl.textContent = String(msg ?? ""); }
 
   // ---------------- STORAGE ----------------
   function loadProfiles() {
@@ -59,63 +57,32 @@
     catch { return {}; }
   }
   function saveProfiles(p) { localStorage.setItem(PROFILES_KEY, JSON.stringify(p)); }
-
   function loadProfile(name) {
     const p = loadProfiles()[name];
     return p ? { ...DEFAULT_META, ...p } : { ...DEFAULT_META };
   }
-
   function saveProfile(name, meta) {
     const all = loadProfiles();
     all[name] = { ...meta };
     saveProfiles(all);
   }
 
-  function loadCurrentName() {
-    try { return (localStorage.getItem(CURRENT_NAME_KEY) || "").trim(); } catch { return ""; }
-  }
-  function saveCurrentName(name) { localStorage.setItem(CURRENT_NAME_KEY, String(name)); }
-
-  // ✅ FIX: Wir nehmen auch mobileUser/pcUser (dein index.js speichert evtl. so)
   function loadAnyName() {
     return (
-      loadCurrentName() ||
+      (localStorage.getItem(CURRENT_NAME_KEY) || "").trim() ||
       (localStorage.getItem("mobileUser") || "").trim() ||
       (localStorage.getItem("pcUser") || "").trim()
     );
   }
 
   function persistIfNamed() {
-    if (playerName) {
-      saveProfile(playerName, meta);
-      saveCurrentName(playerName);
-    }
+    if (playerName) saveProfile(playerName, meta);
   }
 
   // ---------------- UI ----------------
-  // Haupt-App Container
   const app = ensureEl("app", "div");
-  app.style.display = "flex";
-  app.style.alignItems = "flex-start";
-  app.style.gap = "14px";
-
-  // Links: Status Panel
-  const statusPanel = document.createElement("div");
-  statusPanel.id = "statusPanel";
-  statusPanel.style.width = "200px";
-  statusPanel.style.minWidth = "200px";
-  statusPanel.style.flexShrink = "0";
-  app.appendChild(statusPanel);
-
-  // Rechts: Game Column
-  const rightCol = document.createElement("div");
-  rightCol.id = "rightCol";
-  rightCol.style.flex = "1";
-  rightCol.style.minWidth = "350px";
-  rightCol.style.display = "flex";
-  rightCol.style.flexDirection = "column";
-  rightCol.style.gap = "10px";
-  app.appendChild(rightCol);
+  const statusPanel = ensureEl("statusPanel", "div", app);
+  const rightCol = ensureEl("rightCol", "div", app);
 
   const mainArea = ensureEl("mainArea", "div", rightCol);
   const row1 = ensureEl("uiRow1", "div", rightCol);
@@ -126,154 +93,29 @@
   const logEl = ensureEl("log", "pre", leftCol);
   const boardEl = ensureEl("board", "div", mainArea);
 
-  // Layout mainArea
-  mainArea.style.display = "flex";
-  mainArea.style.alignItems = "flex-start";
-  mainArea.style.gap = "12px";
-
-  leftCol.style.flex = "1";
-  leftCol.style.minWidth = "320px";
-  fightPanel.style.minHeight = "260px";
-
   const spinButton = ensureEl("spinButton", "button", row1);
   spinButton.textContent = "Drehen";
-
   const attackButton = ensureEl("attackButton", "button", row1);
   attackButton.textContent = "Angreifen";
-
   const usePotionButton = ensureEl("usePotionButton", "button", row1);
   usePotionButton.textContent = "Trank nutzen (+5 HP)";
-
   const newRoundButton = ensureEl("newRoundButton", "button", row1);
   newRoundButton.textContent = "Neue Runde";
 
-  const hudEl = ensureEl("hud", "div", hudWrapper);
+  const hudEl = ensureEl("hud", "div", statusPanel);
   const shopEl = ensureEl("shop", "div", hudWrapper);
-
   const leaderboardEl = ensureEl("leaderboard", "div", rightCol);
-
-  // Status links rein
-  statusPanel.appendChild(hudEl);
-
-  function safeLog(msg) { logEl.textContent = String(msg ?? ""); }
-
-  // ---------------- SOUND (mini) ----------------
-  const MUSIC_LIST = ["sounds/music/bg1.mp3","sounds/music/bg2.mp3","sounds/music/bg3.mp3"];
-  const SFX_ATTACK_SRC = "sounds/attack.mp3";
-  const SFX_HIT_SRC    = "sounds/hit.mp3";
-
-  const bgMusic = new Audio();
-  bgMusic.preload = "auto";
-
-  let soundMuted = true;
-  let baseVolume = 0.4;
-  let currentMusicIndex = -1;
-
-  const soundBtn = document.createElement("button");
-  soundBtn.type = "button";
-
-  const volumeSlider = document.createElement("input");
-  volumeSlider.type = "range";
-  volumeSlider.min = "0";
-  volumeSlider.max = "1";
-  volumeSlider.step = "0.01";
-  volumeSlider.value = String(baseVolume);
-
-  const audioBox = document.createElement("div");
-  audioBox.style.position = "fixed";
-  audioBox.style.left = "6px";
-  audioBox.style.top = "6px";
-  audioBox.style.zIndex = "10001";
-  audioBox.style.background = "rgba(0,0,0,0.45)";
-  audioBox.style.padding = "3px 5px";
-  audioBox.style.borderRadius = "6px";
-  audioBox.style.display = "flex";
-  audioBox.style.alignItems = "center";
-  audioBox.style.gap = "5px";
-  audioBox.style.border = "1px solid rgba(255,255,255,0.1)";
-  audioBox.style.backdropFilter = "blur(6px)";
-  audioBox.style.fontSize = "10px";
-
-  volumeSlider.style.width = "50px";
-  volumeSlider.style.height = "2px";
-
-  soundBtn.style.padding = "1px 4px";
-  soundBtn.style.fontSize = "11px";
-  soundBtn.style.borderRadius = "4px";
-  soundBtn.style.lineHeight = "1";
-  soundBtn.style.border = "1px solid rgba(255,255,255,0.12)";
-  soundBtn.style.background = "rgba(255,255,255,0.08)";
-  soundBtn.style.color = "#fff";
-  soundBtn.style.cursor = "pointer";
-
-  audioBox.appendChild(volumeSlider);
-  audioBox.appendChild(soundBtn);
-  document.body.appendChild(audioBox);
-
-  function setMusicVolume(v){ baseVolume = v; bgMusic.volume = v; }
-  function applyMute(){
-    bgMusic.muted = soundMuted;
-    soundBtn.textContent = soundMuted ? "🔇" : "🔊";
-    volumeSlider.style.opacity = soundMuted ? "0.5" : "1";
-  }
-
-  function pickNextRandomIndex(){
-    if (MUSIC_LIST.length === 0) return -1;
-    if (MUSIC_LIST.length === 1) return 0;
-    let idx;
-    do { idx = Math.floor(Math.random() * MUSIC_LIST.length); }
-    while (idx === currentMusicIndex);
-    return idx;
-  }
-
-  function playRandomMusic(){
-    if (soundMuted) return;
-    const idx = pickNextRandomIndex();
-    if (idx < 0) return;
-    currentMusicIndex = idx;
-    bgMusic.src = MUSIC_LIST[idx];
-    bgMusic.currentTime = 0;
-    bgMusic.play().catch(()=>{});
-  }
-
-  bgMusic.addEventListener("ended", () => playRandomMusic());
-
-  function playSfx(src, extra = 0.25){
-    if (soundMuted) return;
-    const a = new Audio(src);
-    a.volume = Math.min(1, baseVolume + extra);
-    a.play().catch(()=>{});
-  }
-
-  setMusicVolume(parseFloat(volumeSlider.value));
-  applyMute();
-
-  soundBtn.onclick = () => {
-    soundMuted = !soundMuted;
-    applyMute();
-    if (!soundMuted) playRandomMusic();
-    else bgMusic.pause();
-  };
-  volumeSlider.addEventListener("input", () => setMusicVolume(parseFloat(volumeSlider.value)));
-
-  window.addEventListener("DOMContentLoaded", () => {
-    (document.getElementById("app") || document.body).addEventListener("click", () => {
-      soundMuted = false;
-      applyMute();
-      playRandomMusic();
-    }, { once:true });
-  });
 
   // ---------------- ONLINE RANKING ----------------
   let __rankTries = 0;
 
-  async function renderLeaderboard(){
+  async function renderLeaderboard() {
     if (!window.__ONLINE_RANKING__) {
       __rankTries++;
       leaderboardEl.innerHTML =
         `<b>🏆 Bestenliste (Top 10 – Online)</b><br>` +
         `⏳ Online Ranking startet... (${__rankTries})`;
-      if (__rankTries < 40) setTimeout(renderLeaderboard, 250);
+      if (__rankTries < 60) setTimeout(renderLeaderboard, 250);
       else leaderboardEl.innerHTML =
         `<b>🏆 Bestenliste (Top 10 – Online)</b><br>` +
         `❌ Online Ranking nicht geladen.`;
@@ -287,25 +129,28 @@
     if (!arr.length) html += `Noch keine Einträge.`;
     else {
       html += `<ol style="margin:10px 0 0 18px;padding:0;">`;
-      for (const e of arr){
-        html += `<li><b>${e.name}</b> — Runden: <b>${e.rounds}</b> | Monster: <b>${e.monstersKilled||0}</b> | Bosse: <b>${e.bossesKilled||0}</b></li>`;
+      for (const e of arr) {
+        html += `<li><b>${e.name}</b> — Runden: <b>${e.rounds}</b> | Monster: <b>${e.monstersKilled || 0}</b> | Bosse: <b>${e.bossesKilled || 0}</b></li>`;
       }
       html += `</ol>`;
     }
     leaderboardEl.innerHTML = html;
   }
-  window.renderLeaderboard = renderLeaderboard;
 
   // ---------------- GAME STATE ----------------
   let playerName = "";
   let meta = { ...DEFAULT_META };
+
   let rounds = 0;
   let playerHp = 30;
   let playerPos = 0;
+
   let inFight = false;
   let runOver = false;
+
   let tiles = [];
   let monster = null;
+
   let monstersKilled = 0;
   let bossesKilled = 0;
 
@@ -313,15 +158,14 @@
   let autoSpinTimer = null;
   let autoAttackTimer = null;
 
-  function autoCost(nextStage){
+  function autoCost(nextStage) {
     return AUTO_BASE_COST + (nextStage - 1) * AUTO_STEP_COST;
   }
-  function currentBossIdx(){ return Math.floor(rounds / 10); }
+  function currentBossIdx() { return Math.floor(rounds / 10); }
+  function stopAutoSpin() { if (autoSpinTimer) clearInterval(autoSpinTimer); autoSpinTimer = null; }
+  function stopAutoAttack() { if (autoAttackTimer) clearInterval(autoAttackTimer); autoAttackTimer = null; }
 
-  function stopAutoSpin(){ if (autoSpinTimer) clearInterval(autoSpinTimer); autoSpinTimer = null; }
-  function stopAutoAttack(){ if (autoAttackTimer) clearInterval(autoAttackTimer); autoAttackTimer = null; }
-
-  function startAutoSpin(){
+  function startAutoSpin() {
     stopAutoSpin();
     if (meta.autoSpinStage <= 0) return;
     const maxRounds = meta.autoSpinStage * 10;
@@ -332,7 +176,7 @@
     }, 350);
   }
 
-  function startAutoAttack(){
+  function startAutoAttack() {
     stopAutoAttack();
     if (meta.autoAttackStage <= 0) return;
     autoAttackTimer = setInterval(() => {
@@ -573,8 +417,8 @@
       : Math.floor(Math.random() * 16) + 10;
 
     if (monster?.kind === "boss") meta.bossesDefeated += 1;
-
     meta.gold += reward;
+
     persistIfNamed();
 
     if (tiles[playerPos] && String(tiles[playerPos]).startsWith("monster_")) {
@@ -596,6 +440,7 @@
     inFight = false;
     stopAutoSpin();
     stopAutoAttack();
+
     spinButton.disabled = true;
     attackButton.disabled = true;
 
@@ -608,20 +453,20 @@
       bossesKilled
     };
 
-    // ✅ v12: submitScore via __ONLINE_RANKING__
-    const trySubmit = () => {
-      if (!window.__ONLINE_RANKING__) return false;
-      window.__ONLINE_RANKING__.submitScore(payload).catch(()=>{});
-      return true;
-    };
+    // ✅ Handy-safe: erst lokal speichern
+    localStorage.setItem("mbr_pending_score", JSON.stringify(payload));
 
-    if (!trySubmit()) {
-      let tries = 0;
-      const t = setInterval(() => {
-        tries++;
-        if (trySubmit() || tries > 30) clearInterval(t);
-      }, 250);
-    }
+    // ✅ dann retry bis es klappt
+    const t = setInterval(() => {
+      if (!window.__ONLINE_RANKING__) return;
+      window.__ONLINE_RANKING__.submitScore(payload)
+        .then(() => {
+          localStorage.removeItem("mbr_pending_score");
+          clearInterval(t);
+          renderLeaderboard();
+        })
+        .catch(() => {});
+    }, 500);
 
     monster = null;
     renderFightPanel();
@@ -635,13 +480,11 @@
 
     const playerDmg = Math.max(1, meta.attackPower + (Math.floor(Math.random() * 5) - 2));
     monster.hp -= playerDmg;
-    playSfx(SFX_ATTACK_SRC, 0.35);
 
     if (monster.hp <= 0) return endFightWin();
 
     const enemyDmg = Math.floor(Math.random() * monster.atk) + 1;
     playerHp -= enemyDmg;
-    playSfx(SFX_HIT_SRC, 0.25);
 
     if (playerHp <= 0) {
       playerHp = 0;
@@ -657,18 +500,16 @@
   function usePotion() {
     if (meta.potions <= 0) return;
     if (playerHp >= meta.maxHpBase) return safeLog("❤️ Schon voll.");
-
     meta.potions -= 1;
     playerHp = Math.min(meta.maxHpBase, playerHp + POTION_HEAL);
     persistIfNamed();
-
     updateHud(); renderShop(); refreshUsePotionButton();
     safeLog(`🧪 Trank genutzt: +5 HP. Übrig: ${meta.potions}`);
   }
 
   // ---------------- SPIN ----------------
   function spin() {
-    if (!playerName) return safeLog("🔒 Bitte zuerst anmelden (Name speichern).");
+    if (!playerName) return safeLog("🔒 Bitte zuerst anmelden.");
     if (inFight) return;
     if (runOver) return safeLog("Game Over. Shop ist aktiv. Starte 'Neue Runde'.");
 
@@ -704,7 +545,6 @@
       meta.gold += gold;
       tiles[playerPos] = "normal";
       persistIfNamed();
-
       renderBoard();
       updateHud(); renderShop(); refreshUsePotionButton();
       return safeLog(`💰 Loot! +${gold} Gold. Runde ${rounds}`);
@@ -734,10 +574,8 @@
 
     generateBoard();
     renderBoard();
-
     updateHud(); renderShop(); refreshUsePotionButton();
     setFightPanelIdle();
-
     await renderLeaderboard();
     safeLog("✅ Neue Runde gestartet. Drück 'Drehen'.");
 
@@ -761,7 +599,6 @@
     playerHp = meta.maxHpBase;
   }
 
-  // ✅ FIX: einfacher Watcher (ohne __ONLINE_AUTH__)
   let __lastSeenName = "";
   function watchUserChange() {
     const n = loadAnyName();
@@ -770,7 +607,7 @@
       playerName = n;
       meta = n ? loadProfile(n) : { ...DEFAULT_META };
       resetRunKeepMeta().catch(()=>{});
-      safeLog(n ? `✅ Eingeloggt als "${n}". Drück 'Drehen'.` : "🔒 Bitte Namen eingeben (index.js).");
+      safeLog(n ? `✅ Eingeloggt als "${n}". Drück 'Drehen'.` : "🔒 Bitte anmelden.");
     }
   }
 
@@ -784,8 +621,7 @@
   refreshUsePotionButton();
   setFightPanelIdle();
   renderLeaderboard();
-
-  safeLog(playerName ? `✅ Eingeloggt als "${playerName}". Drück 'Drehen'.` : "🔒 Bitte Namen eingeben (index.js).");
+  safeLog(playerName ? `✅ Eingeloggt als "${playerName}". Drück 'Drehen'.` : "🔒 Bitte anmelden.");
 
   setInterval(watchUserChange, 500);
 })();
