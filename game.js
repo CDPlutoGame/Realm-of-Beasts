@@ -54,7 +54,7 @@
 // ---------------- SOUND (tap-to-start, mobile safe) ----------------
 const MUSIC_LIST = ["sounds/music/bg1.mp3","sounds/music/bg2.mp3","sounds/music/bg3.mp3"];
 const SFX_ATTACK_SRC = "sounds/attack.mp3";
-const SFX_HIT_SRC    = "sounds/hit.mp3";
+const SFX_HIT_SRC    = "music/hit.mp3";
 
 const bgMusic = new Audio();
 bgMusic.preload = "auto";
