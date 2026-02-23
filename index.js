@@ -1,15 +1,15 @@
-// index.js — Login Overlay (mobil + desktop)
-(function () {
-  const KEY_MAIN = "mbr_current_name_online_v10"; // das nutzt game.js auch
+// index.js — Login Overlay (speichert Name kompatibel zu game.js)
+(() => {
+  const KEY_MAIN = "mbr_current_name_online_v10"; // <-- DAS liest game.js
   const KEY_MOBILE = "mobileUser";
   const KEY_PC = "pcUser";
 
-  function showName(name) {
+  function setLabel(name) {
     const el = document.getElementById("playerName");
     if (el) el.textContent = name ? `Eingeloggt als: ${name}` : "";
   }
 
-  function getStoredName() {
+  function getName() {
     return (
       (localStorage.getItem(KEY_MAIN) || "").trim() ||
       (localStorage.getItem(KEY_MOBILE) || "").trim() ||
@@ -21,10 +21,10 @@
     localStorage.setItem(KEY_MAIN, name);
     localStorage.setItem(KEY_MOBILE, name);
     localStorage.setItem(KEY_PC, name);
-    showName(name);
+    setLabel(name);
   }
 
-  function askForName() {
+  function showLogin() {
     const overlay = document.createElement("div");
     overlay.style.position = "fixed";
     overlay.style.inset = "0";
@@ -45,7 +45,6 @@
         </button>
       </div>
     `;
-
     document.body.appendChild(overlay);
 
     const input = overlay.querySelector("#nameInput");
@@ -56,18 +55,15 @@
       if (name.length < 3) return;
       saveName(name);
       overlay.remove();
+      // game.js merkt es nach max. 0.5s automatisch (watchUserChange)
     }
 
     btn.addEventListener("click", submit);
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") submit();
-    });
-
+    input.addEventListener("keydown", (e) => e.key === "Enter" && submit());
     setTimeout(() => input.focus(), 50);
   }
 
-  // beim Laden:
-  const existing = getStoredName();
-  if (existing) showName(existing);
-  else window.addEventListener("DOMContentLoaded", askForName);
+  const existing = getName();
+  if (existing) setLabel(existing);
+  else window.addEventListener("DOMContentLoaded", showLogin);
 })();
