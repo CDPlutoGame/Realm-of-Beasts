@@ -1,53 +1,22 @@
-// ===== INDEX-SKRIPT =====
-(function(){
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Realm of Beasts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
 
-  function isMobile(){
-    return window.innerWidth <= 768;
-  }
+  <h1>Realm of Beasts</h1>
 
-  function getStoredName(){
-    return localStorage.getItem("mobileUser") || localStorage.getItem("pcUser");
-  }
+  <div id="playerName"></div>
 
-  function loadOverlay(){
-    const script = document.createElement("script");
-    script.src = isMobile() ? "auth-mobile.js" : "auth-pc.js";
-    document.body.appendChild(script);
-  }
+  <div id="gameContainer">
+    🎮 Spiel lädt...
+  </div>
 
-  // ❌ SERVICE WORKER KOMPLETT AUS
-  /*
-  function registerServiceWorker(){
-    if("serviceWorker" in navigator){
-      navigator.serviceWorker.register("sw.js");
-    }
-  }
-  */
+  <script src="index.js"></script>
+  <script src="game.js"></script>
 
-  function showStoredName(name){
-    const el = document.getElementById("playerName");
-    if(el){
-      el.textContent = "Spieler: " + name;
-    }
-  }
-
-  function init(){
-
-    // registerServiceWorker();  ❌ deaktiviert
-
-    const name = getStoredName();
-
-    if(name){
-      showStoredName(name);
-    } else {
-      loadOverlay();
-    }
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-
-})();
+</body>
+</html>
