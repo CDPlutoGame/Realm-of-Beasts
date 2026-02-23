@@ -1,3 +1,5 @@
+
+
 /* ================================= */
 /* 🌑 GLOBAL */
 /* ================================= */
@@ -182,4 +184,12 @@ button:disabled { opacity: 0.4; }
 @media (max-width: 480px) {
   body { font-size: 15px; }
   h1 { font-size: 20px; }
+}
+#gameContainer {
+  background: rgba(0,0,0,0.75);
+  padding: 20px;
+  border-radius: 15px;
+  max-width: 500px;
+  margin: 20px auto;
+  text-align: center;
 }
