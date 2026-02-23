@@ -32,7 +32,7 @@ h1 {
 #statusPanel,
 #hud {
   width: 200px;
-  height: 200px;
+  height: 100px;
   background: #161616;
   padding: 15px;
   border-radius: 12px;
