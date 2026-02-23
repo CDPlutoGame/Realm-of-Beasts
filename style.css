@@ -10,6 +10,7 @@ body {
   background-attachment: fixed;
   color: white;
 }
+
 #app {
   display: grid;
   grid-template-columns: 260px 1fr;
