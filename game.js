@@ -51,6 +51,98 @@
   function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
   function safeLog(msg) { logEl.textContent = String(msg ?? ""); }
 
+// ---------------- SOUND (tap-to-start, mobile safe) ----------------
+const MUSIC_LIST = ["sounds/music/bg1.mp3","sounds/music/bg2.mp3","sounds/music/bg3.mp3"];
+const SFX_ATTACK_SRC = "sounds/attack.mp3";
+const SFX_HIT_SRC    = "sounds/hit.mp3";
+
+const bgMusic = new Audio();
+bgMusic.preload = "auto";
+bgMusic.loop = false;
+
+let soundMuted = true;
+let baseVolume = 0.4;
+let currentMusicIndex = -1;
+
+function pickNextRandomIndex(){
+  if (MUSIC_LIST.length === 0) return -1;
+  if (MUSIC_LIST.length === 1) return 0;
+  let idx;
+  do { idx = Math.floor(Math.random() * MUSIC_LIST.length); }
+  while (idx === currentMusicIndex);
+  return idx;
+}
+
+function playRandomMusic(){
+  if (soundMuted) return;
+  const idx = pickNextRandomIndex();
+  if (idx < 0) return;
+  currentMusicIndex = idx;
+  bgMusic.src = MUSIC_LIST[idx];
+  bgMusic.currentTime = 0;
+  bgMusic.volume = baseVolume;
+  bgMusic.muted = false;
+  bgMusic.play().catch(()=>{});
+}
+
+bgMusic.addEventListener("ended", () => playRandomMusic());
+
+function playSfx(src, extra = 0.25){
+  if (soundMuted) return;
+  const a = new Audio(src);
+  a.volume = Math.min(1, baseVolume + extra);
+  a.play().catch(()=>{});
+}
+
+// Button + Slider
+const audioBox = document.createElement("div");
+audioBox.style.position = "fixed";
+audioBox.style.left = "6px";
+audioBox.style.top = "6px";
+audioBox.style.zIndex = "10001";
+audioBox.style.background = "rgba(0,0,0,0.45)";
+audioBox.style.padding = "3px 5px";
+audioBox.style.borderRadius = "6px";
+audioBox.style.display = "flex";
+audioBox.style.alignItems = "center";
+audioBox.style.gap = "6px";
+audioBox.style.border = "1px solid rgba(255,255,255,0.1)";
+
+const soundBtn = document.createElement("button");
+soundBtn.type = "button";
+soundBtn.textContent = "🔇";
+soundBtn.style.padding = "2px 6px";
+soundBtn.style.borderRadius = "6px";
+
+const volumeSlider = document.createElement("input");
+volumeSlider.type = "range";
+volumeSlider.min = "0";
+volumeSlider.max = "1";
+volumeSlider.step = "0.01";
+volumeSlider.value = String(baseVolume);
+volumeSlider.style.width = "70px";
+
+audioBox.appendChild(soundBtn);
+audioBox.appendChild(volumeSlider);
+document.body.appendChild(audioBox);
+
+soundBtn.onclick = () => {
+  soundMuted = !soundMuted;
+  soundBtn.textContent = soundMuted ? "🔇" : "🔊";
+  if (!soundMuted) playRandomMusic();
+  else bgMusic.pause();
+};
+
+volumeSlider.addEventListener("input", () => {
+  baseVolume = parseFloat(volumeSlider.value);
+  bgMusic.volume = baseVolume;
+});
+
+// iOS/Android: Audio startet erst nach User-Tap
+document.addEventListener("pointerdown", () => {
+  if (!soundMuted && bgMusic.paused) playRandomMusic();
+}, { once: true });
+
   // ---------------- STORAGE ----------------
   function loadProfiles() {
     try { return JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}"); }
