@@ -1,4 +1,4 @@
-// ranking.js — Best-Score pro Name + Top10 nach rounds
+// ranking.js — BEST per Name (ranking_best) + Fallback (ranking)
 (() => {
   const firebaseConfig = {
     apiKey: "AIzaSyD3Z_HFQ04XVsbAnL3XCqf_6bkX3Cc21oc",
@@ -11,19 +11,16 @@
   };
 
   if (typeof firebase === "undefined") {
-    console.log("❌ Firebase libs fehlen");
+    console.log("❌ Firebase libs fehlen (firebase undefined)");
     return;
   }
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
   const db = firebase.database();
-
   const toNum = (x) => {
     const n = Number(x);
     return Number.isFinite(n) ? n : 0;
   };
-
-  // sichere Key-Erstellung (keine Slashes, keine Punkte)
   const safeKey = (name) =>
     String(name || "Unknown")
       .trim()
@@ -33,9 +30,8 @@
   async function submitScore(payload) {
     const nameRaw = String(payload?.name || "Unknown").trim() || "Unknown";
     const name = nameRaw.slice(0, 24);
-    const key = safeKey(name);
 
-    const newData = {
+    const data = {
       name,
       rounds: toNum(payload?.rounds),
       monstersKilled: toNum(payload?.monstersKilled),
@@ -43,23 +39,26 @@
       ts: Date.now()
     };
 
-    const ref = db.ref("ranking_best/" + key);
+    // 1) Historie (damit immer was drin ist)
+    await db.ref("ranking").push(data);
 
-    // nur überschreiben, wenn besser als der alte Score
+    // 2) Best-Score pro Name
+    const key = safeKey(name);
+    const ref = db.ref("ranking_best/" + key);
     const snap = await ref.once("value");
     const old = snap.val();
     const oldRounds = toNum(old?.rounds);
 
-    if (!old || newData.rounds > oldRounds) {
-      await ref.set(newData);
-      return true; // updated
+    if (!old || data.rounds > oldRounds) {
+      await ref.set(data);
+      return true;
     }
-    return false; // not better
+    return false;
   }
 
-  async function top10() {
+  async function top10_from(path) {
     const snap = await db
-      .ref("ranking_best")
+      .ref(path)
       .orderByChild("rounds")
       .limitToLast(10)
       .once("value");
@@ -70,6 +69,23 @@
     return arr;
   }
 
+  async function top10() {
+    const best = await top10_from("ranking_best");
+    if (best.length) return best;
+    return await top10_from("ranking");
+  }
+
   window.__ONLINE_RANKING__ = { submitScore, top10 };
-  console.log("✅ Ranking ready (best per name)");
+  console.log("✅ Ranking ready (best+fallback)");
+
+  // pending score nachschieben
+  try {
+    const pending = localStorage.getItem("mbr_pending_score");
+    if (pending) {
+      const payload = JSON.parse(pending);
+      submitScore(payload).then(() => {
+        localStorage.removeItem("mbr_pending_score");
+      }).catch(()=>{});
+    }
+  } catch {}
 })();
