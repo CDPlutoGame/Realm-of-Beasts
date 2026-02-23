@@ -87,7 +87,7 @@ function playRandomMusic(){
 
 bgMusic.addEventListener("ended", () => playRandomMusic());
 
-function playSfx(SFX_HIT_SRC, 0.25);
+function playSfx(src, extra = 0.25) {
   if (soundMuted) return;
   const a = new Audio(src);
   a.volume = Math.min(1, baseVolume + extra);
