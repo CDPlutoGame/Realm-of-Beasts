@@ -1,7 +1,13 @@
 /* ========================= */
 /* DESKTOP LAYOUT CLEAN     */
 /* ========================= */
-
+body {
+  margin: 0;
+  background: url("images/dungeon.jpg") no-repeat center center fixed;
+  background-size: cover;
+  color: white;
+  font-family: Arial, sans-serif;
+}
 #app {
   display: grid;
   grid-template-columns: 260px 1fr;
