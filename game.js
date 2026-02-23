@@ -104,8 +104,6 @@
 
   const hudEl = ensureEl("hud", "div", statusPanel);
   const shopEl = ensureEl("shop", "div", app);
-  sidebar.appendChild(statusPanel);
-  sidebar.appendChild(shopEl);
   const leaderboardEl = ensureEl("leaderboard", "div", rightCol);
 
   // Leaderboard sichtbar & scrollbar (sonst wirkt es wie “nur Platz 1”)
