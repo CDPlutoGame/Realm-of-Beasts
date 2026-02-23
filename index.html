@@ -1,31 +1,45 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <title>Realm of Beasts</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="./manifest.webmanifest">
-<meta name="theme-color" content="#0b0b0b">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-</head>
-<body>
+// ===== INDEX SCRIPT =====
+(function(){
 
-<h1>Realm of Beasts</h1>
-
-<div id="app"></div>
-<div id="playerName"></div>
-
-<script type="module" src="./ranking-online.js"></script>
-<script defer src="./auth-overlay.js"></script>
-<script defer src="./game.js"></script>
-
-<script>
-
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js").catch(console.warn);
+  function isMobile(){
+    return window.innerWidth <= 768;
   }
 
-</script>
-</body>
+  function loadOverlay(){
+    const script = document.createElement("script");
+    script.src = isMobile() ? "auth-mobile.js" : "auth-pc.js";
+    document.body.appendChild(script);
+  }
 
-</html>
+  function registerServiceWorker(){
+    if("serviceWorker" in navigator){
+      navigator.serviceWorker.register("sw.js");
+    }
+  }
+
+  function showStoredName(){
+    const name =
+      localStorage.getItem("mobileUser") ||
+      localStorage.getItem("pcUser");
+
+    if(name){
+      const el = document.getElementById("playerName");
+      if(el){
+        el.textContent = "Spieler: " + name;
+      }
+    }
+  }
+
+  function init(){
+    registerServiceWorker();
+    showStoredName();
+    loadOverlay();
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+
+})();
