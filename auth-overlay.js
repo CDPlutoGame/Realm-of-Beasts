@@ -1,96 +1,101 @@
-// auth-overlay.js — COMPLETE VERSION (Mobile + Status + Auto Name Fill)
+// auth-overlay.js — Clean App Style + Auto Name + Status + Logout
 
 (function () {
 
-  function ensureStyles() {
+  function injectStyles() {
     if (document.getElementById("authStyle")) return;
 
     const style = document.createElement("style");
     style.id = "authStyle";
     style.textContent = `
 
-/* Overlay */
+/* ===== OVERLAY ===== */
 #authOverlay{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.75);
+  background:linear-gradient(180deg,#0b0b0b,#141414);
   display:flex;
   align-items:center;
   justify-content:center;
   z-index:9999;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
 }
 
-/* Card */
+/* ===== CARD ===== */
 #authCard{
-  background:#121212;
-  color:white;
-  font-family:system-ui;
-  border:1px solid rgba(255,255,255,.15);
-  box-shadow:0 20px 60px rgba(0,0,0,.6);
+  width:92vw;
+  max-width:420px;
+  background:#181818;
+  padding:28px;
+  border-radius:26px;
+  box-shadow:0 30px 90px rgba(0,0,0,.7);
+  text-align:center;
+  animation:fadeIn .25s ease;
 }
 
-/* Mobile */
-@media (max-width:768px){
-  #authCard{
-    width:90vw;
-    padding:22px;
-    border-radius:22px;
-  }
+#authCard h2{
+  margin-bottom:22px;
+  font-size:22px;
 }
 
-/* Desktop */
-@media (min-width:769px){
-  #authCard{
-    width:420px;
-    padding:20px;
-    border-radius:14px;
-  }
-}
-
+/* ===== INPUT ===== */
 #authCard input{
   width:100%;
-  padding:14px;
-  margin-bottom:14px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.2);
-  background:#1b1b1b;
+  padding:16px;
+  margin-bottom:16px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.15);
+  background:#111;
   color:white;
+  font-size:16px;
 }
 
-#btnRegister, #btnLogin{
+#authCard input:focus{
+  outline:none;
+  border:1px solid #1f6feb;
+}
+
+/* ===== BUTTONS ===== */
+#btnRegister,#btnLogin{
   width:100%;
-  padding:14px;
+  padding:16px;
   border:none;
-  border-radius:12px;
-  font-size:15px;
+  border-radius:16px;
+  font-size:16px;
+  font-weight:600;
   cursor:pointer;
+  transition:.15s;
 }
 
 #btnRegister{
   background:#2b8a3e;
-  margin-bottom:10px;
+  margin-bottom:12px;
 }
 
 #btnLogin{
   background:#1f6feb;
 }
 
-/* Status oben rechts */
+#btnRegister:active,#btnLogin:active{
+  transform:scale(.96);
+}
+
+/* ===== TOP STATUS ===== */
 #authTopBar{
   position:fixed;
   top:12px;
   right:12px;
-  z-index:10000;
   display:flex;
   gap:8px;
   align-items:center;
+  z-index:10000;
 }
 
 #authStatus{
   background:rgba(0,0,0,.6);
   padding:8px 12px;
-  border-radius:12px;
-  font-size:12px;
+  border-radius:14px;
+  font-size:13px;
   border:1px solid rgba(255,255,255,.2);
 }
 
@@ -98,10 +103,16 @@
   background:#b42318;
   border:none;
   padding:8px 12px;
-  border-radius:12px;
+  border-radius:14px;
   color:white;
   cursor:pointer;
   display:none;
+}
+
+/* ===== ANIMATION ===== */
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
 }
 
     `;
@@ -123,9 +134,9 @@
 
   function createUI() {
 
-    ensureStyles();
+    injectStyles();
 
-    // Top Bar
+    // Top Status Bar
     const top = document.createElement("div");
     top.id = "authTopBar";
     top.innerHTML = `
@@ -159,6 +170,7 @@
       document.getElementById("btnLogin").onclick = async () => {
         const n = document.getElementById("authName").value.trim();
         const p = document.getElementById("authPass").value.trim();
+
         await window.__ONLINE_AUTH__.login(n,p);
 
         fillNameIntoGame();
@@ -169,6 +181,7 @@
       document.getElementById("btnRegister").onclick = async () => {
         const n = document.getElementById("authName").value.trim();
         const p = document.getElementById("authPass").value.trim();
+
         await window.__ONLINE_AUTH__.register(n,p);
 
         fillNameIntoGame();
@@ -179,6 +192,7 @@
 
     function updateStatus() {
       const st = window.__ONLINE_AUTH__?.status;
+
       if (st && st.loggedIn) {
         statusEl.textContent = "🟢 " + st.nameKey;
         logoutBtn.style.display = "inline-block";
@@ -194,7 +208,7 @@
       updateStatus();
     };
 
-    // Initial prüfen
+    // Initial check
     setTimeout(() => {
       updateStatus();
       fillNameIntoGame();
