@@ -5,11 +5,9 @@
 
   // ---------------- SETTINGS ----------------
   const boardSize = 30;
-
   const ENEMY_BUFF_EVERY = 2;
   const ENEMY_HP_BUFF = 5;
   const ENEMY_ATK_BUFF = 2;
-
   const AUTO_BASE_COST = 1000;
   const AUTO_STEP_COST = 500;
 
@@ -20,7 +18,6 @@
   const POTION_COST = 5;
   const HEAL10_AMOUNT = 10;
   const HEAL10_COST = 50;
-
   const MAXHP_UPGRADE_AMOUNT = 5;
   const MAXHP_PRICE_INCREASE = 50;
   const ATK_UPGRADE_AMOUNT = 5;
@@ -49,6 +46,10 @@
     return el;
   }
   function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+  function safeNum(x) {
+    const n = Number(x);
+    return Number.isFinite(n) ? n : 0;
+  }
 
   // ---------------- STORAGE ----------------
   function loadProfiles() {
@@ -78,16 +79,12 @@
   }
 
   // ---------------- UI ROOT ----------------
-  // Damit wirklich was sichtbar ist, bauen wir #app immer neu in den Body.
   const app = ensureEl("app", "div", document.body);
-
   const statusPanel = ensureEl("statusPanel", "div", app);
   const rightCol = ensureEl("rightCol", "div", app);
-
   const mainArea = ensureEl("mainArea", "div", rightCol);
   const row1 = ensureEl("uiRow1", "div", rightCol);
   const hudWrapper = ensureEl("hudWrapper", "div", rightCol);
-
   const leftCol = ensureEl("leftCol", "div", mainArea);
   const fightPanel = ensureEl("fightPanel", "div", leftCol);
   const logEl = ensureEl("log", "pre", leftCol);
@@ -95,22 +92,27 @@
 
   const spinButton = ensureEl("spinButton", "button", row1);
   spinButton.textContent = "Drehen";
+
   const attackButton = ensureEl("attackButton", "button", row1);
   attackButton.textContent = "Angreifen";
+
   const usePotionButton = ensureEl("usePotionButton", "button", row1);
   usePotionButton.textContent = "Trank nutzen (+5 HP)";
+
   const newRoundButton = ensureEl("newRoundButton", "button", row1);
   newRoundButton.textContent = "Neue Runde";
 
   const hudEl = ensureEl("hud", "div", statusPanel);
   const shopEl = ensureEl("shop", "div", hudWrapper);
   const leaderboardEl = ensureEl("leaderboard", "div", rightCol);
-  leaderboardEl.style.maxHeight = "250px";
+
+  // Leaderboard sichtbar & scrollbar (sonst wirkt es wie “nur Platz 1”)
+  leaderboardEl.style.maxHeight = "260px";
   leaderboardEl.style.overflowY = "auto";
   leaderboardEl.style.padding = "10px";
-  leaderboardEl.style.background = "rgba(0,0,0,0.5)";
-  leaderboardEl.style.border = "1px solid rgba(255,255,255,0.2)";
-  leaderboardEl.style.borderRadius = "8px";
+  leaderboardEl.style.borderRadius = "10px";
+  leaderboardEl.style.background = "rgba(0,0,0,0.35)";
+  leaderboardEl.style.border = "1px solid rgba(255,255,255,0.15)";
 
   function safeLog(msg) { logEl.textContent = String(msg ?? ""); }
 
@@ -122,7 +124,7 @@
   bgMusic.preload = "auto";
   bgMusic.loop = false;
 
-  let soundMuted = true;     // 🔇 start stumm (Button schaltet auf 🔊)
+  let soundMuted = true;
   let baseVolume = 0.4;
   let currentMusicIndex = -1;
 
@@ -134,7 +136,6 @@
     while (idx === currentMusicIndex);
     return idx;
   }
-
   function playRandomMusic(){
     if (soundMuted) return;
     const idx = pickNextRandomIndex();
@@ -146,13 +147,10 @@
     bgMusic.muted = false;
     bgMusic.play().catch(()=>{});
   }
-
   bgMusic.addEventListener("ended", () => playRandomMusic());
 
-  // Stabiler Hit-Sound (re-use)
   const hitAudio = new Audio(SFX_HIT_SRC);
   hitAudio.preload = "auto";
-
   function playHit(extra = 0.25){
     if (soundMuted) return;
     hitAudio.currentTime = 0;
@@ -160,7 +158,6 @@
     hitAudio.play().catch(()=>{});
   }
 
-  // Button + Slider
   const audioBox = document.createElement("div");
   audioBox.style.position = "fixed";
   audioBox.style.left = "6px";
@@ -198,90 +195,92 @@
     if (!soundMuted) playRandomMusic();
     else bgMusic.pause();
   };
-
   volumeSlider.addEventListener("input", () => {
     baseVolume = parseFloat(volumeSlider.value);
     bgMusic.volume = baseVolume;
   });
-
-  // iOS/Android: Audio startet erst nach User-Tap
   document.addEventListener("pointerdown", () => {
     if (!soundMuted && bgMusic.paused) playRandomMusic();
   }, { once: true });
 
   // ---------------- ONLINE RANKING ----------------
-let __rankTries = 0;
-async function renderLeaderboard() {
-  // Scrollbar + Höhe (damit man mehr als Platz 1 sehen kann)
-  leaderboardEl.style.maxHeight = "260px";
-  leaderboardEl.style.overflowY = "auto";
-  leaderboardEl.style.padding = "10px";
-  leaderboardEl.style.borderRadius = "10px";
-  leaderboardEl.style.background = "rgba(0,0,0,0.35)";
-  leaderboardEl.style.border = "1px solid rgba(255,255,255,0.15)";
+  let __rankTries = 0;
+  async function renderLeaderboard() {
+    const TITLE = "🏆 Bestenliste (Top 3 – Online)";
 
-  const TITLE = "🏆 Bestenliste (Top 3 – Online)";
+    // ⭐ Best-Score (lokal, pro Gerät)
+    let best = null;
+    try { best = JSON.parse(localStorage.getItem("mbr_best_score") || "null"); } catch {}
 
-  if (!window.__ONLINE_RANKING__) {
-    __rankTries++;
-    leaderboardEl.innerHTML =
-      `<b>${TITLE}</b><br>` +
-      `⏳ Online Ranking startet... (${__rankTries})`;
-    if (__rankTries < 60) setTimeout(renderLeaderboard, 250);
-    else leaderboardEl.innerHTML =
-      `<b>${TITLE}</b><br>` +
-      `❌ Online Ranking nicht geladen.`;
-    return;
-  }
+    if (!window.__ONLINE_RANKING__) {
+      __rankTries++;
+      let html = `<b>${TITLE}</b><br>`;
+      if (best) {
+        html += `
+          <div style="margin:8px 0 12px;padding:8px;border-radius:10px;background:rgba(255,255,255,.08)">
+            <b>⭐ Dein Best Score:</b> ${best.name} — Runden: <b>${best.rounds}</b>
+            | Monster: <b>${best.monstersKilled || 0}</b> | Bosse: <b>${best.bossesKilled || 0}</b>
+          </div>
+        `;
+      }
+      html += `⏳ Online Ranking startet... (${__rankTries})`;
+      leaderboardEl.innerHTML = html;
 
-  let arr = [];
-  try { arr = await window.__ONLINE_RANKING__.top10(); } catch { arr = []; }
-
-  // Sicherheit: falls ranking.js doch mehr liefert, hier auf Top 3 kürzen
-  arr = (arr || []).slice(0, 3);
-
-  let html = `<b>${TITLE}</b><br>`;
-  if (!arr.length) {
-    html += `Noch keine Einträge.`;
-  } else {
-    html += `<ol style="margin:10px 0 0 18px;padding:0;">`;
-    for (const e of arr) {
-      html += `<li><b>${e.name}</b> — Runden: <b>${e.rounds}</b> | Monster: <b>${e.monstersKilled || 0}</b> | Bosse: <b>${e.bossesKilled || 0}</b></li>`;
+      if (__rankTries < 60) setTimeout(renderLeaderboard, 250);
+      else leaderboardEl.innerHTML =
+        `<b>${TITLE}</b><br>❌ Online Ranking nicht geladen.`;
+      return;
     }
-    html += `</ol>`;
-  }
 
-  leaderboardEl.innerHTML = html;
-}
+    let arr = [];
+    try { arr = await window.__ONLINE_RANKING__.top10(); } catch { arr = []; }
+    // Top 3 erzwingen
+    arr = (arr || []).slice(0, 3);
+
+    let html = `<b>${TITLE}</b><br>`;
+    if (best) {
+      html += `
+        <div style="margin:8px 0 12px;padding:8px;border-radius:10px;background:rgba(255,255,255,.08)">
+          <b>⭐ Dein Best Score:</b> ${best.name} — Runden: <b>${best.rounds}</b>
+          | Monster: <b>${best.monstersKilled || 0}</b> | Bosse: <b>${best.bossesKilled || 0}</b>
+        </div>
+      `;
+    }
+
+    if (!arr.length) {
+      html += `Noch keine Einträge.`;
+    } else {
+      html += `<ol style="margin:10px 0 0 18px;padding:0;">`;
+      for (const e of arr) {
+        html += `<li><b>${e.name}</b> — Runden: <b>${e.rounds}</b> | Monster: <b>${e.monstersKilled || 0}</b> | Bosse: <b>${e.bossesKilled || 0}</b></li>`;
+      }
+      html += `</ol>`;
+    }
+    leaderboardEl.innerHTML = html;
+  }
 
   // ---------------- GAME STATE ----------------
   let playerName = "";
   let meta = { ...DEFAULT_META };
-
   let rounds = 0;
   let playerHp = 30;
   let playerPos = 0;
-
   let inFight = false;
   let runOver = false;
-
   let tiles = [];
   let monster = null;
-
   let monstersKilled = 0;
   let bossesKilled = 0;
 
   // ---------------- AUTO SYSTEM ----------------
   let autoSpinTimer = null;
   let autoAttackTimer = null;
-
   function autoCost(nextStage) {
     return AUTO_BASE_COST + (nextStage - 1) * AUTO_STEP_COST;
   }
   function currentBossIdx() { return Math.floor(rounds / 10); }
   function stopAutoSpin() { if (autoSpinTimer) clearInterval(autoSpinTimer); autoSpinTimer = null; }
   function stopAutoAttack() { if (autoAttackTimer) clearInterval(autoAttackTimer); autoAttackTimer = null; }
-
   function startAutoSpin() {
     stopAutoSpin();
     if (meta.autoSpinStage <= 0) return;
@@ -292,7 +291,6 @@ async function renderLeaderboard() {
       spin();
     }, 350);
   }
-
   function startAutoAttack() {
     stopAutoAttack();
     if (meta.autoAttackStage <= 0) return;
@@ -311,7 +309,6 @@ async function renderLeaderboard() {
     if (rounds >= 6)  return Math.random() < 0.6 ? "monster_medium" : "monster_easy";
     return "monster_easy";
   }
-
   function generateBoard() {
     tiles = [];
     const lootChance = 0.12;
@@ -324,7 +321,6 @@ async function renderLeaderboard() {
       else tiles.push("normal");
     }
   }
-
   function renderBoard() {
     boardEl.innerHTML = "";
     for (let i = 0; i < boardSize; i++) {
@@ -366,11 +362,9 @@ async function renderLeaderboard() {
       `☠️ Monster: <b>${monstersKilled}</b><br>` +
       `👑 Bosse: <b>${bossesKilled}</b>`;
   }
-
   function refreshUsePotionButton() {
     usePotionButton.disabled = !(meta.potions > 0 && playerHp < meta.maxHpBase);
   }
-
   function renderShop() {
     const isFullHp = playerHp >= meta.maxHpBase;
     const canBuyPotion = runOver && meta.gold >= POTION_COST;
@@ -435,7 +429,6 @@ async function renderLeaderboard() {
 
     const nextSpinStage = meta.autoSpinStage + 1;
     const nextAtkStage  = meta.autoAttackStage + 1;
-
     const canBuyAutoSpin =
       runOver && (meta.bossesDefeated >= nextSpinStage) && (meta.gold >= autoCost(nextSpinStage));
     const canBuyAutoAtk =
@@ -469,7 +462,6 @@ async function renderLeaderboard() {
 
   // ---------------- ENEMIES ----------------
   function enemyLevel() { return Math.floor(rounds / ENEMY_BUFF_EVERY); }
-
   function makeMonsterByType(type) {
     const lvl = enemyLevel();
     let base;
@@ -481,7 +473,6 @@ async function renderLeaderboard() {
     const atk = base.atk + lvl * ENEMY_ATK_BUFF;
     return { ...base, hp, maxHp: hp, atk };
   }
-
   function makeBossForRound(r) {
     const idx = Math.floor(r / 10);
     const hp = idx * 1000;
@@ -498,7 +489,6 @@ async function renderLeaderboard() {
       </div>
     `;
   }
-
   function renderFightPanel() {
     if (!monster) return setFightPanelIdle();
     const pct = clamp(Math.round((monster.hp / monster.maxHp) * 100), 0, 100);
@@ -524,7 +514,6 @@ async function renderLeaderboard() {
     refreshUsePotionButton();
     if (meta.autoAttackStage > 0) startAutoAttack();
   }
-
   function endFightWin() {
     if (monster?.kind === "boss") bossesKilled += 1;
     else if (monster) monstersKilled += 1;
@@ -571,6 +560,14 @@ async function renderLeaderboard() {
       bossesKilled
     };
 
+    // ⭐ Best-Score lokal (pro Gerät)
+    let best = null;
+    try { best = JSON.parse(localStorage.getItem("mbr_best_score") || "null"); } catch {}
+    if (!best || safeNum(payload.rounds) > safeNum(best.rounds)) {
+      localStorage.setItem("mbr_best_score", JSON.stringify(payload));
+    }
+
+    // Handy-safe: parken + retry
     localStorage.setItem("mbr_pending_score", JSON.stringify(payload));
 
     const t = setInterval(() => {
@@ -591,25 +588,17 @@ async function renderLeaderboard() {
     safeLog("💀 Game Over! Shop ist aktiv.");
   }
 
-  // ✅ FIXED attack()
   function attack() {
     if (!inFight || !monster) return;
 
     const playerDmg = Math.max(1, meta.attackPower + (Math.floor(Math.random() * 5) - 2));
-
-    // Gegner bekommt Schaden
     monster.hp -= playerDmg;
 
-    // Hit-Sound
     playHit(0.25);
-
-    // UI updaten
     renderFightPanel();
 
-    // Gegner tot?
     if (monster.hp <= 0) return endFightWin();
 
-    // Gegner schlägt zurück
     const enemyDmg = Math.floor(Math.random() * monster.atk) + 1;
     playerHp -= enemyDmg;
 
@@ -626,9 +615,11 @@ async function renderLeaderboard() {
   function usePotion() {
     if (meta.potions <= 0) return;
     if (playerHp >= meta.maxHpBase) return safeLog("❤️ Schon voll.");
+
     meta.potions -= 1;
     playerHp = Math.min(meta.maxHpBase, playerHp + POTION_HEAL);
     persistIfNamed();
+
     updateHud(); renderShop(); refreshUsePotionButton();
     safeLog(`🧪 Trank genutzt: +5 HP. Übrig: ${meta.potions}`);
   }
@@ -671,6 +662,7 @@ async function renderLeaderboard() {
       meta.gold += g;
       tiles[playerPos] = "normal";
       persistIfNamed();
+
       renderBoard();
       updateHud(); renderShop(); refreshUsePotionButton();
       return safeLog(`💰 Loot! +${g} Gold. Runde ${rounds}`);
@@ -700,9 +692,11 @@ async function renderLeaderboard() {
 
     generateBoard();
     renderBoard();
+
     updateHud(); renderShop(); refreshUsePotionButton();
     setFightPanelIdle();
     await renderLeaderboard();
+
     safeLog("✅ Neue Runde gestartet. Drück 'Drehen'.");
 
     if (meta.autoSpinStage > 0) startAutoSpin();
@@ -747,7 +741,7 @@ async function renderLeaderboard() {
   refreshUsePotionButton();
   setFightPanelIdle();
   renderLeaderboard();
-  safeLog(playerName ? `✅ Eingeloggt als "${playerName}". Drück 'Drehen'.` : "🔒 Bitte anmelden.");
 
+  safeLog(playerName ? `✅ Eingeloggt als "${playerName}". Drück 'Drehen'.` : "🔒 Bitte anmelden.");
   setInterval(watchUserChange, 500);
 })();
