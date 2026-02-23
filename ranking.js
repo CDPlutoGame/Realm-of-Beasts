@@ -1,4 +1,5 @@
 // ranking.js — nur /ranking (Top10 nach rounds)
+console.log("✅ ranking.js geladen");
 (() => {
   const firebaseConfig = {
     apiKey: "AIzaSyD3Z_HFQ04XVsbAnL3XCqf_6bkX3Cc21oc",
