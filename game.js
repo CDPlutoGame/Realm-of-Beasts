@@ -568,37 +568,35 @@ document.addEventListener("pointerdown", () => {
   }
 
   function attack() {
-    if (!inFight || !monster) return;
+  if (!inFight || !monster) return;
 
-    const playerDmg = Math.max(1, meta.attackPower + (Math.floor(Math.random() * 5) - 2));
-    monsterHp -= playerDmg;
-    playSfx(SFX_HIT_SRC, 0.25);
+  const playerDmg = Math.max(1, meta.attackPower + (Math.floor(Math.random() * 5) - 2));
 
-    if (monster.hp <= 0) return endFightWin();
+  // ✅ Gegner bekommt Schaden
+  monster.hp -= playerDmg;
 
-    const enemyDmg = Math.floor(Math.random() * monster.atk) + 1;
-    playerHp -= enemyDmg;
+  // ✅ Hit-Sound beim Treffer
+  playSfx(SFX_HIT_SRC, 0.25);
 
-    if (playerHp <= 0) {
-      playerHp = 0;
-      updateHud();
-      return gameOver();
-    }
+  // ✅ UI updaten
+  renderFightPanel();
 
-    renderFightPanel();
-    updateHud(); renderShop(); refreshUsePotionButton();
-    safeLog(`⚔️ Du machst ${playerDmg} Schaden.\n💀 Gegner macht ${enemyDmg} Schaden.`);
+  // ✅ Gegner tot?
+  if (monster.hp <= 0) return endFightWin();
+
+  // Gegner schlägt zurück
+  const enemyDmg = Math.floor(Math.random() * monster.atk) + 1;
+  playerHp -= enemyDmg;
+
+  if (playerHp <= 0) {
+    playerHp = 0;
+    updateHud();
+    return gameOver();
   }
 
-  function usePotion() {
-    if (meta.potions <= 0) return;
-    if (playerHp >= meta.maxHpBase) return safeLog("❤️ Schon voll.");
-    meta.potions -= 1;
-    playerHp = Math.min(meta.maxHpBase, playerHp + POTION_HEAL);
-    persistIfNamed();
-    updateHud(); renderShop(); refreshUsePotionButton();
-    safeLog(`🧪 Trank genutzt: +5 HP. Übrig: ${meta.potions}`);
-  }
+  updateHud(); renderShop(); refreshUsePotionButton();
+  safeLog(`⚔️ Du machst ${playerDmg} Schaden.\n💀 Gegner macht ${enemyDmg} Schaden.`);
+}
 
   // ---------------- SPIN ----------------
   function spin() {
