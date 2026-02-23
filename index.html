@@ -1,8 +1,13 @@
-// ===== INDEX SCRIPT =====
+// ===== INDEX-SKRIPT =====
 (function(){
 
   function isMobile(){
     return window.innerWidth <= 768;
+  }
+
+  function getStoredName(){
+    return localStorage.getItem("mobileUser") ||
+           localStorage.getItem("pcUser");
   }
 
   function loadOverlay(){
@@ -17,23 +22,24 @@
     }
   }
 
-  function showStoredName(){
-    const name =
-      localStorage.getItem("mobileUser") ||
-      localStorage.getItem("pcUser");
-
-    if(name){
-      const el = document.getElementById("playerName");
-      if(el){
-        el.textContent = "Spieler: " + name;
-      }
+  function showStoredName(name){
+    const el = document.getElementById("playerName");
+    if(el){
+      el.textContent = "Spieler: " + name;
     }
   }
 
   function init(){
     registerServiceWorker();
-    showStoredName();
-    loadOverlay();
+
+    const name = getStoredName();
+
+    if(name){
+      showStoredName(name);
+      // ❗ KEIN Overlay laden
+    } else {
+      loadOverlay(); // nur wenn kein Name existiert
+    }
   }
 
   if(document.readyState === "loading"){
