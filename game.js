@@ -54,7 +54,7 @@
 // ---------------- SOUND (tap-to-start, mobile safe) ----------------
 const MUSIC_LIST = ["sounds/music/bg1.mp3","sounds/music/bg2.mp3","sounds/music/bg3.mp3"];
 const SFX_ATTACK_SRC = "sounds/attack.mp3";
-const SFX_HIT_SRC    = "music/hit.mp3";
+const SFX_HIT_SRC    = "sounds/hit.mp3";
 
 const bgMusic = new Audio();
 bgMusic.preload = "auto";
@@ -87,7 +87,7 @@ function playRandomMusic(){
 
 bgMusic.addEventListener("ended", () => playRandomMusic());
 
-function playSfx(src, extra = 0.25){
+function playSfx(SFX_HIT_SRC, 0.25);
   if (soundMuted) return;
   const a = new Audio(src);
   a.volume = Math.min(1, baseVolume + extra);
