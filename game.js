@@ -1,9 +1,4 @@
-// ===== Monster Browser Game (ONLINE v12) =====
-// index.html:
-// <script type="module" src="ranking-online.js"></script>
-// <script defer src="auth-overlay.js"></script>
-// <script defer src="game.js"></script>
-
+// ===== Monster Browser Game (ONLINE v12 - FIXED) =====
 (() => {
   if (window.__MBR_LOADED_V12__) {
     console.warn("MBR v12: game.js wurde schon geladen – zweites Laden ignoriert.");
@@ -13,7 +8,6 @@
 
   // ---------------- SETTINGS ----------------
   const boardSize = 30;
-
   const ENEMY_BUFF_EVERY = 2;
   const ENEMY_HP_BUFF = 5;
   const ENEMY_ATK_BUFF = 2;
@@ -26,13 +20,11 @@
 
   const POTION_HEAL = 5;
   const POTION_COST = 5;
-
   const HEAL10_AMOUNT = 10;
   const HEAL10_COST = 50;
 
   const MAXHP_UPGRADE_AMOUNT = 5;
   const MAXHP_PRICE_INCREASE = 50;
-
   const ATK_UPGRADE_AMOUNT = 5;
   const ATK_PRICE_INCREASE = 5;
 
@@ -41,10 +33,8 @@
     potions: 0,
     maxHpBase: 30,
     attackPower: 5,
-
     maxHpPrice: 100,
     attackPowerPrice: 100,
-
     bossesDefeated: 0,
     autoSpinStage: 0,
     autoAttackStage: 0,
@@ -60,8 +50,8 @@
     }
     return el;
   }
+
   function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
-  function safeLog(msg) { logEl.textContent = String(msg ?? ""); }
 
   // ---------------- STORAGE ----------------
   function loadProfiles() {
@@ -69,28 +59,47 @@
     catch { return {}; }
   }
   function saveProfiles(p) { localStorage.setItem(PROFILES_KEY, JSON.stringify(p)); }
+
   function loadProfile(name) {
     const p = loadProfiles()[name];
     return p ? { ...DEFAULT_META, ...p } : { ...DEFAULT_META };
   }
+
   function saveProfile(name, meta) {
     const all = loadProfiles();
     all[name] = { ...meta };
     saveProfiles(all);
   }
+
   function loadCurrentName() {
     try { return (localStorage.getItem(CURRENT_NAME_KEY) || "").trim(); } catch { return ""; }
   }
   function saveCurrentName(name) { localStorage.setItem(CURRENT_NAME_KEY, String(name)); }
-  function persistIfNamed() { if (playerName) { saveProfile(playerName, meta); saveCurrentName(playerName); } }
+
+  // ✅ FIX: Wir nehmen auch mobileUser/pcUser (dein index.js speichert evtl. so)
+  function loadAnyName() {
+    return (
+      loadCurrentName() ||
+      (localStorage.getItem("mobileUser") || "").trim() ||
+      (localStorage.getItem("pcUser") || "").trim()
+    );
+  }
+
+  function persistIfNamed() {
+    if (playerName) {
+      saveProfile(playerName, meta);
+      saveCurrentName(playerName);
+    }
+  }
 
   // ---------------- UI ----------------
+  // Haupt-App Container
   const app = ensureEl("app", "div");
   app.style.display = "flex";
   app.style.alignItems = "flex-start";
   app.style.gap = "14px";
 
-  // Links: NUR Status
+  // Links: Status Panel
   const statusPanel = document.createElement("div");
   statusPanel.id = "statusPanel";
   statusPanel.style.width = "200px";
@@ -115,13 +124,13 @@
   const leftCol = ensureEl("leftCol", "div", mainArea);
   const fightPanel = ensureEl("fightPanel", "div", leftCol);
   const logEl = ensureEl("log", "pre", leftCol);
-
   const boardEl = ensureEl("board", "div", mainArea);
 
-  // Layout mainArea rechts
+  // Layout mainArea
   mainArea.style.display = "flex";
   mainArea.style.alignItems = "flex-start";
   mainArea.style.gap = "12px";
+
   leftCol.style.flex = "1";
   leftCol.style.minWidth = "320px";
   fightPanel.style.minHeight = "260px";
@@ -140,12 +149,15 @@
 
   const hudEl = ensureEl("hud", "div", hudWrapper);
   const shopEl = ensureEl("shop", "div", hudWrapper);
+
   const leaderboardEl = ensureEl("leaderboard", "div", rightCol);
 
   // Status links rein
   statusPanel.appendChild(hudEl);
 
-  // ---------------- SOUND (ultra mini, slider links + button rechts) ----------------
+  function safeLog(msg) { logEl.textContent = String(msg ?? ""); }
+
+  // ---------------- SOUND (mini) ----------------
   const MUSIC_LIST = ["sounds/music/bg1.mp3","sounds/music/bg2.mp3","sounds/music/bg3.mp3"];
   const SFX_ATTACK_SRC = "sounds/attack.mp3";
   const SFX_HIT_SRC    = "sounds/hit.mp3";
@@ -204,6 +216,7 @@
     soundBtn.textContent = soundMuted ? "🔇" : "🔊";
     volumeSlider.style.opacity = soundMuted ? "0.5" : "1";
   }
+
   function pickNextRandomIndex(){
     if (MUSIC_LIST.length === 0) return -1;
     if (MUSIC_LIST.length === 1) return 0;
@@ -212,6 +225,7 @@
     while (idx === currentMusicIndex);
     return idx;
   }
+
   function playRandomMusic(){
     if (soundMuted) return;
     const idx = pickNextRandomIndex();
@@ -221,6 +235,7 @@
     bgMusic.currentTime = 0;
     bgMusic.play().catch(()=>{});
   }
+
   bgMusic.addEventListener("ended", () => playRandomMusic());
 
   function playSfx(src, extra = 0.25){
@@ -251,6 +266,7 @@
 
   // ---------------- ONLINE RANKING ----------------
   let __rankTries = 0;
+
   async function renderLeaderboard(){
     if (!window.__ONLINE_RANKING__) {
       __rankTries++;
@@ -283,17 +299,13 @@
   // ---------------- GAME STATE ----------------
   let playerName = "";
   let meta = { ...DEFAULT_META };
-
   let rounds = 0;
   let playerHp = 30;
   let playerPos = 0;
-
   let inFight = false;
   let runOver = false;
-
   let tiles = [];
   let monster = null;
-
   let monstersKilled = 0;
   let bossesKilled = 0;
 
@@ -305,13 +317,13 @@
     return AUTO_BASE_COST + (nextStage - 1) * AUTO_STEP_COST;
   }
   function currentBossIdx(){ return Math.floor(rounds / 10); }
+
   function stopAutoSpin(){ if (autoSpinTimer) clearInterval(autoSpinTimer); autoSpinTimer = null; }
   function stopAutoAttack(){ if (autoAttackTimer) clearInterval(autoAttackTimer); autoAttackTimer = null; }
 
   function startAutoSpin(){
     stopAutoSpin();
     if (meta.autoSpinStage <= 0) return;
-
     const maxRounds = meta.autoSpinStage * 10;
     autoSpinTimer = setInterval(() => {
       if (runOver || inFight) return;
@@ -323,7 +335,6 @@
   function startAutoAttack(){
     stopAutoAttack();
     if (meta.autoAttackStage <= 0) return;
-
     autoAttackTimer = setInterval(() => {
       if (runOver) return;
       if (!inFight || !monster) return;
@@ -344,7 +355,6 @@
     tiles = [];
     const lootChance = 0.12;
     const monsterChance = 0.35;
-
     for (let i = 0; i < boardSize; i++) {
       if (i === 0) { tiles.push("start"); continue; }
       const r = Math.random();
@@ -359,7 +369,6 @@
     for (let i = 0; i < boardSize; i++) {
       const tile = document.createElement("div");
       tile.className = "tile";
-
       const t = tiles[i];
       let icon = "";
       if (t === "monster_easy") icon = "🐸";
@@ -382,19 +391,19 @@
   }
 
   // ---------------- HUD + SHOP ----------------
-function updateHud() {
-  hudEl.innerHTML =
-    `<b>📊 Status</b><br>` +
-    `👤 Account: <b>${playerName || "(nicht eingeloggt)"}</b><br>` +
-    `🏁 Runde: <b>${rounds}</b><br>` +
-    `📍 Feld: <b>${playerPos + 1}</b><br>` +
-    `❤️ HP: <b>${playerHp}/${meta.maxHpBase}</b><br>` +
-    `💰 Gold: <b>${meta.gold}</b><br>` +
-    `🧪 Tränke: <b>${meta.potions}</b><br>` +
-    `⚔️ Kraft: <b>${meta.attackPower}</b><br>` +
-    `☠️ Monster: <b>${monstersKilled}</b><br>` +
-    `👑 Bosse: <b>${bossesKilled}</b>`;
-}
+  function updateHud() {
+    hudEl.innerHTML =
+      `<b>📊 Status</b><br>` +
+      `👤 Account: <b>${playerName || "(nicht eingeloggt)"}</b><br>` +
+      `🏁 Runde: <b>${rounds}</b><br>` +
+      `📍 Feld: <b>${playerPos + 1}</b><br>` +
+      `❤️ HP: <b>${playerHp}/${meta.maxHpBase}</b><br>` +
+      `💰 Gold: <b>${meta.gold}</b><br>` +
+      `🧪 Tränke: <b>${meta.potions}</b><br>` +
+      `⚔️ Kraft: <b>${meta.attackPower}</b><br>` +
+      `☠️ Monster: <b>${monstersKilled}</b><br>` +
+      `👑 Bosse: <b>${bossesKilled}</b>`;
+  }
 
   function refreshUsePotionButton() {
     usePotionButton.disabled = !(meta.potions > 0 && playerHp < meta.maxHpBase);
@@ -402,7 +411,6 @@ function updateHud() {
 
   function renderShop() {
     const isFullHp = playerHp >= meta.maxHpBase;
-
     const canBuyPotion = runOver && meta.gold >= POTION_COST;
     const canBuyMaxHp  = runOver && meta.gold >= meta.maxHpPrice;
     const canBuyAtk    = runOver && meta.gold >= meta.attackPowerPrice;
@@ -415,7 +423,6 @@ function updateHud() {
         <button id="buyHeal10" ${canBuyHeal10 ? "" : "disabled"}>Sofort +10 — 50 Gold</button>
         <button id="buyMaxHp" ${canBuyMaxHp ? "" : "disabled"}>Max HP +5 — ${meta.maxHpPrice} Gold</button>
         <button id="buyAtk" ${canBuyAtk ? "" : "disabled"}>Kraft +5 — ${meta.attackPowerPrice} Gold</button>
-
         <button id="buyAutoSpin">Auto-Start</button>
         <button id="buyAutoAttack">Auto-Attack</button>
       </div>
@@ -469,7 +476,6 @@ function updateHud() {
 
     const canBuyAutoSpin =
       runOver && (meta.bossesDefeated >= nextSpinStage) && (meta.gold >= autoCost(nextSpinStage));
-
     const canBuyAutoAtk =
       runOver && (meta.bossesDefeated >= nextAtkStage) && (meta.gold >= autoCost(nextAtkStage));
 
@@ -508,7 +514,6 @@ function updateHud() {
     if (type === "monster_easy") base = { kind:"mob", name:"Froschling", hp:10, atk:3, icon:"🐸" };
     else if (type === "monster_medium") base = { kind:"mob", name:"Wolfsjäger", hp:18, atk:5, icon:"🐺" };
     else base = { kind:"mob", name:"Bärenwächter", hp:30, atk:8, icon:"🐻" };
-
     const hp = base.hp + lvl * ENEMY_HP_BUFF;
     const atk = base.atk + lvl * ENEMY_ATK_BUFF;
     return { ...base, hp, maxHp: hp, atk };
@@ -534,7 +539,6 @@ function updateHud() {
   function renderFightPanel() {
     if (!monster) return setFightPanelIdle();
     const pct = clamp(Math.round((monster.hp / monster.maxHp) * 100), 0, 100);
-
     fightPanel.innerHTML = `
       <div style="text-align:center;height:100%;display:flex;flex-direction:column;justify-content:center;">
         <div style="font-size:${monster.kind === "boss" ? 62 : 52}px;line-height:1;">${monster.icon}</div>
@@ -590,10 +594,8 @@ function updateHud() {
   function gameOver() {
     runOver = true;
     inFight = false;
-
     stopAutoSpin();
     stopAutoAttack();
-
     spinButton.disabled = true;
     attackButton.disabled = true;
 
@@ -606,6 +608,7 @@ function updateHud() {
       bossesKilled
     };
 
+    // ✅ v12: submitScore via __ONLINE_RANKING__
     const trySubmit = () => {
       if (!window.__ONLINE_RANKING__) return false;
       window.__ONLINE_RANKING__.submitScore(payload).catch(()=>{});
@@ -624,7 +627,6 @@ function updateHud() {
     renderFightPanel();
     updateHud(); renderShop(); refreshUsePotionButton();
     renderLeaderboard();
-
     safeLog("💀 Game Over! Shop ist aktiv.");
   }
 
@@ -655,16 +657,18 @@ function updateHud() {
   function usePotion() {
     if (meta.potions <= 0) return;
     if (playerHp >= meta.maxHpBase) return safeLog("❤️ Schon voll.");
+
     meta.potions -= 1;
     playerHp = Math.min(meta.maxHpBase, playerHp + POTION_HEAL);
     persistIfNamed();
+
     updateHud(); renderShop(); refreshUsePotionButton();
     safeLog(`🧪 Trank genutzt: +5 HP. Übrig: ${meta.potions}`);
   }
 
   // ---------------- SPIN ----------------
   function spin() {
-    if (!playerName) return safeLog("🔒 Bitte zuerst anmelden (Overlay).");
+    if (!playerName) return safeLog("🔒 Bitte zuerst anmelden (Name speichern).");
     if (inFight) return;
     if (runOver) return safeLog("Game Over. Shop ist aktiv. Starte 'Neue Runde'.");
 
@@ -700,6 +704,7 @@ function updateHud() {
       meta.gold += gold;
       tiles[playerPos] = "normal";
       persistIfNamed();
+
       renderBoard();
       updateHud(); renderShop(); refreshUsePotionButton();
       return safeLog(`💰 Loot! +${gold} Gold. Runde ${rounds}`);
@@ -715,11 +720,9 @@ function updateHud() {
     rounds = 0;
     playerHp = meta.maxHpBase;
     playerPos = 0;
-
     inFight = false;
     runOver = false;
     monster = null;
-
     monstersKilled = 0;
     bossesKilled = 0;
 
@@ -731,10 +734,11 @@ function updateHud() {
 
     generateBoard();
     renderBoard();
+
     updateHud(); renderShop(); refreshUsePotionButton();
     setFightPanelIdle();
-    await renderLeaderboard();
 
+    await renderLeaderboard();
     safeLog("✅ Neue Runde gestartet. Drück 'Drehen'.");
 
     if (meta.autoSpinStage > 0) startAutoSpin();
@@ -747,40 +751,31 @@ function updateHud() {
   usePotionButton.onclick = usePotion;
   newRoundButton.onclick = resetRunKeepMeta;
 
-  // ---------------- INIT / AUTO-USER SWITCH ----------------
+  // ---------------- INIT ----------------
   attackButton.disabled = true;
 
   function loadUserFromStorage() {
-    const n = loadCurrentName();
+    const n = loadAnyName();
     playerName = n;
     meta = n ? loadProfile(n) : { ...DEFAULT_META };
     playerHp = meta.maxHpBase;
   }
 
+  // ✅ FIX: einfacher Watcher (ohne __ONLINE_AUTH__)
   let __lastSeenName = "";
   function watchUserChange() {
-  const n = loadCurrentName();
-
-  // Nur wenn Firebase wirklich eingeloggt ist
-  if (window.__ONLINE_AUTH__?.status?.loggedIn) {
+    const n = loadAnyName();
     if (n !== __lastSeenName) {
       __lastSeenName = n;
       playerName = n;
-      meta = loadProfile(n);
+      meta = n ? loadProfile(n) : { ...DEFAULT_META };
       resetRunKeepMeta().catch(()=>{});
-      safeLog(`✅ Eingeloggt als "${n}". Drück 'Drehen'.`);
-    }
-  } else {
-    // Wenn nicht eingeloggt -> alles resetten
-    if (__lastSeenName !== "") {
-      __lastSeenName = "";
-      playerName = "";
-      meta = { ...DEFAULT_META };
-      resetRunKeepMeta().catch(()=>{});
-      safeLog("🔒 Bitte anmelden (Overlay).");
+      safeLog(n ? `✅ Eingeloggt als "${n}". Drück 'Drehen'.` : "🔒 Bitte Namen eingeben (index.js).");
     }
   }
-} __lastSeenName = playerName;
+
+  loadUserFromStorage();
+  __lastSeenName = playerName;
 
   generateBoard();
   renderBoard();
@@ -790,7 +785,7 @@ function updateHud() {
   setFightPanelIdle();
   renderLeaderboard();
 
-  safeLog(playerName ? `✅ Eingeloggt als "${playerName}". Drück 'Drehen'.` : "🔒 Bitte anmelden (Overlay).");
+  safeLog(playerName ? `✅ Eingeloggt als "${playerName}". Drück 'Drehen'.` : "🔒 Bitte Namen eingeben (index.js).");
 
   setInterval(watchUserChange, 500);
 })();
