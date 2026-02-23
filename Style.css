@@ -167,3 +167,61 @@ h1{
   .tileIcon{ font-size:18px; }
   #uiRow1 button{ padding:10px 10px; font-size:14px; }
 }
+/* ========================= */
+/* 📱 MOBILE VERSION */
+/* ========================= */
+
+@media (max-width: 768px) {
+
+  body {
+    margin: 0;
+    padding: 10px;
+    font-size: 16px;
+  }
+
+  h1 {
+    font-size: 22px;
+    text-align: center;
+  }
+
+  #app {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  /* Status oben */
+  .status {
+    width: 100%;
+  }
+
+  /* Kampfbereich mittig */
+  .combat-area {
+    text-align: center;
+  }
+
+  /* Rechte Zahlenleiste AUSBLENDEN auf Mobile */
+  .board-numbers {
+    display: none !important;
+  }
+
+  /* Buttons größer machen */
+  button {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  /* Shop untereinander */
+  .shop {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .shop button {
+    width: 100%;
+  }
+
+}
