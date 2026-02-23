@@ -57,4 +57,14 @@
 
   window.__ONLINE_RANKING__ = { submitScore, top10 };
   console.log("✅ __ONLINE_RANKING__ bereit");
+    // pending score nachschieben (Handy-Fix)
+  try {
+    const pending = localStorage.getItem("mbr_pending_score");
+    if (pending) {
+      submitScore(JSON.parse(pending)).then(() => {
+        localStorage.removeItem("mbr_pending_score");
+        console.log("✅ pending score hochgeladen");
+      }).catch(()=>{});
+    }
+  } catch {}
 })();
