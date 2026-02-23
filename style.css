@@ -119,6 +119,7 @@ h1 {
 
 /* Leaderboard */
 #leaderboard {
+  max-heigt: 300px;
   background: #161616;
   padding: 15px;
   border-radius: 12px;
