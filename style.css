@@ -29,8 +29,7 @@ h1 {
 }
 
 /* linker Statusblock */
-#statusPanel,
-#hud {
+#statusPanel {
   width: 200px;
   height: 100px;
   background: #161616;
@@ -40,6 +39,11 @@ h1 {
   position: absolute;
   bottom: 20px;
   right: 20px;
+}
+
+/* Inhalt im Status */
+#hud {
+  width: 100%;
 }
 
 /* rechter Bereich */
