@@ -47,7 +47,7 @@
     return arr;
   }
 
-  window.__ONLINE_RANKING__ = { submitScore, top3 };
+  window.__ONLINE_RANKING__ = { submitScore, top10 };
   console.log("✅ Ranking ready");
 
   // pending score nachschieben
