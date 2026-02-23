@@ -35,10 +35,10 @@
     return true;
   }
 
-  async function top10() {
+  async function top3() {
     const snap = await db.ref("ranking")
       .orderByChild("rounds")
-      .limitToLast(10)
+      .limitToLast(3)
       .once("value");
 
     const arr = [];
@@ -47,7 +47,7 @@
     return arr;
   }
 
-  window.__ONLINE_RANKING__ = { submitScore, top10 };
+  window.__ONLINE_RANKING__ = { submitScore, top3 };
   console.log("✅ Ranking ready");
 
   // pending score nachschieben
