@@ -31,11 +31,15 @@ h1 {
 /* linker Statusblock */
 #statusPanel,
 #hud {
-  width: 200;
-  height: 200;
+  width: 200px;
+  height: 200px;
   background: #161616;
   padding: 15px;
   border-radius: 12px;
+
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
 }
 
 /* rechter Bereich */
