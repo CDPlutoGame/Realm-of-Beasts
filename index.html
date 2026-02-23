@@ -1,23 +1,22 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Realm of Beasts</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- ✅ CSS EINBINDEN -->
-  <link rel="stylesheet" href="style.css">
-
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h1>Realm of Beasts</h1>
   <div id="playerName"></div>
   <div id="gameContainer"></div>
 
- <script src="index.js"></script>
- <script src="ranking.js"></script>
- <script src="game.js"></script>
+  <!-- Firebase (muss vor ranking.js kommen) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script src="index.js"></script>
+  <script src="ranking.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>
