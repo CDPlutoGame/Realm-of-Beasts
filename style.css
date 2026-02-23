@@ -3,7 +3,7 @@
 /* ========================= */
 body {
   margin: 0;
-  background-image:  ("images/dungeon.jpg");
+  background-image: url("images/dungeon.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
