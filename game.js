@@ -571,7 +571,8 @@ document.addEventListener("pointerdown", () => {
     if (!inFight || !monster) return;
 
     const playerDmg = Math.max(1, meta.attackPower + (Math.floor(Math.random() * 5) - 2));
-    monster.hp -= playerDmg;
+    monsterHp -= playerDmg;
+    playSfx(SFX_HIT_SRC, 0.25);
 
     if (monster.hp <= 0) return endFightWin();
 
