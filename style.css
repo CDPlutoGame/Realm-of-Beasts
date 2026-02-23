@@ -23,77 +23,36 @@ h1 {
 /* IDs passen zu deinem game.js   */
 /* ============================= */
 
+/* ===== Step 1: Links (Status + Shop) ===== */
 #app{
-  display:grid;
-  grid-template-columns: 260px 1fr;
-  gap:14px;
-  padding:14px;
-  align-items:start;
+  display: grid;
+  grid-template-columns: 260px 1fr;  /* links | rechts */
+  gap: 14px;
+  padding: 14px;
+  align-items: start;
 }
 
 #sidebar{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-#statusPanel{ background:#161616; padding:12px; border-radius:12px; }
-#shop{ background:#161616; padding:12px; border-radius:12px; }
-
-/* Links */
-#statusPanel{ grid-area: status; background:#161616; padding:12px; border-radius:12px; }
-#hud{ width:100%; }
-
-#shop{ grid-area: shop; background:#161616; padding:12px; border-radius:12px; }
-#shop button{ background:#2b8a3e; }
-
-/* Mitte */
-#fightPanel{ grid-area: fight; background:#121212; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:12px; }
-#log{
-  background:#0f0f0f;
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:12px;
-  padding:12px;
-  min-height:120px;
-  white-space:pre-wrap;
-  margin-top:12px;
-}
-
-/* Rechts */
-#board{
-  grid-area: board;
-  display:grid;
-  grid-template-columns: repeat(10, 1fr);
-  gap:8px;
-  padding:12px;
-  background:#111;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.08);
-}
-.tile{ position:relative; background:#1a1a1a; border-radius:10px; padding:10px 6px; text-align:center; border:1px solid rgba(255,255,255,0.06); }
-.tile.player{ outline:2px solid #1f6feb; box-shadow:0 0 0 2px rgba(31,111,235,0.25); }
-.tileNum{ position:absolute; top:6px; left:8px; font-size:11px; opacity:0.6; }
-.tileIcon{ font-size:20px; }
-
-/* Buttons unter alles */
-#uiRow1{
-  grid-area: buttons;
-  display:grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap:10px;
-}
-#uiRow1 button{ padding:10px 8px; border-radius:10px; }
-
-/* Leaderboard ganz unten (mit Scroll!) */
-#leaderboard{
-  grid-area: leader;
-  max-height: 260px;
-  overflow-y: auto;
+#statusPanel{
   background:#161616;
   padding:12px;
   border-radius:12px;
-  border:1px solid rgba(255,255,255,0.08);
 }
+
+#hud{ width:100%; }
+
+#shop{
+  background:#161616;
+  padding:12px;
+  border-radius:12px;
+}
+
+#shop button{ background:#2b8a3e; }
 /* ================================= */
 /* 🔘 BUTTONS */
 /* ================================= */
