@@ -78,43 +78,47 @@
     if (playerName) saveProfile(playerName, meta);
   }
 
-  // ---------------- UI ROOT ----------------
-  const app = ensureEl("app", "div", document.body);
-  const statusPanel = ensureEl("statusPanel", "div", app);
-  const rightCol = ensureEl("rightCol", "div", app);
-  const mainArea = ensureEl("mainArea", "div", rightCol);
-  const row1 = ensureEl("uiRow1", "div", rightCol);
-  const hudWrapper = ensureEl("hudWrapper", "div", rightCol);
-  const leftCol = ensureEl("leftCol", "div", mainArea);
-  const fightPanel = ensureEl("fightPanel", "div", leftCol);
-  const logEl = ensureEl("log", "pre", leftCol);
-  const boardEl = ensureEl("board", "div", mainArea);
+ // ---------------- UI ROOT ----------------
+const app = ensureEl("app", "div", document.body);
 
-  const spinButton = ensureEl("spinButton", "button", row1);
-  spinButton.textContent = "Drehen";
+// 2 Spalten: links Sidebar, rechts alles andere
+const sidebar  = ensureEl("sidebar", "div", app);
+const rightCol = ensureEl("rightCol", "div", app);
 
-  const attackButton = ensureEl("attackButton", "button", row1);
-  attackButton.textContent = "Angreifen";
+// LINKS: Status (mit hud + shop untereinander)
+const statusPanel = ensureEl("statusPanel", "div", sidebar);
+const hudEl  = ensureEl("hud", "div", statusPanel);
+const shopEl = ensureEl("shop", "div", statusPanel); // ✅ Shop UNTER Status
 
-  const usePotionButton = ensureEl("usePotionButton", "button", row1);
-  usePotionButton.textContent = "Trank nutzen (+5 HP)";
+// RECHTS: Main + Buttons + Leaderboard
+const mainArea = ensureEl("mainArea", "div", rightCol);
+const row1     = ensureEl("uiRow1", "div", rightCol);
 
-  const newRoundButton = ensureEl("newRoundButton", "button", row1);
-  newRoundButton.textContent = "Neue Runde";
+const leftCol   = ensureEl("leftCol", "div", mainArea);
+const fightPanel = ensureEl("fightPanel", "div", leftCol);
+const logEl      = ensureEl("log", "pre", leftCol);
+const boardEl    = ensureEl("board", "div", mainArea);
 
-  const hudEl = ensureEl("hud", "div", statusPanel);
-  const shopEl = ensureEl("shop", "div", app);
-  const leaderboardEl = ensureEl("leaderboard", "div", rightCol);
+const spinButton = ensureEl("spinButton", "button", row1);
+spinButton.textContent = "Drehen";
+const attackButton = ensureEl("attackButton", "button", row1);
+attackButton.textContent = "Angreifen";
+const usePotionButton = ensureEl("usePotionButton", "button", row1);
+usePotionButton.textContent = "Trank nutzen (+5 HP)";
+const newRoundButton = ensureEl("newRoundButton", "button", row1);
+newRoundButton.textContent = "Neue Runde";
 
-  // Leaderboard sichtbar & scrollbar (sonst wirkt es wie “nur Platz 1”)
-  leaderboardEl.style.maxHeight = "260px";
-  leaderboardEl.style.overflowY = "auto";
-  leaderboardEl.style.padding = "10px";
-  leaderboardEl.style.borderRadius = "10px";
-  leaderboardEl.style.background = "rgba(0,0,0,0.35)";
-  leaderboardEl.style.border = "1px solid rgba(255,255,255,0.15)";
+const leaderboardEl = ensureEl("leaderboard", "div", rightCol);
 
-  function safeLog(msg) { logEl.textContent = String(msg ?? ""); }
+// Leaderboard scrollbar (sonst wirkt es wie “nur Platz 1”)
+leaderboardEl.style.maxHeight = "260px";
+leaderboardEl.style.overflowY = "auto";
+leaderboardEl.style.padding = "10px";
+leaderboardEl.style.borderRadius = "10px";
+leaderboardEl.style.background = "rgba(0,0,0,0.35)";
+leaderboardEl.style.border = "1px solid rgba(255,255,255,0.15)";
+
+function safeLog(msg) { logEl.textContent = String(msg ?? ""); }
 
   // ---------------- SOUND (tap-to-start, mobile safe) ----------------
   const MUSIC_LIST = ["sounds/music/bg1.mp3","sounds/music/bg2.mp3","sounds/music/bg3.mp3"];
