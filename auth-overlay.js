@@ -1,55 +1,15 @@
-// auth-overlay.js — Mobile + Desktop getrennt
+// auth-overlay.js — FULL FIXED VERSION (Mobile + Desktop getrennt + Auto Close)
 
 (function () {
-
-  function isMobile() {
-    return window.innerWidth <= 768;
-  }
 
   function ensureStyles() {
     if (document.getElementById("authStyle")) return;
 
-    const s = document.createElement("style");
-    s.id = "authStyle";
-    s.textContent = `
+    const style = document.createElement("style");
+    style.id = "authStyle";
+    style.textContent = `
 
-/* ===== MOBILE ===== */
-@media (max-width:768px){
-
-  #authCard{
-    width:90vw;
-    border-radius:20px;
-    padding:20px;
-  }
-
-  #authCard h2{
-    font-size:22px;
-    text-align:center;
-  }
-
-  #authCard input{
-    font-size:16px;
-    padding:14px;
-  }
-
-  #authCard button{
-    font-size:16px;
-    padding:14px;
-  }
-
-}
-
-/* ===== DESKTOP ===== */
-@media (min-width:769px){
-
-  #authCard{
-    width:420px;
-    border-radius:14px;
-    padding:18px;
-  }
-
-}
-
+/* ===== OVERLAY ===== */
 #authOverlay{
   position:fixed;
   inset:0;
@@ -60,45 +20,80 @@
   z-index:9999;
 }
 
+/* ===== CARD ===== */
 #authCard{
   background:#121212;
-  color:#fff;
+  color:white;
+  font-family:system-ui;
   border:1px solid rgba(255,255,255,.15);
   box-shadow:0 20px 60px rgba(0,0,0,.6);
-  font-family:system-ui;
 }
 
+/* ===== MOBILE ===== */
+@media (max-width:768px){
+  #authCard{
+    width:90vw;
+    padding:22px;
+    border-radius:22px;
+  }
+  #authCard h2{
+    font-size:22px;
+    text-align:center;
+  }
+}
+
+/* ===== DESKTOP ===== */
+@media (min-width:769px){
+  #authCard{
+    width:420px;
+    padding:20px;
+    border-radius:14px;
+  }
+}
+
+/* ===== INPUTS ===== */
 #authCard input{
   width:100%;
-  margin-bottom:12px;
+  padding:14px;
+  margin-bottom:14px;
   border-radius:12px;
   border:1px solid rgba(255,255,255,.2);
   background:#1b1b1b;
   color:white;
+  font-size:15px;
 }
 
+/* ===== BUTTONS ===== */
 #btnRegister{
   width:100%;
-  background:#2b8a3e;
-  color:white;
+  padding:14px;
   border:none;
   border-radius:12px;
+  background:#2b8a3e;
+  color:white;
+  font-size:16px;
   margin-bottom:10px;
+  cursor:pointer;
 }
 
 #btnLogin{
   width:100%;
-  background:#1f6feb;
-  color:white;
+  padding:14px;
   border:none;
   border-radius:12px;
+  background:#1f6feb;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
 }
 
     `;
-    document.head.appendChild(s);
+    document.head.appendChild(style);
   }
 
   function createOverlay() {
+
+    if (document.getElementById("authOverlay")) return;
 
     ensureStyles();
 
@@ -118,20 +113,35 @@
     document.body.appendChild(overlay);
 
     document.getElementById("btnLogin").onclick = async () => {
-      const n = document.getElementById("authName").value;
-      const p = document.getElementById("authPass").value;
-      await window.__ONLINE_AUTH__.login(n,p);
+      const n = document.getElementById("authName").value.trim();
+      const p = document.getElementById("authPass").value.trim();
+
+      if (!n || !p) return;
+
+      const ok = await window.__ONLINE_AUTH__.login(n, p);
+
+      if (ok !== false) {
+        overlay.remove(); // 🔥 HIER WIRD ES GESCHLOSSEN
+      }
     };
 
     document.getElementById("btnRegister").onclick = async () => {
-      const n = document.getElementById("authName").value;
-      const p = document.getElementById("authPass").value;
-      await window.__ONLINE_AUTH__.register(n,p);
+      const n = document.getElementById("authName").value.trim();
+      const p = document.getElementById("authPass").value.trim();
+
+      if (!n || !p) return;
+
+      const ok = await window.__ONLINE_AUTH__.register(n, p);
+
+      if (ok !== false) {
+        overlay.remove(); // 🔥 schließt nach Registrierung
+      }
     };
   }
 
-  if(document.readyState==="loading")
-    document.addEventListener("DOMContentLoaded",createOverlay);
+  // Auto Start
+  if (document.readyState === "loading")
+    document.addEventListener("DOMContentLoaded", createOverlay);
   else
     createOverlay();
 
