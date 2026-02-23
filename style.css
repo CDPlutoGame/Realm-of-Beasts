@@ -3,11 +3,11 @@
 /* ========================= */
 body {
   margin: 0;
-  background-image: url("images/dungeon.jpg");
-  background-size: cover;        /* füllt ganzen Bildschirm */
-  background-position: center;   /* zentriert */
-  background-repeat: no-repeat;  /* nicht wiederholen */
-  background-attachment: fixed;  /* bleibt beim Scrollen */
+  background-image:  ("images/dungeon.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: white;
 }
 #app {
