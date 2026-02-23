@@ -3,10 +3,12 @@
 /* ========================= */
 body {
   margin: 0;
-  background: url("images/dungeon.jpg") no-repeat center center fixed;
-  background-size: cover;
+  background-image: url("images/dungeon.jpg");
+  background-size: cover;        /* füllt ganzen Bildschirm */
+  background-position: center;   /* zentriert */
+  background-repeat: no-repeat;  /* nicht wiederholen */
+  background-attachment: fixed;  /* bleibt beim Scrollen */
   color: white;
-  font-family: Arial, sans-serif;
 }
 #app {
   display: grid;
@@ -67,7 +69,6 @@ body {
 }
 
 /* BOARD */
-/* BOARD FIX: wieder als Kasten/GRID */
 #board{
   display: grid !important;
   grid-template-columns: repeat(10, minmax(0, 1fr)) !important;
