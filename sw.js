@@ -1,4 +1,4 @@
-const CACHE_NAME = "realm-cache-v1";
+const CACHE_NAME = "realm-cache-v2";
 
 const ASSETS = [
   "./",
