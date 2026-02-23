@@ -1,15 +1,15 @@
 // ===== ONLINE RANKING (FIREBASE REALTIME DATABASE) =====
-(function () {
-  const firebaseConfig = {
-    apiKey: "DEIN_KEY",
-    authDomain: "DEIN_PROJECT.firebaseapp.com",
-    databaseURL: "https://DEIN_PROJECT-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "DEIN_PROJECT",
-    storageBucket: "DEIN_PROJECT.appspot.com",
-    messagingSenderId: "…",
-    appId: "…"
-  };
-
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyD3Z_HFQ04XVsbAnL3XCqf_6bkX3Cc21oc",
+  authDomain: "realm-of-beaasts.firebaseapp.com",
+  databaseURL: "https://realm-of-beaasts-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "realm-of-beaasts",
+  storageBucket: "realm-of-beaasts.firebasestorage.app",
+  messagingSenderId: "723138830522",
+  appId: "1:723138830522:web:b3ec8a3d8947c25ec66283",
+  measurementId: "G-084J12EZHN"
+};
   try {
     if (typeof firebase === "undefined") {
       console.log("Firebase libs nicht geladen");
