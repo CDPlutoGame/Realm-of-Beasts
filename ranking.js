@@ -1,4 +1,4 @@
-// ===== ranking.js (Firebase Realtime Database) =====
+// ranking.js — Best-Score pro Name + Top10 nach rounds
 (() => {
   const firebaseConfig = {
     apiKey: "AIzaSyD3Z_HFQ04XVsbAnL3XCqf_6bkX3Cc21oc",
@@ -10,69 +10,66 @@
     appId: "1:723138830522:web:b3ec8a3d8947c25ec66283"
   };
 
-  // Firebase libs müssen VORHER in index.html geladen sein
   if (typeof firebase === "undefined") {
-    console.log("❌ firebase ist undefined (libs fehlen in index.html)");
+    console.log("❌ Firebase libs fehlen");
     return;
   }
-
-  try {
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  } catch (e) {
-    console.log("❌ Firebase init Fehler:", e);
-    return;
-  }
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
   const db = firebase.database();
 
-  function getName() {
-    return (
-      (localStorage.getItem("mbr_current_name_online_v10") || "").trim() ||
-      (localStorage.getItem("mobileUser") || "").trim() ||
-      (localStorage.getItem("pcUser") || "").trim() ||
-      (localStorage.getItem("playerName") || "").trim()
-    );
-  }
+  const toNum = (x) => {
+    const n = Number(x);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  // sichere Key-Erstellung (keine Slashes, keine Punkte)
+  const safeKey = (name) =>
+    String(name || "Unknown")
+      .trim()
+      .slice(0, 24)
+      .replace(/[.#$\[\]\/]/g, "_");
 
   async function submitScore(payload) {
-    const name = getName() || String(payload?.name || "Unknown").trim() || "Unknown";
+    const nameRaw = String(payload?.name || "Unknown").trim() || "Unknown";
+    const name = nameRaw.slice(0, 24);
+    const key = safeKey(name);
 
-    const data = {
-      name: String(name).slice(0, 24),
-      rounds: Number(payload?.rounds || 0),
-      monstersKilled: Number(payload?.monstersKilled || 0),
-      bossesKilled: Number(payload?.bossesKilled || 0),
+    const newData = {
+      name,
+      rounds: toNum(payload?.rounds),
+      monstersKilled: toNum(payload?.monstersKilled),
+      bossesKilled: toNum(payload?.bossesKilled),
       ts: Date.now()
     };
 
-    await db.ref("ranking").push(data);
-    console.log("✅ Ranking gespeichert:", data);
+    const ref = db.ref("ranking_best/" + key);
+
+    // nur überschreiben, wenn besser als der alte Score
+    const snap = await ref.once("value");
+    const old = snap.val();
+    const oldRounds = toNum(old?.rounds);
+
+    if (!old || newData.rounds > oldRounds) {
+      await ref.set(newData);
+      return true; // updated
+    }
+    return false; // not better
   }
 
   async function top10() {
-    const snap = await db.ref("ranking")
+    const snap = await db
+      .ref("ranking_best")
       .orderByChild("rounds")
       .limitToLast(10)
       .once("value");
 
     const arr = [];
-    snap.forEach(c => arr.push(c.val()));
-    arr.sort((a, b) => (b.rounds || 0) - (a.rounds || 0));
+    snap.forEach((c) => arr.push(c.val()));
+    arr.sort((a, b) => toNum(b.rounds) - toNum(a.rounds));
     return arr;
   }
 
   window.__ONLINE_RANKING__ = { submitScore, top10 };
-  console.log("✅ __ONLINE_RANKING__ bereit");
-
-  // pending score nachschieben (falls game.js ihn geparkt hat)
-  try {
-    const pending = localStorage.getItem("mbr_pending_score");
-    if (pending) {
-      const payload = JSON.parse(pending);
-      submitScore(payload).then(() => {
-        localStorage.removeItem("mbr_pending_score");
-        console.log("✅ Pending Score hochgeladen");
-      }).catch((e) => console.log("❌ Pending Upload Fehler:", e));
-    }
-  } catch {}
+  console.log("✅ Ranking ready (best per name)");
 })();
