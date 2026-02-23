@@ -105,6 +105,12 @@
   const hudEl = ensureEl("hud", "div", statusPanel);
   const shopEl = ensureEl("shop", "div", hudWrapper);
   const leaderboardEl = ensureEl("leaderboard", "div", rightCol);
+  leaderboardEl.style.maxHeight = "250px";
+  leaderboardEl.style.overflowY = "auto";
+  leaderboardEl.style.padding = "10px";
+  leaderboardEl.style.background = "rgba(0,0,0,0.5)";
+  leaderboardEl.style.border = "1px solid rgba(255,255,255,0.2)";
+  leaderboardEl.style.borderRadius = "8px";
 
   function safeLog(msg) { logEl.textContent = String(msg ?? ""); }
 
