@@ -1,13 +1,3 @@
-
-// 🔥 FORCE SW RESET
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(function(registrations) {
-    for (let registration of registrations) {
-      registration.unregister();
-    }
-  });
-}
-
 // ===== INDEX-SKRIPT =====
 (function(){
 
@@ -16,8 +6,7 @@ if ('serviceWorker' in navigator) {
   }
 
   function getStoredName(){
-    return localStorage.getItem("mobileUser") ||
-           localStorage.getItem("pcUser");
+    return localStorage.getItem("mobileUser") || localStorage.getItem("pcUser");
   }
 
   function loadOverlay(){
@@ -46,9 +35,8 @@ if ('serviceWorker' in navigator) {
 
     if(name){
       showStoredName(name);
-      // ❗ KEIN Overlay laden
     } else {
-      loadOverlay(); // nur wenn kein Name existiert
+      loadOverlay();
     }
   }
 
