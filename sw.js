@@ -1,4 +1,4 @@
-const CACHE_NAME = "realm-cache-v2";
+const CACHE_NAME = "realm-cache-2026-02-23";";
 
 const ASSETS = [
   "./",
