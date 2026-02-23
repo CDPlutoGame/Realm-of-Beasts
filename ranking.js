@@ -1,4 +1,4 @@
-// ===== ranking.js (Firebase Realtime Database) =====
+// ranking.js — Online Ranking (Firebase RTDB)
 (() => {
   const firebaseConfig = {
     apiKey: "AIzaSyD3Z_HFQ04XVsbAnL3XCqf_6bkX3Cc21oc",
@@ -11,20 +11,13 @@
   };
 
   if (typeof firebase === "undefined") {
-    console.log("❌ Firebase libs fehlen (firebase ist undefined)");
+    console.log("❌ Firebase libs fehlen");
     return;
   }
 
-  try {
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  } catch (e) {
-    console.log("❌ Firebase init Fehler", e);
-    return;
-  }
-
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  // game.js erwartet: window.__ONLINE_RANKING__.top10() und .submitScore(payload)
   window.__ONLINE_RANKING__ = {
     async submitScore(payload) {
       const p = {
@@ -34,7 +27,7 @@
         bossesKilled: Number(payload?.bossesKilled || 0),
         ts: Date.now()
       };
-      await db.ref("ranking").push(p);
+      return db.ref("ranking").push(p);
     },
 
     async top10() {
@@ -51,16 +44,16 @@
     }
   };
 
-  // ✅ Handy-Fix: pending score automatisch nachschieben
+  // pending score nachschieben (Handy-Fix)
   try {
     const pending = localStorage.getItem("mbr_pending_score");
     if (pending) {
       const payload = JSON.parse(pending);
-      window.__ONLINE_RANKING__.submitScore(payload)
-        .then(() => localStorage.removeItem("mbr_pending_score"))
-        .catch(() => {});
+      window.__ONLINE_RANKING__.submitScore(payload).then(() => {
+        localStorage.removeItem("mbr_pending_score");
+      }).catch(()=>{});
     }
   } catch {}
 
-  console.log("✅ __ONLINE_RANKING__ bereit");
+  console.log("✅ Ranking ready");
 })();
