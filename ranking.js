@@ -1,9 +1,9 @@
-// ranking.js — stable + top10 defined
+// ranking.js — stable (game.js erwartet top10!)
 (() => {
-  console.log("✅ ranking.js gestartet");
+  console.log("✅ ranking.js geladen");
 
   if (typeof firebase === "undefined") {
-    console.log("❌ firebase ist undefined -> Firebase-Libs fehlen");
+    console.log("❌ firebase undefined -> Firebase-Libs fehlen");
     return;
   }
 
@@ -25,7 +25,6 @@
   }
 
   const db = firebase.database();
-
   const toNum = (x) => {
     const n = Number(x);
     return Number.isFinite(n) ? n : 0;
@@ -43,7 +42,7 @@
     return true;
   }
 
-  // WICHTIG: game.js ruft top10() auf -> muss existieren
+  // game.js ruft top10() auf -> wir liefern einfach TOP 3 zurück
   async function top10() {
     const snap = await db.ref("ranking")
       .orderByChild("ts")
@@ -53,7 +52,7 @@
     const arr = [];
     snap.forEach(c => arr.push(c.val()));
     arr.sort((a, b) => toNum(b.rounds) - toNum(a.rounds));
-    return arr.slice(0, 10);
+    return arr.slice(0, 3);
   }
 
   window.__ONLINE_RANKING__ = { submitScore, top10 };
