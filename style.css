@@ -45,10 +45,24 @@ body {
 }
 
 /* BUTTONS */
-#uiRow1 {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+button {
+  background: #b22222;       /* dunkles Rot */
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #ff3030;       /* helleres Rot beim Hover */
+  transform: scale(1.05);
+}
+
+button:active {
+  background: #8b0000;       /* dunkler beim Klicken */
 }
 
 /* FIGHT PANEL */
