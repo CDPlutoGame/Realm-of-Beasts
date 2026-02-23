@@ -1,11 +1,11 @@
 // =======================================
-// 🎮 REALM OF BEASTS - CLEAN VERSION
+// 🎮 REALM OF BEASTS – ORIGINAL + SOUND
 // =======================================
 
 (function () {
 
   // ===============================
-  // 🔊 SOUND
+  // 🔊 SOUND (funktioniert PC + Handy)
   // ===============================
   const HIT_SOUND = "music/hit.mp3";
   let soundUnlocked = false;
@@ -23,9 +23,8 @@
 
   document.addEventListener("click", unlockSound, { once: true });
 
-
   // ===============================
-  // 👤 LOGIN
+  // 👤 LOGIN (PC + Handy)
   // ===============================
   function getPlayerName() {
     return localStorage.getItem("playerName");
@@ -46,7 +45,6 @@
 
   document.getElementById("playerName").innerHTML =
     "👤 Spieler: <b>" + playerName + "</b>";
-
 
   // ===============================
   // 🎲 GAME STATE
@@ -124,7 +122,7 @@
     const playerDmg = Math.floor(Math.random() * 8) + 5;
     monsterHp -= playerDmg;
 
-    playHitSound();
+    playHitSound(); // 🔊 Sound beim Treffer
 
     if (monsterHp <= 0) {
       const reward = Math.floor(Math.random() * 20) + 10;
@@ -180,7 +178,7 @@
 
     log("💀 GAME OVER<br>Runde erreicht: " + round);
 
-    // Online Ranking senden
+    // Ranking senden
     if (window.__ONLINE_RANKING__) {
       window.__ONLINE_RANKING__.submitScore({
         name: playerName,
