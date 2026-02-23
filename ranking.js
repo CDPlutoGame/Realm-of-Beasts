@@ -1,47 +1,53 @@
 // ===== ONLINE RANKING (FIREBASE REALTIME DATABASE) =====
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyD3Z_HFQ04XVsbAnL3XCqf_6bkX3Cc21oc",
-  authDomain: "realm-of-beaasts.firebaseapp.com",
-  databaseURL: "https://realm-of-beaasts-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "realm-of-beaasts",
-  storageBucket: "realm-of-beaasts.firebasestorage.app",
-  messagingSenderId: "723138830522",
-  appId: "1:723138830522:web:b3ec8a3d8947c25ec66283",
-  measurementId: "G-084J12EZHN"
-};
+(function () {
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3Z_HFQ04XVsbAnL3XCqf_6bkX3Cc21oc",
+    authDomain: "realm-of-beaasts.firebaseapp.com",
+    databaseURL: "https://realm-of-beaasts-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "realm-of-beaasts",
+    storageBucket: "realm-of-beaasts.firebasestorage.app",
+    messagingSenderId: "723138830522",
+    appId: "1:723138830522:web:b3ec8a3d8947c25ec66283"
+  };
+
+  function log(msg, err) {
+    console.log("[RANKING]", msg, err || "");
+  }
+
+  if (typeof firebase === "undefined") {
+    log("Firebase libs nicht geladen (firebase ist undefined)");
+    return;
+  }
+
   try {
-    if (typeof firebase === "undefined") {
-      console.log("Firebase libs nicht geladen");
-      return;
-    }
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   } catch (e) {
-    console.log("Firebase init Fehler", e);
+    log("Firebase init Fehler", e);
     return;
   }
 
   const db = firebase.database();
 
   function getCurrentUser() {
-    return localStorage.getItem("mobileUser") || localStorage.getItem("pcUser");
+    return localStorage.getItem("mobileUser") || localStorage.getItem("pcUser") || "";
   }
 
   async function submitScore(score) {
-    const name = getCurrentUser();
+    const name = getCurrentUser().trim();
     if (!name) return;
 
     try {
       const ref = db.ref("ranking").push();
       await ref.set({ name, score: Number(score) || 0, ts: Date.now() });
     } catch (e) {
-      console.log("Ranking Upload Fehler", e);
+      log("Ranking Upload Fehler", e);
     }
   }
 
   async function loadRanking() {
     try {
-      const snap = await db.ref("ranking")
+      const snap = await db
+        .ref("ranking")
         .orderByChild("score")
         .limitToLast(10)
         .once("value");
@@ -51,7 +57,7 @@ const firebaseConfig = {
       list.sort((a, b) => (b.score || 0) - (a.score || 0));
       showRanking(list);
     } catch (e) {
-      console.log("Ranking Laden Fehler", e);
+      log("Ranking Laden Fehler", e);
       showRanking([]);
     }
   }
@@ -73,18 +79,19 @@ const firebaseConfig = {
       box.style.zIndex = "9999";
       document.body.appendChild(box);
     }
+
     box.innerHTML = "<b>🏆 Top 10</b><br><br>";
     if (!list.length) {
       box.innerHTML += "Keine Daten / offline<br>";
       return;
     }
+
     list.forEach((e, i) => {
-      box.innerHTML += `${i + 1}. ${e.name} - ${e.score}<br>`;
+      box.innerHTML += `${i + 1}. ${e.name || "?"} - ${e.score ?? 0}<br>`;
     });
   }
 
   window.RANKING = { submitScore, loadRanking };
 
-  // direkt beim Start laden
   document.addEventListener("DOMContentLoaded", () => loadRanking());
 })();
