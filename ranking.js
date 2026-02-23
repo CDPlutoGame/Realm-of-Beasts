@@ -1,5 +1,12 @@
-// ranking.js — nur /ranking (Top10 nach rounds)
+// ranking.js — stable + top10 defined
 (() => {
+  console.log("✅ ranking.js gestartet");
+
+  if (typeof firebase === "undefined") {
+    console.log("❌ firebase ist undefined -> Firebase-Libs fehlen");
+    return;
+  }
+
   const firebaseConfig = {
     apiKey: "AIzaSyD3Z_HFQ04XVsbAnL3XCqf_6bkX3Cc21oc",
     authDomain: "realm-of-beaasts.firebaseapp.com",
@@ -10,12 +17,13 @@
     appId: "1:723138830522:web:b3ec8a3d8947c25ec66283"
   };
 
-  if (typeof firebase === "undefined") {
-    console.log("❌ Firebase libs fehlen");
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  } catch (e) {
+    console.log("❌ Firebase init Fehler:", e);
     return;
   }
 
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
   const toNum = (x) => {
@@ -35,28 +43,19 @@
     return true;
   }
 
-  async function top3() {
+  // WICHTIG: game.js ruft top10() auf -> muss existieren
+  async function top10() {
     const snap = await db.ref("ranking")
-      .orderByChild("rounds")
-      .limitToLast(3)
+      .orderByChild("ts")
+      .limitToLast(300)
       .once("value");
 
     const arr = [];
     snap.forEach(c => arr.push(c.val()));
-    arr.sort((a,b) => toNum(b.rounds) - toNum(a.rounds));
-    return arr;
+    arr.sort((a, b) => toNum(b.rounds) - toNum(a.rounds));
+    return arr.slice(0, 10);
   }
 
   window.__ONLINE_RANKING__ = { submitScore, top10 };
-  console.log("✅ Ranking ready");
-
-  // pending score nachschieben
-  try {
-    const pending = localStorage.getItem("mbr_pending_score");
-    if (pending) {
-      submitScore(JSON.parse(pending)).then(() => {
-        localStorage.removeItem("mbr_pending_score");
-      }).catch(()=>{});
-    }
-  } catch {}
+  console.log("✅ __ONLINE_RANKING__ bereit");
 })();
