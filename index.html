@@ -15,11 +15,14 @@
     document.body.appendChild(script);
   }
 
+  // ❌ SERVICE WORKER KOMPLETT AUS
+  /*
   function registerServiceWorker(){
     if("serviceWorker" in navigator){
       navigator.serviceWorker.register("sw.js");
     }
   }
+  */
 
   function showStoredName(name){
     const el = document.getElementById("playerName");
@@ -29,7 +32,8 @@
   }
 
   function init(){
-    registerServiceWorker();
+
+    // registerServiceWorker();  ❌ deaktiviert
 
     const name = getStoredName();
 
