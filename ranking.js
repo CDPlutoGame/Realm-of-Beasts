@@ -24,7 +24,7 @@
 
   const db = firebase.database();
 
-  // game.js wartet auf window.__ONLINE_RANKING__
+  // game.js erwartet: window.__ONLINE_RANKING__.top10() und .submitScore(payload)
   window.__ONLINE_RANKING__ = {
     async submitScore(payload) {
       const p = {
@@ -34,8 +34,6 @@
         bossesKilled: Number(payload?.bossesKilled || 0),
         ts: Date.now()
       };
-
-      // Pfad muss zu deinen Rules passen: /ranking
       await db.ref("ranking").push(p);
     },
 
@@ -52,6 +50,17 @@
       return arr;
     }
   };
+
+  // ✅ Handy-Fix: pending score automatisch nachschieben
+  try {
+    const pending = localStorage.getItem("mbr_pending_score");
+    if (pending) {
+      const payload = JSON.parse(pending);
+      window.__ONLINE_RANKING__.submitScore(payload)
+        .then(() => localStorage.removeItem("mbr_pending_score"))
+        .catch(() => {});
+    }
+  } catch {}
 
   console.log("✅ __ONLINE_RANKING__ bereit");
 })();
