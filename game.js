@@ -78,21 +78,18 @@
     if (playerName) saveProfile(playerName, meta);
   }
 
-// ---------------- UI ROOT ----------------
-const app = ensureEl("app", "div", document.body);
+// ---------------- UI ROOT (aus index.html verwenden) ----------------
+const app = document.getElementById("app");
+const leftCol = document.getElementById("leftCol");
+const rightCol = document.getElementById("rightCol");
 
-// Linke Spalte
-const leftCol = ensureEl("leftCol", "div", app);
-const statusPanel = ensureEl("statusPanel", "div", leftCol);
-const hudEl = ensureEl("hud", "div", statusPanel);
-const shopEl = ensureEl("shop", "div", leftCol);
+const statusPanel = document.getElementById("statusPanel");
+const hudEl = ensureEl("hud", "div", statusPanel); // hud darf JS erstellen (ist ok)
+const shopEl = document.getElementById("shop");
 
-// Rechte Spalte
-const rightCol = ensureEl("rightCol", "div", app);
-const controlsPanel = ensureEl("controlsPanel", "div", rightCol);
+const controlsPanel = document.getElementById("controlsPanel");
 controlsPanel.classList.add("window");
-
-const controlsRow = ensureEl("controlsRow", "div", controlsPanel);
+const controlsRow = document.getElementById("controlsRow");
 
 const spinButton = ensureEl("spinButton", "button", controlsRow);
 spinButton.textContent = "Drehen";
@@ -106,17 +103,13 @@ usePotionButton.textContent = "Trank nutzen (+5 HP)";
 const newRoundButton = ensureEl("newRoundButton", "button", controlsRow);
 newRoundButton.textContent = "Neue Runde";
 
-const fightPanel = ensureEl("fightPanel", "div", rightCol);
-const logEl = ensureEl("log", "pre", rightCol);
-const boardEl = ensureEl("board", "div", rightCol);
-const leaderboardPanel = ensureEl("leaderboardPanel", "div", rightCol);
+const fightPanel = document.getElementById("fightPanel");
+const logEl = document.getElementById("log");
+const boardEl = document.getElementById("board");
+
+const leaderboardPanel = document.getElementById("leaderboardPanel");
 leaderboardPanel.classList.add("window");
-
-const leaderboardEl = ensureEl("leaderboard", "div", leaderboardPanel);
-function safeLog(msg) {
-  logEl.textContent = String(msg ?? "");
-}
-
+const leaderboardEl = document.getElementById("leaderboard");
   // ---------------- SOUND (tap-to-start, mobile safe) ----------------
   const MUSIC_LIST = ["sounds/music/bg1.mp3","sounds/music/bg2.mp3","sounds/music/bg3.mp3"];
   const SFX_HIT_SRC = "sounds/hit.mp3";
