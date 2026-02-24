@@ -257,45 +257,38 @@ button:disabled{
   padding: 10px;
 }
 
-/* ===== STATUS ===== */
+/* =========================
+   STATUS FINAL COMPACT
+   ========================= */
+
 #statusPanel{
-  font-size: 12px;
-  line-height: 1.2;
+  padding: 8px;
+  font-size: 11px;      /* kleiner */
+  line-height: 1.15;
 }
 
 #statusPanel h3{
-  font-size: 13px;
+  font-size: 12px;      /* Titel kleiner */
   margin-bottom: 6px;
 }
 
+/* einzelne Zeilen enger */
 #statusPanel div{
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
-/* ===== SHOP ===== */
-#shop button{
-  padding: 7px 9px;
-  font-size: 12px;
-  border-radius: 10px;
+/* Emojis kleiner machen */
+#statusPanel{
+  letter-spacing: 0.2px;
 }
 
-/* ===== LEADERBOARD ===== */
-#leaderboardPanel{
-  font-size: 12px;
+/* Falls Icons als IMG */
+#statusPanel img{
+  width: 14px;
+  height: 14px;
 }
 
-#leaderboard{
-  max-height: 180px;
-}
-
-/* ===== CONTROLS ===== */
-#controlsRow button,
-#controlsPanel button{
-  padding: 8px 10px;
-  font-size: 12px;
-}
-
-/* ===== FIGHT PANEL ===== */
-#fightPanel{
-  font-size: 13px;
+/* Falls Emojis direkt im Text → etwas kleiner */
+#statusPanel span{
+  font-size: 11px;
 }
