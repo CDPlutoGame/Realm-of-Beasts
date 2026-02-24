@@ -182,7 +182,6 @@ async function saveLayout() {
 }
 
 /* ================= Drag ================= */
-
 function makeDraggable(el) {
   if (el.__dragBound) return;
   el.__dragBound = true;
@@ -216,10 +215,9 @@ function makeDraggable(el) {
 
   const end = () => (dragging = false);
 
-  // Pointer (modern)
   el.addEventListener("pointerdown", (e) => {
-    if (!editMode) return;              // ✅ NUR im Edit-Modus ziehen
-    if (isUiControl(e.target)) return;  // ✅ Buttons klickbar lassen
+    if (!editMode) return;
+    if (isUiControl(e.target)) return;
 
     const rect = el.getBoundingClientRect();
     if ((e.clientY - rect.top) > 40) return;
@@ -237,10 +235,9 @@ function makeDraggable(el) {
   el.addEventListener("pointerup", end);
   el.addEventListener("pointercancel", end);
 
-  // Mouse fallback
   el.addEventListener("mousedown", (e) => {
-    if (!editMode) return;              // ✅ NUR im Edit-Modus ziehen
-    if (isUiControl(e.target)) return;  // ✅ Buttons klickbar lassen
+    if (!editMode) return;
+    if (isUiControl(e.target)) return;
 
     const rect = el.getBoundingClientRect();
     if ((e.clientY - rect.top) > 40) return;
@@ -253,6 +250,9 @@ function makeDraggable(el) {
   window.addEventListener("mouseup", end);
 }
 
+function bindWindows() {
+  winList().forEach(makeDraggable);
+}
 /* ================= Observe New Windows ================= */
 function observeNewWindows() {
   const obs = new MutationObserver(() => {
