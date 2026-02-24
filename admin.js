@@ -253,11 +253,12 @@ function makeDraggable(el) {
   window.addEventListener("mouseup", end);
 }
 
+/* ================= Observe New Windows ================= */
 function observeNewWindows() {
   const obs = new MutationObserver(() => {
     if (!editMode) return;
 
-    // 🔥 wichtig: neue windows/topbar sofort positions-fixen
+    // sobald game.js neue UI reinrendert: Positionen nochmal fixieren
     freezeWindowsToAbsolute();
 
     // Drag an neue Elemente binden
@@ -266,7 +267,6 @@ function observeNewWindows() {
 
   obs.observe(document.body, { childList: true, subtree: true });
 }
-
 /* ================= Admin Ready ================= */
 
 function waitForAdminReady() {
