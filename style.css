@@ -281,51 +281,27 @@ button:disabled{
 }
 
 /* =========================
-   SHOP – CLEAN & COMPACT
+   SHOP – FINAL (kompakt + länger)
    ========================= */
-
 #shop{
-  padding: 10px;
+  width: 100%;
+  min-height: 480px;   /* länger */
+  padding: 12px;       /* NICHT 114px */
   font-size: 12px;
   line-height: 1.25;
 }
 
-/* Falls du einen Titel im Shop hast (z.B. <b>Shop</b> oder <h3>) */
 #shop h3, #shop b{
   font-size: 13px;
   display: inline-block;
   margin-bottom: 8px;
 }
 
-/* =========================
-   SHOP – EXTRA COMPACT
-   ========================= */
-
-#shop{
-  padding: 8px;
-  font-size: 11px;
-  line-height: 1.2;
-}
-
-/* Titel kleiner */
-#shop h3, #shop b{
-  font-size: 12px;
-  margin-bottom: 6px;
-}
-
-/* Buttons deutlich kompakter */
 #shop button{
   display: block;
   width: 100%;
-  padding: 6px 8px;      /* kleiner */
-  font-size: 10.5px;     /* kleiner */
+  padding: 6px 8px;
+  font-size: 10.5px;
   border-radius: 8px;
   margin: 8px 0;
-}
-
-/* SHOP BOX größer */
-#shop{
-  width: 100%;          /* volle Breite der linken Spalte */
-  min-height: 480px;    /* länger nach unten */
-  padding: 114px;
 }
