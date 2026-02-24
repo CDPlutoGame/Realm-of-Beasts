@@ -5,13 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Realm of Beaasts</title>
 
-  <!-- ✅ Externe CSS Datei (damit Änderungen wirklich greifen) -->
   <link rel="stylesheet" href="style.css" />
-
-  <!-- (Optional) Mini-Base, falls du ganz ohne CSS kurz was sehen willst -->
-  <style>
-    body{ margin:0; }
-  </style>
 </head>
 
 <body>
@@ -26,37 +20,32 @@
 
   <!-- Game Layout -->
   <div id="app">
-    <!-- ✅ Links -->
+    <!-- Links -->
     <div id="leftCol">
       <div id="statusPanel" class="window"></div>
       <div id="shop" class="window"></div>
+      <!-- ⛔ Ranking NICHT mehr links, weil es rechts unter die Buttons soll -->
+    </div>
+
+    <!-- Rechts -->
+    <div id="rightCol">
+      <div id="fightPanel" class="window"></div>
+
+      <div id="controlsPanel" class="window">
+        <div id="controlsRow"></div>
+      </div>
+
+      <!-- ✅ Ranking unter den Buttons -->
       <div id="leaderboardPanel" class="window">
         <h3>🏆 Bestenliste (Top 3 – Online)</h3>
         <div id="leaderboard"></div>
       </div>
+
+      <div id="board" class="window"></div>
+      <pre id="log" class="window"></pre>
     </div>
-
-    <!-- ✅ Rechts -->
-    <div id="rightCol">
-      <div id="fightPanel" class="window"></div>
-
-      <!-- 4 Buttons Box -->
-    <div id="rightCol">
-  <div id="fightPanel" class="window"></div>
-
-  <div id="controlsPanel" class="window">
-    <div id="controlsRow"></div>
   </div>
 
-  <!-- 👇 HIER unter den Buttons -->
-  <div id="leaderboardPanel" class="window">
-    <h3>🏆 Bestenliste (Top 3 – Online)</h3>
-    <div id="leaderboard"></div>
-  </div>
-
-  <div id="board" class="window"></div>
-  <pre id="log" class="window"></pre>
-</div>
   <!-- Firebase Setup -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
