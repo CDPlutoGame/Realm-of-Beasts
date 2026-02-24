@@ -279,3 +279,41 @@ button:disabled{
   display: inline-block;
   width: 14px;          /* sorgt für saubere Ausrichtung */
 }
+
+/* =========================
+   SHOP – CLEAN & COMPACT
+   ========================= */
+
+#shop{
+  padding: 10px;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+/* Falls du einen Titel im Shop hast (z.B. <b>Shop</b> oder <h3>) */
+#shop h3, #shop b{
+  font-size: 13px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+/* Shop-Buttons kompakt + gleich breit */
+#shop button{
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 12px;
+  border-radius: 10px;
+  margin: 6px 0;
+  background: rgba(43,138,62,.95);
+  border: 1px solid rgba(120,255,160,.18);
+}
+
+#shop button:hover{
+  background: rgba(62,180,88,.95);
+}
+
+/* Wenn du Textzeilen im Shop hast */
+#shop div{
+  margin: 4px 0;
+}
