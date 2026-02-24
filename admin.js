@@ -48,26 +48,37 @@ function ensureCSS() {
 
 /* ================= Layout Mode ================= */
 
-function setEditMode(on) {
-  editMode = !!on;
-  document.body.classList.toggle("layoutEdit", editMode);
-  if (saveBtn) saveBtn.style.display = editMode ? "inline-block" : "none";
-
-  if (editMode) freezeWindowsToAbsolute();
-
-  console.log("🧩 Layout-Edit:", editMode ? "AN" : "AUS");
-}
-
 function freezeWindowsToAbsolute() {
+  const app = document.getElementById("app");
+  const appRect = app.getBoundingClientRect();
+
   document.querySelectorAll(".window").forEach((el) => {
     const r = el.getBoundingClientRect();
-    el.style.left = r.left + "px";
-    el.style.top  = r.top + "px";
-    el.style.width = r.width + "px";
-    el.style.height = r.height + "px";
+
+    // relativ zu #app (sonst springen alle nach links oben)
+    el.style.left = Math.round(r.left - appRect.left) + "px";
+    el.style.top  = Math.round(r.top  - appRect.top)  + "px";
+
+    el.style.width  = Math.round(r.width) + "px";
+    el.style.height = Math.round(r.height) + "px";
   });
 }
 
+function setEditMode(on) {
+  editMode = !!on;
+
+  if (editMode) {
+    // WICHTIG: erst messen, dann layoutEdit aktivieren
+    freezeWindowsToAbsolute();
+    document.body.classList.add("layoutEdit");
+    bindWindows?.(); // falls du die Funktion hast
+  } else {
+    document.body.classList.remove("layoutEdit");
+  }
+
+  if (saveBtn) saveBtn.style.display = (editMode ? "inline-block" : "none");
+  console.log("🧩 Layout-Edit:", editMode ? "AN" : "AUS");
+}
 /* ================= Save / Load ================= */
 
 function captureLayout() {
