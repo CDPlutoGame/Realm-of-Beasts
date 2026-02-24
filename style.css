@@ -322,3 +322,10 @@ button:disabled{
   border-radius: 8px;
   margin: 4px 0;
 }
+
+/* SHOP BOX größer */
+#shop{
+  width: 100%;          /* volle Breite der linken Spalte */
+  min-height: 420px;    /* länger nach unten */
+  padding: 12px;
+}
