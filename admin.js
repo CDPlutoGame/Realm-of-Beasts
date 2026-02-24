@@ -68,10 +68,10 @@ function ensureKey(el) {
 
 function refreshAdminButtons() {
   const isAdmin = !!window.__IS_ADMIN__;
+
   if (toggleBtn) toggleBtn.style.display = isAdmin ? "inline-block" : "none";
   if (saveBtn) saveBtn.style.display = (isAdmin && editMode) ? "inline-block" : "none";
 }
-
 /* ================= Layout Mode ================= */
 
 function freezeWindowsToAbsolute() {
