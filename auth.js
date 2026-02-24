@@ -1,3 +1,11 @@
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
 loginBtn?.addEventListener("click", async () => {
   const email = prompt("Email:");
   if (!email) return;
