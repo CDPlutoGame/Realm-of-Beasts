@@ -1,6 +1,17 @@
 // admin.js — secure admin layout editor (Firebase Auth + RTDB rules)
 (() => {
-  const EDIT_IDS = ["statusPanel", "shop", "fightPanel", "log", "board", "leaderboard", "uiRow1"];
+  const EDIT_IDS = [
+  "statusPanel",
+  "shop",
+  "fightPanel",
+  "log",
+  "board",
+  "leaderboard",
+  "uiRow1",
+  "leftCol",
+  "rightCol",
+  "mainArea"
+];
   const LAYOUT_PATH = "globalLayout/v1";
 
   const $ = (id) => document.getElementById(id);
