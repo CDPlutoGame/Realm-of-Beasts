@@ -263,7 +263,7 @@ button:disabled{
 
 #statusPanel{
   padding: 10px;
-  font-size: 15px;
+  font-size: 10px;
   line-height: 1.25;
   background: rgba(20,20,20,0.85);
 }
@@ -285,6 +285,6 @@ button:disabled{
 
 /* Emojis kleiner & gleichmäßig */
 #statusPanel img{
-  width: 15px;
+  width: 10px;
   height: 15px;
 }
