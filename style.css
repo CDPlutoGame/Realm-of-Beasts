@@ -237,49 +237,65 @@ button:disabled{
     gap: 6px;
   }
 }
-/* ===== COMPACT PATCH (Status/Shop/Bestenliste + allgemein) ===== */
+/* =========================
+   CLEAN COMPACT SETTINGS
+   ========================= */
 
-/* linke Spalte schmaler */
+/* Linke Spalte etwas schmaler + enger */
 :root{
-  --left-w: 210px;        /* war 260 */
-  --gap: 12px;            /* etwas enger */
+  --left-w: 220px;   /* guter Mittelwert */
+  --gap: 12px;
 }
 
-/* Panels kompakter */
-#statusPanel, #shop, #leaderboardPanel,
-#fightPanel, #log, #controlsPanel{
-  padding: 10px !important;
-  border-radius: 12px !important;
+/* Panels allgemein etwas kompakter */
+#statusPanel,
+#shop,
+#leaderboardPanel,
+#fightPanel,
+#log,
+#controlsPanel{
+  padding: 10px;
 }
 
-/* Status: kleinere Schrift/Abstände */
+/* ===== STATUS ===== */
 #statusPanel{
-  font-size: 12px !important;
-  line-height: 1.15 !important;
+  font-size: 12px;
+  line-height: 1.2;
 }
 
-/* Shop Buttons kleiner */
+#statusPanel h3{
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+#statusPanel div{
+  margin-bottom: 4px;
+}
+
+/* ===== SHOP ===== */
 #shop button{
-  padding: 7px 8px !important;
-  font-size: 11px !important;
-  border-radius: 10px !important;
+  padding: 7px 9px;
+  font-size: 12px;
+  border-radius: 10px;
 }
 
-/* Bestenliste kompakter */
+/* ===== LEADERBOARD ===== */
 #leaderboardPanel{
-  font-size: 12px !important;
+  font-size: 12px;
 }
+
 #leaderboard{
-  max-height: 170px !important;
+  max-height: 180px;
 }
 
-/* Controls-Buttons kompakter */
-#controlsRow button, #controlsPanel button{
-  padding: 7px 9px !important;
-  font-size: 12px !important;
+/* ===== CONTROLS ===== */
+#controlsRow button,
+#controlsPanel button{
+  padding: 8px 10px;
+  font-size: 12px;
 }
 
-/* Fight Panel Text kleiner */
+/* ===== FIGHT PANEL ===== */
 #fightPanel{
-  font-size: 13px !important;
+  font-size: 13px;
 }
