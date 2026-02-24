@@ -19,11 +19,11 @@ function ensureCSS() {
   const style = document.createElement("style");
   style.id = "layoutEditCss";
  style.textContent = `
-body.layoutApplied #app{
+body.layoutEdit #app{
   position:relative !important;
 }
-body.layoutApplied .window,
-body.layoutApplied .admin-draggable{
+body.layoutEdit .window,
+body.layoutEdit .admin-draggable{
   position:absolute !important;
   box-sizing: border-box;
 }
