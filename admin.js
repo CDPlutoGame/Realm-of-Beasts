@@ -19,37 +19,46 @@ function ensureCSS() {
 
   const style = document.createElement("style");
   style.id = "layoutEditCss";
-  style.textContent = `
-    body.layoutEdit #app{
-      display:block !important;
-      position:relative !important;
-      min-height:100vh;
-    }
+ style.textContent = `
+  body.layoutEdit #app{
+    display:block !important;
+    position:relative !important;
+    min-height:100vh;
+  }
 
-    body.layoutEdit .window{
-      position:absolute !important;
-      cursor:move;
-      user-select:none;
-      touch-action:none;
-    }
+  /* Fenster + Admin-Leiste */
+  body.layoutEdit .window,
+  body.layoutEdit .admin-draggable{
+    position:absolute !important;
+    cursor:move;
+    user-select:none;
+    touch-action:none;
 
-    /* Drag-Zone oben (nur Anzeige) */
-    body.layoutEdit .window::before{
-      content:"DRAG (oben ziehen)";
-      position:absolute;
-      left:0; top:0; right:0;
-      height:34px;
-      line-height:34px;
-      padding-left:10px;
-      font-size:12px;
-      color:rgba(255,255,255,.9);
-      background:rgba(178,34,34,.22);
-      border-top-left-radius:12px;
-      border-top-right-radius:12px;
-      pointer-events:none;
-      z-index:99999;
-    }
-  `;
+    /* Resize aktivieren */
+    resize: both;
+    overflow: auto;
+    min-width:120px;
+    min-height:60px;
+  }
+
+  /* Drag-Zone oben */
+  body.layoutEdit .window::before,
+  body.layoutEdit .admin-draggable::before{
+    content:"DRAG (oben ziehen)";
+    position:absolute;
+    left:0; top:0; right:0;
+    height:34px;
+    line-height:34px;
+    padding-left:10px;
+    font-size:12px;
+    color:rgba(255,255,255,.9);
+    background:rgba(178,34,34,.22);
+    border-top-left-radius:12px;
+    border-top-right-radius:12px;
+    pointer-events:none;
+    z-index:99999;
+  }
+`;
   document.head.appendChild(style);
 }
 
