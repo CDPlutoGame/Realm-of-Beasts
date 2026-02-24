@@ -305,29 +305,53 @@ button:disabled{
   border-radius: 8px;
   margin: 8px 0;
 }
-/* ===== RIGHT COLUMN LAYOUT FINAL ===== */
+/* ===== 2x2 GRID – GLEICHE HÖHE ===== */
+
 #rightCol{
   display: grid !important;
-  grid-template-columns: 1fr auto;   /* links flexibel, rechts Board/Log */
-  gap: 14px;
-  align-items: start;
+  grid-template-columns: 1fr 1fr;   /* beide Seiten gleich breit */
+  grid-template-rows: auto auto auto;
+  gap: 16px;
+  align-items: stretch;  /* wichtig! */
 }
 
 /* Row 1 */
-#fightPanel{ grid-column: 1; grid-row: 1; }
-#board{ grid-column: 2; grid-row: 1; }
-
-/* Row 2 */
-#controlsPanel{ grid-column: 1; grid-row: 2; }
-#log{ grid-column: 2; grid-row: 2; }
-
-/* Row 3 */
-#leaderboardPanel{ 
-  grid-column: 1 / -1; 
-  grid-row: 3; 
+#fightPanel{ 
+  grid-column: 1; 
+  grid-row: 1; 
+  height: 100%;
 }
 
-/* Log optisch etwas klarer */
+#board{ 
+  grid-column: 2; 
+  grid-row: 1; 
+  height: 100%;
+}
+
+/* Row 2 */
+#controlsPanel{ 
+  grid-column: 1; 
+  grid-row: 2; 
+  height: 100%;
+}
+
+#log{ 
+  grid-column: 2; 
+  grid-row: 2; 
+  height: 100%;
+}
+
+/* Row 3 (volle Breite) */
+#leaderboardPanel{
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+
+/* Panels sollen sich strecken */
+#fightPanel,
+#board,
+#controlsPanel,
 #log{
-  min-height: 160px;
+  display: flex;
+  flex-direction: column;
 }
