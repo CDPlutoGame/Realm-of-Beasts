@@ -1,4 +1,4 @@
-// admin.js (type="module") — Drag (PC+Touch) + Save/Load + auto-bind for late windows
+// admin.js (type="module")
 
 import { ref, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
@@ -10,8 +10,11 @@ const saveBtn = document.getElementById("saveLayoutBtn");
 let editMode = false;
 let zTop = 1000;
 
+/* ================= CSS ================= */
+
 function ensureCSS() {
   if (document.getElementById("layoutEditCss")) return;
+
   const style = document.createElement("style");
   style.id = "layoutEditCss";
   style.textContent = `
@@ -20,12 +23,13 @@ function ensureCSS() {
       position:relative !important;
       min-height:100vh;
     }
+
     body.layoutEdit .window{
       position:absolute !important;
-      user-select:none;
-      touch-action:none;
       cursor:move;
+      user-select:none;
     }
+
     body.layoutEdit .window::before{
       content:"DRAG (oben ziehen)";
       position:absolute;
@@ -34,201 +38,154 @@ function ensureCSS() {
       line-height:34px;
       padding-left:10px;
       font-size:12px;
-      color:rgba(255,255,255,.85);
       background:rgba(178,34,34,.25);
-      border-top-left-radius:12px;
-      border-top-right-radius:12px;
+      color:#fff;
       pointer-events:none;
-      z-index:99999;
     }
   `;
   document.head.appendChild(style);
 }
 
-function show(el, yes) {
-  if (!el) return;
-  el.style.display = yes ? "inline-block" : "none";
-}
-
-function windows() {
-  return Array.from(document.querySelectorAll(".window"));
-}
-
-function ensureKey(el) {
-  if (el.id) return el.id;
-  if (el.getAttribute("data-win")) return el.getAttribute("data-win");
-  const gen = "win_" + Math.random().toString(36).slice(2, 10);
-  el.setAttribute("data-win", gen);
-  return gen;
-}
-
-/** wichtig: beim Umschalten auf absolute die aktuelle Grid-Position “einfrieren” */
-function freezeWindowsToAbsolute() {
-  windows().forEach((el) => {
-    const r = el.getBoundingClientRect();
-    el.style.left = (r.left + window.scrollX) + "px";
-    el.style.top  = (r.top  + window.scrollY) + "px";
-    // optional: Größe mitschreiben, damit’s stabil bleibt
-    if (!el.style.width) el.style.width = Math.round(r.width) + "px";
-    if (!el.style.height) el.style.height = Math.round(r.height) + "px";
-  });
-}
+/* ================= Layout Mode ================= */
 
 function setEditMode(on) {
   editMode = !!on;
   document.body.classList.toggle("layoutEdit", editMode);
+  if (saveBtn) saveBtn.style.display = editMode ? "inline-block" : "none";
 
-  if (editMode) {
-    // 🔥 das ist der entscheidende Schritt
-    freezeWindowsToAbsolute();
-    // und sicherstellen, dass alle (auch spätere) windows Listener haben
-    bindAllWindows();
-  }
+  if (editMode) freezeWindowsToAbsolute();
 
-  show(saveBtn, !!window.__IS_ADMIN__);
   console.log("🧩 Layout-Edit:", editMode ? "AN" : "AUS");
+}
+
+function freezeWindowsToAbsolute() {
+  document.querySelectorAll(".window").forEach((el) => {
+    const r = el.getBoundingClientRect();
+    el.style.left = r.left + "px";
+    el.style.top  = r.top + "px";
+    el.style.width = r.width + "px";
+    el.style.height = r.height + "px";
+  });
+}
+
+/* ================= Save / Load ================= */
+
+function captureLayout() {
+  const layout = {};
+  document.querySelectorAll(".window").forEach((el) => {
+    const id = el.id || (el.dataset.win ||= "win_" + Math.random().toString(36).slice(2));
+    layout[id] = {
+      left: el.style.left,
+      top: el.style.top,
+      width: el.style.width,
+      height: el.style.height,
+      z: el.style.zIndex || 1
+    };
+  });
+  return layout;
 }
 
 function applyLayout(layout) {
   if (!layout) return;
-  windows().forEach((el) => {
-    const key = ensureKey(el);
-    const s = layout[key];
-    if (!s) return;
-    if (s.left) el.style.left = s.left;
-    if (s.top) el.style.top = s.top;
-    if (s.width) el.style.width = s.width;
-    if (s.height) el.style.height = s.height;
-    if (s.z) el.style.zIndex = String(s.z);
+  document.querySelectorAll(".window").forEach((el) => {
+    const id = el.id || el.dataset.win;
+    if (!id || !layout[id]) return;
+    const s = layout[id];
+    el.style.left = s.left;
+    el.style.top = s.top;
+    el.style.width = s.width;
+    el.style.height = s.height;
+    el.style.zIndex = s.z;
   });
-}
-
-function captureLayout() {
-  const out = {};
-  windows().forEach((el) => {
-    const key = ensureKey(el);
-    out[key] = {
-      left: el.style.left || "",
-      top: el.style.top || "",
-      width: el.style.width || "",
-      height: el.style.height || "",
-      z: Number(el.style.zIndex || 1),
-    };
-  });
-  return out;
 }
 
 async function loadLayout() {
   try {
     const snap = await get(ref(db, "globalLayout/v1"));
-    if (snap.exists()) applyLayout(snap.val());
-    console.log("✅ globalLayout geladen");
+    if (snap.exists()) {
+      applyLayout(snap.val());
+      console.log("✅ globalLayout geladen");
+    }
   } catch (e) {
-    console.log("❌ globalLayout load:", e?.code || e?.message);
+    console.log("❌ load:", e);
   }
 }
 
 async function saveLayout() {
+  if (!window.__IS_ADMIN__) return alert("❌ Kein Admin");
+
   try {
-    if (!window.__IS_ADMIN__) return alert("❌ Kein Admin");
     await set(ref(db, "globalLayout/v1"), captureLayout());
     alert("✅ Layout gespeichert");
   } catch (e) {
     console.log("❌ save:", e);
-    alert("❌ Speichern fehlgeschlagen: " + (e?.code || e?.message));
   }
 }
 
-// --- DRAG (Pointer + Mouse) ---
+/* ================= Drag ================= */
+
 function makeDraggable(el) {
-  if (el.__dragBound) return; // ✅ nicht doppelt binden
+  if (el.__dragBound) return;
   el.__dragBound = true;
 
   let dragging = false;
   let startX = 0, startY = 0;
   let origX = 0, origY = 0;
 
-  const begin = (clientX, clientY) => {
-    if (!editMode) return;
-    dragging = true;
-
-    const r = el.getBoundingClientRect();
-    origX = r.left + window.scrollX;
-    origY = r.top + window.scrollY;
-    startX = clientX;
-    startY = clientY;
-
-    zTop += 1;
-    el.style.zIndex = String(zTop);
-
-    // beim ersten Mal sicher setzen
-    el.style.left = origX + "px";
-    el.style.top  = origY + "px";
-  };
-
-  const move = (clientX, clientY) => {
-    if (!dragging) return;
-    el.style.left = (origX + (clientX - startX)) + "px";
-    el.style.top  = (origY + (clientY - startY)) + "px";
-  };
-
-  const end = () => { dragging = false; };
-
-  // Pointer
-  el.addEventListener("pointerdown", (e) => {
-    const rect = el.getBoundingClientRect();
-    if ((e.clientY - rect.top) > 40) return; // nur oben ziehen
-    el.setPointerCapture?.(e.pointerId);
-    begin(e.clientX, e.clientY);
-    e.preventDefault();
-  });
-
-  el.addEventListener("pointermove", (e) => {
-    move(e.clientX, e.clientY);
-    if (dragging) e.preventDefault();
-  });
-
-  el.addEventListener("pointerup", end);
-  el.addEventListener("pointercancel", end);
-
-  // Mouse fallback
   el.addEventListener("mousedown", (e) => {
-    const rect = el.getBoundingClientRect();
-    if ((e.clientY - rect.top) > 40) return;
-    begin(e.clientX, e.clientY);
-    e.preventDefault();
-  });
-
-  window.addEventListener("mousemove", (e) => move(e.clientX, e.clientY));
-  window.addEventListener("mouseup", end);
-}
-
-function bindAllWindows() {
-  windows().forEach(makeDraggable);
-}
-
-// 🔥 beobachtet DOM: wenn game.js später windows erstellt, werden sie automatisch draggable
-function observeNewWindows() {
-  const obs = new MutationObserver(() => {
     if (!editMode) return;
-    bindAllWindows();
+
+    const rect = el.getBoundingClientRect();
+    if (e.clientY - rect.top > 40) return;
+
+    dragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    origX = rect.left;
+    origY = rect.top;
+
+    zTop++;
+    el.style.zIndex = zTop;
   });
-  obs.observe(document.body, { childList: true, subtree: true });
+
+  window.addEventListener("mousemove", (e) => {
+    if (!dragging) return;
+    el.style.left = origX + (e.clientX - startX) + "px";
+    el.style.top  = origY + (e.clientY - startY) + "px";
+  });
+
+  window.addEventListener("mouseup", () => dragging = false);
 }
+
+function bindWindows() {
+  document.querySelectorAll(".window").forEach(makeDraggable);
+}
+
+/* ================= Admin Wait ================= */
+
+function waitForAdminReady() {
+  const check = () => {
+    if (typeof window.__IS_ADMIN__ !== "undefined") {
+      console.log("🟢 Admin erkannt:", window.__IS_ADMIN__);
+      setEditMode(!!window.__IS_ADMIN__);
+    } else {
+      setTimeout(check, 200);
+    }
+  };
+  check();
+}
+
+/* ================= Init ================= */
 
 function init() {
   ensureCSS();
-
-  saveBtn?.addEventListener("click", saveLayout);
+  bindWindows();
   loadLayout();
+  saveBtn?.addEventListener("click", saveLayout);
 
-  // Observer starten
-  observeNewWindows();
+  waitForAdminReady();
 
-  // Wenn Admin: Edit direkt an
-  setEditMode(!!window.__IS_ADMIN__);
-
-  console.log("✅ Drag ready | Admin:", window.__IS_ADMIN__);
+  console.log("✅ Drag ready");
 }
 
 if (document.readyState === "loading") {
