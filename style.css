@@ -237,3 +237,49 @@ button:disabled{
     gap: 6px;
   }
 }
+/* ===== COMPACT PATCH (Status/Shop/Bestenliste + allgemein) ===== */
+
+/* linke Spalte schmaler */
+:root{
+  --left-w: 210px;        /* war 260 */
+  --gap: 12px;            /* etwas enger */
+}
+
+/* Panels kompakter */
+#statusPanel, #shop, #leaderboardPanel,
+#fightPanel, #log, #controlsPanel{
+  padding: 10px !important;
+  border-radius: 12px !important;
+}
+
+/* Status: kleinere Schrift/Abstände */
+#statusPanel{
+  font-size: 12px !important;
+  line-height: 1.15 !important;
+}
+
+/* Shop Buttons kleiner */
+#shop button{
+  padding: 7px 8px !important;
+  font-size: 11px !important;
+  border-radius: 10px !important;
+}
+
+/* Bestenliste kompakter */
+#leaderboardPanel{
+  font-size: 12px !important;
+}
+#leaderboard{
+  max-height: 170px !important;
+}
+
+/* Controls-Buttons kompakter */
+#controlsRow button, #controlsPanel button{
+  padding: 7px 9px !important;
+  font-size: 12px !important;
+}
+
+/* Fight Panel Text kleiner */
+#fightPanel{
+  font-size: 13px !important;
+}
