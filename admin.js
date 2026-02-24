@@ -108,9 +108,6 @@ function freezeWindowsToAbsolute() {
 function setEditMode(on) {
   editMode = !!on;
 
-  // Layout (Positionen) IMMER aktiv lassen
-  document.body.classList.add("layoutApplied");
-
   if (editMode) {
     document.body.classList.add("layoutEdit");
     freezeWindowsToAbsolute();
@@ -140,20 +137,17 @@ function captureLayout() {
   return out;
 }
 
-function applyLayout(layout) {
-  if (!layout) return;
+} else {
+  document.body.classList.remove("layoutEdit");
 
+  // ✅ zurück in normales Layout (HTML-Reihenfolge)
   winList().forEach((el) => {
-    const key = el.id;
-    if (!layout[key]) return;
-
-    const s = layout[key];
-
-    if (s.left) el.style.left = s.left;
-    if (s.top) el.style.top = s.top;
-    if (s.width) el.style.width = s.width;
-    if (s.height) el.style.height = s.height;
-    if (s.z) el.style.zIndex = String(s.z);
+    el.style.left = "";
+    el.style.top = "";
+    el.style.width = "";
+    el.style.height = "";
+    // zIndex kannst du lassen oder auch resetten:
+    // el.style.zIndex = "";
   });
 }
 
