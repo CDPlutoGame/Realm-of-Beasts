@@ -176,12 +176,39 @@ function waitForAdminReady() {
 }
 
 /* ================= Init ================= */
-
 function init() {
   ensureCSS();
+
   bindWindows();
   loadLayout();
+
   saveBtn?.addEventListener("click", saveLayout);
+
+  const toggleBtn = document.getElementById("toggleEditBtn");
+
+  function refreshAdminButtons() {
+    const isAdmin = !!window.__IS_ADMIN__;
+    if (toggleBtn) toggleBtn.style.display = isAdmin ? "inline-block" : "none";
+    if (saveBtn) saveBtn.style.display = (isAdmin && editMode) ? "inline-block" : "none";
+  }
+
+  toggleBtn?.addEventListener("click", () => {
+    setEditMode(!editMode);
+    refreshAdminButtons();
+  });
+
+  function waitForAdminReady() {
+    const check = () => {
+      if (typeof window.__IS_ADMIN__ !== "undefined") {
+        console.log("🟢 Admin erkannt:", window.__IS_ADMIN__);
+        setEditMode(false); // Start mit Edit AUS
+        refreshAdminButtons();
+      } else {
+        setTimeout(check, 200);
+      }
+    };
+    check();
+  }
 
   waitForAdminReady();
 
