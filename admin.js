@@ -187,6 +187,9 @@ function makeDraggable(el) {
   let startX = 0, startY = 0;
   let origX = 0, origY = 0;
 
+  const isUiControl = (target) =>
+    !!target?.closest?.("button, a, input, textarea, select, label");
+
   const begin = (clientX, clientY) => {
     if (!editMode) return;
     dragging = true;
@@ -209,10 +212,14 @@ function makeDraggable(el) {
 
   const end = () => (dragging = false);
 
-  // Drag nur in oberem Bereich (damit Buttons im Fenster noch klickbar bleiben)
+  // Pointer (modern)
   el.addEventListener("pointerdown", (e) => {
+    if (!editMode) return;              // ✅ NUR im Edit-Modus ziehen
+    if (isUiControl(e.target)) return;  // ✅ Buttons klickbar lassen
+
     const rect = el.getBoundingClientRect();
     if ((e.clientY - rect.top) > 40) return;
+
     el.setPointerCapture?.(e.pointerId);
     begin(e.clientX, e.clientY);
     e.preventDefault();
@@ -226,10 +233,14 @@ function makeDraggable(el) {
   el.addEventListener("pointerup", end);
   el.addEventListener("pointercancel", end);
 
-  // Mouse fallback (sicher)
+  // Mouse fallback
   el.addEventListener("mousedown", (e) => {
+    if (!editMode) return;              // ✅ NUR im Edit-Modus ziehen
+    if (isUiControl(e.target)) return;  // ✅ Buttons klickbar lassen
+
     const rect = el.getBoundingClientRect();
     if ((e.clientY - rect.top) > 40) return;
+
     begin(e.clientX, e.clientY);
     e.preventDefault();
   });
