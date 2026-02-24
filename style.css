@@ -278,7 +278,6 @@ button:disabled{
 /* Zeilen etwas klarer getrennt */
 #statusPanel div{
   margin-bottom: 5px;
-  display: flex;
   align-items: center;
   gap: 6px;
 }
