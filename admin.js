@@ -56,7 +56,9 @@ function ensureCSS() {
 /* ================= Helpers ================= */
 
 function winList() {
-  return Array.from(document.querySelectorAll(".window"));
+  return Array.from(
+    document.querySelectorAll(".window, .admin-draggable")
+  );
 }
 
 function ensureKey(el) {
