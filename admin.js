@@ -1,4 +1,4 @@
-// admin.js (type="module") — Drag (Mouse+Touch+Pointer) + Save/Load
+// admin.js (type="module") — Drag (PC+Touch) + Save/Load + auto-bind for late windows
 
 import { ref, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
@@ -27,7 +27,7 @@ function ensureCSS() {
       cursor:move;
     }
     body.layoutEdit .window::before{
-      content:"DRAG";
+      content:"DRAG (oben ziehen)";
       position:absolute;
       left:0; top:0; right:0;
       height:34px;
@@ -39,6 +39,7 @@ function ensureCSS() {
       border-top-left-radius:12px;
       border-top-right-radius:12px;
       pointer-events:none;
+      z-index:99999;
     }
   `;
   document.head.appendChild(style);
@@ -61,9 +62,29 @@ function ensureKey(el) {
   return gen;
 }
 
+/** wichtig: beim Umschalten auf absolute die aktuelle Grid-Position “einfrieren” */
+function freezeWindowsToAbsolute() {
+  windows().forEach((el) => {
+    const r = el.getBoundingClientRect();
+    el.style.left = (r.left + window.scrollX) + "px";
+    el.style.top  = (r.top  + window.scrollY) + "px";
+    // optional: Größe mitschreiben, damit’s stabil bleibt
+    if (!el.style.width) el.style.width = Math.round(r.width) + "px";
+    if (!el.style.height) el.style.height = Math.round(r.height) + "px";
+  });
+}
+
 function setEditMode(on) {
   editMode = !!on;
   document.body.classList.toggle("layoutEdit", editMode);
+
+  if (editMode) {
+    // 🔥 das ist der entscheidende Schritt
+    freezeWindowsToAbsolute();
+    // und sicherstellen, dass alle (auch spätere) windows Listener haben
+    bindAllWindows();
+  }
+
   show(saveBtn, !!window.__IS_ADMIN__);
   console.log("🧩 Layout-Edit:", editMode ? "AN" : "AUS");
 }
@@ -118,8 +139,11 @@ async function saveLayout() {
   }
 }
 
-// --- DRAG (Pointer + Mouse + Touch Fallback) ---
+// --- DRAG (Pointer + Mouse) ---
 function makeDraggable(el) {
+  if (el.__dragBound) return; // ✅ nicht doppelt binden
+  el.__dragBound = true;
+
   let dragging = false;
   let startX = 0, startY = 0;
   let origX = 0, origY = 0;
@@ -127,17 +151,19 @@ function makeDraggable(el) {
   const begin = (clientX, clientY) => {
     if (!editMode) return;
     dragging = true;
-    startX = clientX;
-    startY = clientY;
+
     const r = el.getBoundingClientRect();
     origX = r.left + window.scrollX;
     origY = r.top + window.scrollY;
+    startX = clientX;
+    startY = clientY;
 
     zTop += 1;
     el.style.zIndex = String(zTop);
-    // wichtig: beim ersten Drag absolute Koordinaten setzen
+
+    // beim ersten Mal sicher setzen
     el.style.left = origX + "px";
-    el.style.top = origY + "px";
+    el.style.top  = origY + "px";
   };
 
   const move = (clientX, clientY) => {
@@ -148,16 +174,20 @@ function makeDraggable(el) {
 
   const end = () => { dragging = false; };
 
-  // Pointer (modern)
+  // Pointer
   el.addEventListener("pointerdown", (e) => {
-    // Drag nur in oberem Bereich (Header)
     const rect = el.getBoundingClientRect();
-    if ((e.clientY - rect.top) > 40) return;
+    if ((e.clientY - rect.top) > 40) return; // nur oben ziehen
     el.setPointerCapture?.(e.pointerId);
     begin(e.clientX, e.clientY);
     e.preventDefault();
   });
-  el.addEventListener("pointermove", (e) => { move(e.clientX, e.clientY); if (dragging) e.preventDefault(); });
+
+  el.addEventListener("pointermove", (e) => {
+    move(e.clientX, e.clientY);
+    if (dragging) e.preventDefault();
+  });
+
   el.addEventListener("pointerup", end);
   el.addEventListener("pointercancel", end);
 
@@ -168,35 +198,35 @@ function makeDraggable(el) {
     begin(e.clientX, e.clientY);
     e.preventDefault();
   });
+
   window.addEventListener("mousemove", (e) => move(e.clientX, e.clientY));
   window.addEventListener("mouseup", end);
+}
 
-  // Touch fallback
-  el.addEventListener("touchstart", (e) => {
-    const t = e.touches[0];
-    const rect = el.getBoundingClientRect();
-    if ((t.clientY - rect.top) > 40) return;
-    begin(t.clientX, t.clientY);
-    e.preventDefault();
-  }, { passive:false });
-  window.addEventListener("touchmove", (e) => {
-    const t = e.touches[0];
-    if (!t) return;
-    move(t.clientX, t.clientY);
-    if (dragging) e.preventDefault();
-  }, { passive:false });
-  window.addEventListener("touchend", end);
+function bindAllWindows() {
+  windows().forEach(makeDraggable);
+}
+
+// 🔥 beobachtet DOM: wenn game.js später windows erstellt, werden sie automatisch draggable
+function observeNewWindows() {
+  const obs = new MutationObserver(() => {
+    if (!editMode) return;
+    bindAllWindows();
+  });
+  obs.observe(document.body, { childList: true, subtree: true });
 }
 
 function init() {
   ensureCSS();
-  windows().forEach(makeDraggable);
+
   saveBtn?.addEventListener("click", saveLayout);
   loadLayout();
 
-  // ✅ WICHTIG: wenn Admin -> Edit sofort AN (damit du nicht erst "E" drücken musst)
-  if (window.__IS_ADMIN__) setEditMode(true);
-  else setEditMode(false);
+  // Observer starten
+  observeNewWindows();
+
+  // Wenn Admin: Edit direkt an
+  setEditMode(!!window.__IS_ADMIN__);
 
   console.log("✅ Drag ready | Admin:", window.__IS_ADMIN__);
 }
