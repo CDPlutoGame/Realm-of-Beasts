@@ -18,10 +18,6 @@
     <button id="saveLayoutBtn" style="display:none;">Layout speichern</button>
     <button id="toggleEditBtn" style="display:none;">Layout bearbeiten</button>
   </div>
-<body>
-
-  <!-- 🔥 SPIEL TITEL -->
-  <h1 id="gameTitle">Realm of Beaasts</h1>
 
   <!-- Game Layout -->
   <div id="app">
@@ -81,3 +77,30 @@
   <script type="module" src="admin.js"></script>
 </body>
 </html>
+/* ===== GAME ZENTRIEREN ===== */
+
+body{
+  display: flex;
+  justify-content: center;
+}
+
+/* Haupt-Container */
+#app{
+  width: 1400px;
+  max-width: 95%;
+  margin-top: 80px;
+}
+
+/* ===== SPIEL TITEL ===== */
+
+#gameTitle{
+  position: absolute;
+  top: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 42px;
+  letter-spacing: 2px;
+  color: #ffb347;
+  text-shadow: 0 0 15px rgba(255,140,0,0.8);
+  font-weight: 900;
+}
