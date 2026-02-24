@@ -162,17 +162,31 @@ button:disabled{
   color: rgba(255,255,255,.88);
 }
 
-/* ===== Board ===== */
+/* ===== Board (kompakt, feste Tiles) ===== */
 #board{
   background: rgba(17,17,17,.80);
-  width: 100%;
-  max-width: var(--board-max);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+
   display: grid !important;
-  grid-template-columns: repeat(10, minmax(0, 1fr)) !important;
-  gap: 8px;
-  padding: 12px;
-  font-size: 18px; /* Board-Symbole kleiner/größer: 16-20 */
+  grid-template-columns: repeat(10, 34px) !important; /* feste Spalten */
+  grid-auto-rows: 34px !important;                    /* feste Zeilen */
+  gap: 6px;
+  padding: 10px;
+
+  width: max-content;          /* Board nimmt nur so viel Platz wie es braucht */
+  max-width: none !important;
+
+  font-size: 16px;             /* Emoji/Icons kleiner */
   line-height: 1;
+}
+
+/* Tiles zentrieren */
+#board .tile{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius: 10px;
 }
 
 /* Tiles dürfen NICHT 100% breit erzwingen */
