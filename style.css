@@ -355,3 +355,16 @@ button:disabled{
   display: flex;
   flex-direction: column;
 }
+/* ===== GAME ZENTRIEREN ===== */
+
+body{
+  display: flex;
+  justify-content: center;   /* horizontal mittig */
+}
+
+/* Haupt-Container */
+#app{
+  width: 1400px;             /* fixe Breite für schönes Layout */
+  max-width: 95%;
+  margin-top: 80px;          /* Platz für Titel oben */
+}
