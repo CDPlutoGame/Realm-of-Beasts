@@ -243,7 +243,7 @@ button:disabled{
 
 /* Linke Spalte etwas schmaler + enger */
 :root{
-  --left-w: 220px;   /* guter Mittelwert */
+  --left-w: 250px;   /* guter Mittelwert */
   --gap: 12px;
 }
 
