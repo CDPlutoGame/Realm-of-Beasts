@@ -297,23 +297,28 @@ button:disabled{
   margin-bottom: 8px;
 }
 
-/* Shop-Buttons kompakt + gleich breit */
+/* =========================
+   SHOP – EXTRA COMPACT
+   ========================= */
+
+#shop{
+  padding: 8px;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+/* Titel kleiner */
+#shop h3, #shop b{
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+/* Buttons deutlich kompakter */
 #shop button{
   display: block;
   width: 100%;
-  padding: 8px 10px;
-  font-size: 12px;
-  border-radius: 10px;
-  margin: 6px 0;
-  background: rgba(43,138,62,.95);
-  border: 1px solid rgba(120,255,160,.18);
-}
-
-#shop button:hover{
-  background: rgba(62,180,88,.95);
-}
-
-/* Wenn du Textzeilen im Shop hast */
-#shop div{
+  padding: 6px 8px;      /* kleiner */
+  font-size: 10.5px;     /* kleiner */
+  border-radius: 8px;
   margin: 4px 0;
 }
