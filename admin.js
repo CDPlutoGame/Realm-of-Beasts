@@ -48,36 +48,37 @@ function ensureCSS() {
 
 /* ================= Layout Mode ================= */
 
-function freezeWindowsToAbsolute() {
-  const app = document.getElementById("app");
-  const appRect = app.getBoundingClientRect();
+// ===== Admin Buttons / Toggle =====
+const toggleBtn = document.getElementById("toggleEditBtn");
 
-  document.querySelectorAll(".window").forEach((el) => {
-    const r = el.getBoundingClientRect();
+function refreshAdminButtons() {
+  const isAdmin = !!window.__IS_ADMIN__;
 
-    // relativ zu #app (sonst springen alle nach links oben)
-    el.style.left = Math.round(r.left - appRect.left) + "px";
-    el.style.top  = Math.round(r.top  - appRect.top)  + "px";
+  // Layout bearbeiten Button: immer sichtbar für Admin
+  if (toggleBtn) toggleBtn.style.display = isAdmin ? "inline-block" : "none";
 
-    el.style.width  = Math.round(r.width) + "px";
-    el.style.height = Math.round(r.height) + "px";
-  });
+  // Layout speichern Button: nur sichtbar für Admin + wenn editMode an ist
+  if (saveBtn) saveBtn.style.display = (isAdmin && editMode) ? "inline-block" : "none";
 }
 
-function setEditMode(on) {
-  editMode = !!on;
+// Klick auf "Layout bearbeiten"
+toggleBtn?.addEventListener("click", () => {
+  setEditMode(!editMode);
+  refreshAdminButtons();
+});
 
-  if (editMode) {
-    // WICHTIG: erst messen, dann layoutEdit aktivieren
-    freezeWindowsToAbsolute();
-    document.body.classList.add("layoutEdit");
-    bindWindows?.(); // falls du die Funktion hast
-  } else {
-    document.body.classList.remove("layoutEdit");
-  }
-
-  if (saveBtn) saveBtn.style.display = (editMode ? "inline-block" : "none");
-  console.log("🧩 Layout-Edit:", editMode ? "AN" : "AUS");
+// Warten bis __IS_ADMIN__ nach Login gesetzt ist
+function waitForAdminReady() {
+  const check = () => {
+    if (typeof window.__IS_ADMIN__ !== "undefined") {
+      console.log("🟢 Admin erkannt:", window.__IS_ADMIN__);
+      setEditMode(false);         // Start: Edit AUS
+      refreshAdminButtons();      // ✅ wichtig: Button nach Login einblenden
+    } else {
+      setTimeout(check, 200);
+    }
+  };
+  check();
 }
 /* ================= Save / Load ================= */
 
