@@ -83,19 +83,16 @@ button:hover {
   grid-template-columns: repeat(10, minmax(0, 1fr)) !important;
   gap: 8px;
   padding: 12px;
-
   background: #111;
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.08);
-
   width: 100%;
-  max-width: 720px;   /* optional: macht “Kasten” */
+  max-width: 720px;
 }
 
 /* Tiles dürfen NICHT 100% breit erzwingen */
 .tile{
   width: auto !important;
-}
 }
 
 /* LEADERBOARD */
@@ -106,4 +103,15 @@ button:hover {
   padding: 12px;
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.08);
+}
+/* ========================= */
+/* ADMIN TOP BAR            */
+/* ========================= */
+#topBar{
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 9999999;
+  display: flex;
+  gap: 8px;
 }
