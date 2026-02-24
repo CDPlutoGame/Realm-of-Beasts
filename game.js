@@ -78,7 +78,6 @@
     if (playerName) saveProfile(playerName, meta);
   }
 
- // ---------------- UI ROOT ----------------
 // ---------------- UI ROOT ----------------
 const app = ensureEl("app", "div", document.body);
 
@@ -90,25 +89,30 @@ const shopEl = ensureEl("shop", "div", leftCol);
 
 // Rechte Spalte
 const rightCol = ensureEl("rightCol", "div", app);
-const row1 = ensureEl("uiRow1", "div", rightCol);
+const controlsPanel = ensureEl("controlsPanel", "div", rightCol);
+controlsPanel.classList.add("window");
 
-const spinButton = ensureEl("spinButton", "button", row1);
+const controlsRow = ensureEl("controlsRow", "div", controlsPanel);
+
+const spinButton = ensureEl("spinButton", "button", controlsRow);
 spinButton.textContent = "Drehen";
 
-const attackButton = ensureEl("attackButton", "button", row1);
+const attackButton = ensureEl("attackButton", "button", controlsRow);
 attackButton.textContent = "Angreifen";
 
-const usePotionButton = ensureEl("usePotionButton", "button", row1);
+const usePotionButton = ensureEl("usePotionButton", "button", controlsRow);
 usePotionButton.textContent = "Trank nutzen (+5 HP)";
 
-const newRoundButton = ensureEl("newRoundButton", "button", row1);
+const newRoundButton = ensureEl("newRoundButton", "button", controlsRow);
 newRoundButton.textContent = "Neue Runde";
 
 const fightPanel = ensureEl("fightPanel", "div", rightCol);
 const logEl = ensureEl("log", "pre", rightCol);
 const boardEl = ensureEl("board", "div", rightCol);
-const leaderboardEl = ensureEl("leaderboard", "div", rightCol);
+const leaderboardPanel = ensureEl("leaderboardPanel", "div", rightCol);
+leaderboardPanel.classList.add("window");
 
+const leaderboardEl = ensureEl("leaderboard", "div", leaderboardPanel);
 function safeLog(msg) {
   logEl.textContent = String(msg ?? "");
 }
