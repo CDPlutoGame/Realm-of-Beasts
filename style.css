@@ -320,12 +320,12 @@ button:disabled{
   padding: 6px 8px;      /* kleiner */
   font-size: 10.5px;     /* kleiner */
   border-radius: 8px;
-  margin: 4px 0;
+  margin: 8px 0;
 }
 
 /* SHOP BOX größer */
 #shop{
   width: 100%;          /* volle Breite der linken Spalte */
-  min-height: 420px;    /* länger nach unten */
-  padding: 12px;
+  min-height: 480px;    /* länger nach unten */
+  padding: 114px;
 }
