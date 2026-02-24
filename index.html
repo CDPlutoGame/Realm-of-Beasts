@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Realm of Beaasts</title>
 
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -20,22 +21,23 @@
 
   <!-- Game Layout -->
   <div id="app">
-    <!-- Links -->
+    <!-- LINKS -->
     <div id="leftCol">
       <div id="statusPanel" class="window"></div>
       <div id="shop" class="window"></div>
-      <!-- ⛔ Ranking NICHT mehr links, weil es rechts unter die Buttons soll -->
+      <!-- ✅ KEIN leaderboardPanel links (sonst doppelt) -->
     </div>
 
-    <!-- Rechts -->
+    <!-- RECHTS -->
     <div id="rightCol">
       <div id="fightPanel" class="window"></div>
 
+      <!-- Buttons -->
       <div id="controlsPanel" class="window">
         <div id="controlsRow"></div>
       </div>
 
-      <!-- ✅ Ranking unter den Buttons -->
+      <!-- ✅ Bestenliste direkt unter den Buttons -->
       <div id="leaderboardPanel" class="window">
         <h3>🏆 Bestenliste (Top 3 – Online)</h3>
         <div id="leaderboard"></div>
