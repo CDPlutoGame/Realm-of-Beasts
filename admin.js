@@ -125,7 +125,9 @@ function setEditMode(on) {
 function captureLayout() {
   const out = {};
   winList().forEach((el) => {
-    const key = ensureKey(el);
+    const key = el.id;
+    if (!key) return;
+
     out[key] = {
       left: el.style.left || "",
       top: el.style.top || "",
@@ -139,10 +141,12 @@ function captureLayout() {
 
 function applyLayout(layout) {
   if (!layout) return;
+
   winList().forEach((el) => {
-    const key = ensureKey(el);
+    const key = el.id;
+    if (!layout[key]) return;
+
     const s = layout[key];
-    if (!s) return;
 
     if (s.left) el.style.left = s.left;
     if (s.top) el.style.top = s.top;
@@ -249,15 +253,17 @@ function makeDraggable(el) {
   window.addEventListener("mouseup", end);
 }
 
-function bindWindows() {
-  winList().forEach(makeDraggable);
-}
-
 function observeNewWindows() {
   const obs = new MutationObserver(() => {
     if (!editMode) return;
+
+    // 🔥 wichtig: neue windows/topbar sofort positions-fixen
+    freezeWindowsToAbsolute();
+
+    // Drag an neue Elemente binden
     bindWindows();
   });
+
   obs.observe(document.body, { childList: true, subtree: true });
 }
 
