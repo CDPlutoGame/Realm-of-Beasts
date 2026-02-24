@@ -20,11 +20,13 @@ function ensureCSS() {
   const style = document.createElement("style");
   style.id = "layoutEditCss";
  style.textContent = `
-  body.layoutEdit #app{
-    display:block !important;
-    position:relative !important;
-    min-height:100vh;
-  }
+body.layoutApplied #app{
+  position:relative !important;
+}
+body.layoutApplied .window,
+body.layoutApplied .admin-draggable{
+  position:absolute !important;
+}
 
   /* Fenster + Admin-Leiste */
   body.layoutEdit .window,
@@ -160,7 +162,12 @@ async function loadLayout() {
   try {
     const snap = await get(ref(db, "globalLayout/v1"));
     if (snap.exists()) {
-      applyLayout(snap.val());
+      const layout = snap.val();
+      applyLayout(layout);
+
+      // ✅ sorgt dafür, dass Positionen auch außerhalb Edit-Mode gelten
+      document.body.classList.add("layoutApplied");
+
       console.log("✅ globalLayout geladen");
     } else {
       console.log("ℹ️ globalLayout leer");
@@ -256,12 +263,12 @@ function bindWindows() {
 /* ================= Observe New Windows ================= */
 function observeNewWindows() {
   const obs = new MutationObserver(() => {
+    // ✅ wenn game.js neue Panels/Buttons reinrendert: Layout wieder anwenden
+    loadLayout();
+
+    // Drag nur im Edit-Mode neu binden
     if (!editMode) return;
-
-    // sobald game.js neue UI reinrendert: Positionen nochmal fixieren
     freezeWindowsToAbsolute();
-
-    // Drag an neue Elemente binden
     bindWindows();
   });
 
