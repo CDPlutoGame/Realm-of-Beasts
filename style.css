@@ -305,3 +305,29 @@ button:disabled{
   border-radius: 8px;
   margin: 8px 0;
 }
+/* ===== RIGHT COLUMN LAYOUT FINAL ===== */
+#rightCol{
+  display: grid !important;
+  grid-template-columns: 1fr auto;   /* links flexibel, rechts Board/Log */
+  gap: 14px;
+  align-items: start;
+}
+
+/* Row 1 */
+#fightPanel{ grid-column: 1; grid-row: 1; }
+#board{ grid-column: 2; grid-row: 1; }
+
+/* Row 2 */
+#controlsPanel{ grid-column: 1; grid-row: 2; }
+#log{ grid-column: 2; grid-row: 2; }
+
+/* Row 3 */
+#leaderboardPanel{ 
+  grid-column: 1 / -1; 
+  grid-row: 3; 
+}
+
+/* Log optisch etwas klarer */
+#log{
+  min-height: 160px;
+}
