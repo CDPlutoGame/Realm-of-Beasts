@@ -258,37 +258,33 @@ button:disabled{
 }
 
 /* =========================
-   STATUS FINAL COMPACT
+   STATUS – FINAL PROPORTION
    ========================= */
 
 #statusPanel{
-  padding: 8px;
-  font-size: 11px;      /* kleiner */
-  line-height: 1.15;
+  padding: 10px;
+  font-size: 12px;
+  line-height: 1.25;
+  background: rgba(20,20,20,0.85);
 }
 
+/* Titel */
 #statusPanel h3{
-  font-size: 12px;      /* Titel kleiner */
-  margin-bottom: 6px;
+  font-size: 13px;
+  margin-bottom: 8px;
+  font-weight: 700;
 }
 
-/* einzelne Zeilen enger */
+/* Zeilen etwas klarer getrennt */
 #statusPanel div{
-  margin-bottom: 3px;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-/* Emojis kleiner machen */
-#statusPanel{
-  letter-spacing: 0.2px;
-}
-
-/* Falls Icons als IMG */
+/* Emojis kleiner & gleichmäßig */
 #statusPanel img{
-  width: 14px;
-  height: 14px;
-}
-
-/* Falls Emojis direkt im Text → etwas kleiner */
-#statusPanel span{
-  font-size: 11px;
+  width: 15px;
+  height: 15px;
 }
