@@ -350,19 +350,19 @@ function safeLog(msg) {
   }
 
   // ---------------- HUD + SHOP ----------------
-  function updateHud() {
-    hudEl.innerHTML =
-      `<b>📊 Status</b><br>` +
-      `👤 Account: <b>${playerName || "(nicht eingeloggt)"}</b><br>` +
-      `🏁 Runde: <b>${rounds}</b><br>` +
-      `📍 Feld: <b>${playerPos + 1}</b><br>` +
-      `❤️ HP: <b>${playerHp}/${meta.maxHpBase}</b><br>` +
-      `💰 Gold: <b>${meta.gold}</b><br>` +
-      `🧪 Tränke: <b>${meta.potions}</b><br>` +
-      `⚔️ Kraft: <b>${meta.attackPower}</b><br>` +
-      `☠️ Monster: <b>${monstersKilled}</b><br>` +
-      `👑 Bosse: <b>${bossesKilled}</b>`;
-  }
+function updateHud() {
+  hudEl.innerHTML =
+    `<b>📊 Status</b><br>` +
+    `<span class="emoji">👤</span> Account: <b>${playerName || "(nicht eingeloggt)"}</b><br>` +
+    `<span class="emoji">🏁</span> Runde: <b>${rounds}</b><br>` +
+    `<span class="emoji">📍</span> Feld: <b>${playerPos + 1}</b><br>` +
+    `<span class="emoji">❤️</span> HP: <b>${playerHp}/${meta.maxHpBase}</b><br>` +
+    `<span class="emoji">💰</span> Gold: <b>${meta.gold}</b><br>` +
+    `<span class="emoji">🧪</span> Tränke: <b>${meta.potions}</b><br>` +
+    `<span class="emoji">⚔️</span> Kraft: <b>${meta.attackPower}</b><br>` +
+    `<span class="emoji">☠️</span> Monster: <b>${monstersKilled}</b><br>` +
+    `<span class="emoji">👑</span> Bosse: <b>${bossesKilled}</b>`;
+}
   function refreshUsePotionButton() {
     usePotionButton.disabled = !(meta.potions > 0 && playerHp < meta.maxHpBase);
   }
