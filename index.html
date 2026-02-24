@@ -1,92 +1,57 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Realm of Beaasts</title>
 
+  <!-- ✅ Externe CSS Datei (damit Änderungen wirklich greifen) -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- (Optional) Mini-Base, falls du ganz ohne CSS kurz was sehen willst -->
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: url("images/dungeon.png") no-repeat center center fixed;
-      background-size: cover;
-      color: white;
-    }
-
-    #topBar {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      display: flex;
-      gap: 10px;
-      z-index: 1000;
-    }
-
-    button {
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: none;
-      background: #b22222;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    button:hover {
-      background: #8b0000;
-    }
-
-    #app {
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      gap: 20px;
-      padding: 20px;
-    }
-
-    #sidebar {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .window {
-      background: rgba(0,0,0,0.75);
-      padding: 15px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
+    body{ margin:0; }
   </style>
 </head>
-<body>
 
+<body>
   <!-- Top Buttons -->
-<div id="topBar" class="admin-draggable">
-  <button id="loginBtn">Login</button>
-  <button id="resetBtn">Passwort zurücksetzen</button>
-  <button id="logoutBtn" style="display:none;">Logout</button>
-  <button id="saveLayoutBtn" style="display:none;">Layout speichern</button>
-  <button id="toggleEditBtn" style="display:none;">Layout bearbeiten</button>
-</div>
+  <div id="topBar" class="admin-draggable">
+    <button id="loginBtn">Login</button>
+    <button id="resetBtn">Passwort zurücksetzen</button>
+    <button id="logoutBtn" style="display:none;">Logout</button>
+    <button id="saveLayoutBtn" style="display:none;">Layout speichern</button>
+    <button id="toggleEditBtn" style="display:none;">Layout bearbeiten</button>
+  </div>
+
   <!-- Game Layout -->
   <div id="app">
-    <div id="sidebar">
+    <!-- ✅ Links -->
+    <div id="leftCol">
       <div id="statusPanel" class="window"></div>
       <div id="shop" class="window"></div>
+      <div id="leaderboardPanel" class="window">
+        <h3>🏆 Bestenliste (Top 3 – Online)</h3>
+        <div id="leaderboard"></div>
+      </div>
     </div>
 
-<div id="mainArea">
-  <div id="fightPanel" class="window"></div>
+    <!-- ✅ Rechts -->
+    <div id="rightCol">
+      <div id="fightPanel" class="window"></div>
 
-  <div id="attackPanel" class="window"></div>
-  <div id="rankPanel" class="window"></div>
+      <!-- 4 Buttons Box -->
+      <div id="controlsPanel" class="window">
+        <div id="controlsRow"></div>
+      </div>
 
-  <div id="board" class="window"></div>
-  <div id="log" class="window"></div>
-</div>
-    
+      <div id="board" class="window"></div>
+      <pre id="log" class="window"></pre>
+    </div>
+  </div> <!-- ✅ #app wird jetzt sauber geschlossen -->
+
   <!-- Firebase Setup -->
   <script type="module">
-
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getDatabase } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -102,19 +67,15 @@
       measurementId: "G-084J12EZHN"
     };
 
-    const app = initializeApp(firebaseConfig);
-
-    // global verfügbar machen für game.js & admin.js
-    window.auth = getAuth(app);
-    window.db = getDatabase(app);
-
+    const fbApp = initializeApp(firebaseConfig);
+    window.auth = getAuth(fbApp);
+    window.db = getDatabase(fbApp);
   </script>
 
   <!-- Game Scripts -->
-<script type="module" src="auth.js"></script>
-<script type="module" src="ranking.js"></script>
-<script type="module" src="game.js"></script>
-<script type="module" src="admin.js"></script>
-  
+  <script type="module" src="auth.js"></script>
+  <script type="module" src="ranking.js"></script>
+  <script type="module" src="game.js"></script>
+  <script type="module" src="admin.js"></script>
 </body>
 </html>
