@@ -1,11 +1,13 @@
-// admin.js (type="module")
+// admin.js (type="module") — Layout Editor (Drag) + Save/Load (RTDB)
 
 import { ref, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 console.log("✅ admin.js geladen");
 
 const db = window.db;
+
 const saveBtn = document.getElementById("saveLayoutBtn");
+const toggleBtn = document.getElementById("toggleEditBtn");
 
 let editMode = false;
 let zTop = 1000;
@@ -28,8 +30,10 @@ function ensureCSS() {
       position:absolute !important;
       cursor:move;
       user-select:none;
+      touch-action:none;
     }
 
+    /* Drag-Zone oben (nur Anzeige) */
     body.layoutEdit .window::before{
       content:"DRAG (oben ziehen)";
       position:absolute;
@@ -38,76 +42,102 @@ function ensureCSS() {
       line-height:34px;
       padding-left:10px;
       font-size:12px;
-      background:rgba(178,34,34,.25);
-      color:#fff;
+      color:rgba(255,255,255,.9);
+      background:rgba(178,34,34,.22);
+      border-top-left-radius:12px;
+      border-top-right-radius:12px;
       pointer-events:none;
+      z-index:99999;
     }
   `;
   document.head.appendChild(style);
 }
 
-/* ================= Layout Mode ================= */
+/* ================= Helpers ================= */
 
-// ===== Admin Buttons / Toggle =====
-const toggleBtn = document.getElementById("toggleEditBtn");
+function winList() {
+  return Array.from(document.querySelectorAll(".window"));
+}
+
+function ensureKey(el) {
+  if (el.id) return el.id;
+  if (el.dataset.win) return el.dataset.win;
+  el.dataset.win = "win_" + Math.random().toString(36).slice(2, 10);
+  return el.dataset.win;
+}
 
 function refreshAdminButtons() {
   const isAdmin = !!window.__IS_ADMIN__;
-
-  // Layout bearbeiten Button: immer sichtbar für Admin
   if (toggleBtn) toggleBtn.style.display = isAdmin ? "inline-block" : "none";
-
-  // Layout speichern Button: nur sichtbar für Admin + wenn editMode an ist
   if (saveBtn) saveBtn.style.display = (isAdmin && editMode) ? "inline-block" : "none";
 }
 
-// Klick auf "Layout bearbeiten"
-toggleBtn?.addEventListener("click", () => {
-  setEditMode(!editMode);
-  refreshAdminButtons();
-});
+/* ================= Layout Mode ================= */
 
-// Warten bis __IS_ADMIN__ nach Login gesetzt ist
-function waitForAdminReady() {
-  const check = () => {
-    if (typeof window.__IS_ADMIN__ !== "undefined") {
-      console.log("🟢 Admin erkannt:", window.__IS_ADMIN__);
-      setEditMode(false);         // Start: Edit AUS
-      refreshAdminButtons();      // ✅ wichtig: Button nach Login einblenden
-    } else {
-      setTimeout(check, 200);
-    }
-  };
-  check();
+function freezeWindowsToAbsolute() {
+  const app = document.getElementById("app");
+  if (!app) return;
+
+  const appRect = app.getBoundingClientRect();
+
+  winList().forEach((el) => {
+    const r = el.getBoundingClientRect();
+
+    // RELATIV zu #app (wichtig!)
+    el.style.left = Math.round(r.left - appRect.left) + "px";
+    el.style.top  = Math.round(r.top  - appRect.top)  + "px";
+
+    // Größe festhalten
+    el.style.width  = Math.round(r.width) + "px";
+    el.style.height = Math.round(r.height) + "px";
+  });
 }
+
+function setEditMode(on) {
+  editMode = !!on;
+
+  if (editMode) {
+    // erst messen, dann absolute aktivieren
+    freezeWindowsToAbsolute();
+    document.body.classList.add("layoutEdit");
+    bindWindows(); // sicherheitshalber nochmal binden
+  } else {
+    document.body.classList.remove("layoutEdit");
+  }
+
+  console.log("🧩 Layout-Edit:", editMode ? "AN" : "AUS");
+  refreshAdminButtons();
+}
+
 /* ================= Save / Load ================= */
 
 function captureLayout() {
-  const layout = {};
-  document.querySelectorAll(".window").forEach((el) => {
-    const id = el.id || (el.dataset.win ||= "win_" + Math.random().toString(36).slice(2));
-    layout[id] = {
-      left: el.style.left,
-      top: el.style.top,
-      width: el.style.width,
-      height: el.style.height,
-      z: el.style.zIndex || 1
+  const out = {};
+  winList().forEach((el) => {
+    const key = ensureKey(el);
+    out[key] = {
+      left: el.style.left || "",
+      top: el.style.top || "",
+      width: el.style.width || "",
+      height: el.style.height || "",
+      z: Number(el.style.zIndex || 1),
     };
   });
-  return layout;
+  return out;
 }
 
 function applyLayout(layout) {
   if (!layout) return;
-  document.querySelectorAll(".window").forEach((el) => {
-    const id = el.id || el.dataset.win;
-    if (!id || !layout[id]) return;
-    const s = layout[id];
-    el.style.left = s.left;
-    el.style.top = s.top;
-    el.style.width = s.width;
-    el.style.height = s.height;
-    el.style.zIndex = s.z;
+  winList().forEach((el) => {
+    const key = ensureKey(el);
+    const s = layout[key];
+    if (!s) return;
+
+    if (s.left) el.style.left = s.left;
+    if (s.top) el.style.top = s.top;
+    if (s.width) el.style.width = s.width;
+    if (s.height) el.style.height = s.height;
+    if (s.z) el.style.zIndex = String(s.z);
   });
 }
 
@@ -117,20 +147,22 @@ async function loadLayout() {
     if (snap.exists()) {
       applyLayout(snap.val());
       console.log("✅ globalLayout geladen");
+    } else {
+      console.log("ℹ️ globalLayout leer");
     }
   } catch (e) {
-    console.log("❌ load:", e);
+    console.log("❌ globalLayout load:", e?.code || e?.message);
   }
 }
 
 async function saveLayout() {
-  if (!window.__IS_ADMIN__) return alert("❌ Kein Admin");
-
   try {
+    if (!window.__IS_ADMIN__) return alert("❌ Kein Admin");
     await set(ref(db, "globalLayout/v1"), captureLayout());
     alert("✅ Layout gespeichert");
   } catch (e) {
-    console.log("❌ save:", e);
+    console.log("❌ globalLayout save:", e?.code || e?.message);
+    alert("❌ Speichern fehlgeschlagen");
   }
 }
 
@@ -144,42 +176,77 @@ function makeDraggable(el) {
   let startX = 0, startY = 0;
   let origX = 0, origY = 0;
 
-  el.addEventListener("mousedown", (e) => {
+  const begin = (clientX, clientY) => {
     if (!editMode) return;
-
-    const rect = el.getBoundingClientRect();
-    if (e.clientY - rect.top > 40) return;
-
     dragging = true;
-    startX = e.clientX;
-    startY = e.clientY;
-    origX = rect.left;
-    origY = rect.top;
 
-    zTop++;
-    el.style.zIndex = zTop;
-  });
+    const r = el.getBoundingClientRect();
+    origX = r.left;
+    origY = r.top;
+    startX = clientX;
+    startY = clientY;
 
-  window.addEventListener("mousemove", (e) => {
+    zTop += 1;
+    el.style.zIndex = String(zTop);
+  };
+
+  const move = (clientX, clientY) => {
     if (!dragging) return;
-    el.style.left = origX + (e.clientX - startX) + "px";
-    el.style.top  = origY + (e.clientY - startY) + "px";
+    el.style.left = (origX + (clientX - startX)) + "px";
+    el.style.top  = (origY + (clientY - startY)) + "px";
+  };
+
+  const end = () => (dragging = false);
+
+  // Drag nur in oberem Bereich (damit Buttons im Fenster noch klickbar bleiben)
+  el.addEventListener("pointerdown", (e) => {
+    const rect = el.getBoundingClientRect();
+    if ((e.clientY - rect.top) > 40) return;
+    el.setPointerCapture?.(e.pointerId);
+    begin(e.clientX, e.clientY);
+    e.preventDefault();
   });
 
-  window.addEventListener("mouseup", () => dragging = false);
+  el.addEventListener("pointermove", (e) => {
+    move(e.clientX, e.clientY);
+    if (dragging) e.preventDefault();
+  });
+
+  el.addEventListener("pointerup", end);
+  el.addEventListener("pointercancel", end);
+
+  // Mouse fallback (sicher)
+  el.addEventListener("mousedown", (e) => {
+    const rect = el.getBoundingClientRect();
+    if ((e.clientY - rect.top) > 40) return;
+    begin(e.clientX, e.clientY);
+    e.preventDefault();
+  });
+
+  window.addEventListener("mousemove", (e) => move(e.clientX, e.clientY));
+  window.addEventListener("mouseup", end);
 }
 
 function bindWindows() {
-  document.querySelectorAll(".window").forEach(makeDraggable);
+  winList().forEach(makeDraggable);
 }
 
-/* ================= Admin Wait ================= */
+function observeNewWindows() {
+  const obs = new MutationObserver(() => {
+    if (!editMode) return;
+    bindWindows();
+  });
+  obs.observe(document.body, { childList: true, subtree: true });
+}
+
+/* ================= Admin Ready ================= */
 
 function waitForAdminReady() {
   const check = () => {
     if (typeof window.__IS_ADMIN__ !== "undefined") {
       console.log("🟢 Admin erkannt:", window.__IS_ADMIN__);
-      setEditMode(!!window.__IS_ADMIN__);
+      refreshAdminButtons();
+      setEditMode(false); // Start: Edit AUS (du schaltest per Button an)
     } else {
       setTimeout(check, 200);
     }
@@ -188,43 +255,22 @@ function waitForAdminReady() {
 }
 
 /* ================= Init ================= */
+
 function init() {
   ensureCSS();
 
-  bindWindows();
-  loadLayout();
-
   saveBtn?.addEventListener("click", saveLayout);
-
-  const toggleBtn = document.getElementById("toggleEditBtn");
-
-  function refreshAdminButtons() {
-    const isAdmin = !!window.__IS_ADMIN__;
-    if (toggleBtn) toggleBtn.style.display = isAdmin ? "inline-block" : "none";
-    if (saveBtn) saveBtn.style.display = (isAdmin && editMode) ? "inline-block" : "none";
-  }
 
   toggleBtn?.addEventListener("click", () => {
     setEditMode(!editMode);
-    refreshAdminButtons();
   });
 
-  function waitForAdminReady() {
-    const check = () => {
-      if (typeof window.__IS_ADMIN__ !== "undefined") {
-        console.log("🟢 Admin erkannt:", window.__IS_ADMIN__);
-        setEditMode(false); // Start mit Edit AUS
-        refreshAdminButtons();
-      } else {
-        setTimeout(check, 200);
-      }
-    };
-    check();
-  }
-
+  loadLayout();
+  bindWindows();
+  observeNewWindows();
   waitForAdminReady();
 
-  console.log("✅ Drag ready");
+  console.log("✅ admin init done");
 }
 
 if (document.readyState === "loading") {
