@@ -198,40 +198,20 @@ const leaderboardEl = document.getElementById("leaderboard");
   }, { once: true });
 
   // ---------------- ONLINE RANKING ----------------
-  let __rankTries = 0;
-  async function renderLeaderboard() {
-    const TITLE = "🏆 Bestenliste (Top 3 – Online)";
+let __rankTries = 0;
 
-    // ⭐ Best-Score (lokal, pro Gerät)
-    let best = null;
-    try { best = JSON.parse(localStorage.getItem("mbr_best_score") || "null"); } catch {}
+async function renderLeaderboard() {
+  // Titel steht schon in index.html als <h3>...<h3>
+  // -> hier NICHT nochmal ausgeben
 
-    if (!window.__ONLINE_RANKING__) {
-      __rankTries++;
-      let html = `<b>${TITLE}</b><br>`;
-      if (best) {
-        html += `
-          <div style="margin:8px 0 12px;padding:8px;border-radius:10px;background:rgba(255,255,255,.08)">
-            <b>⭐ Dein Best Score:</b> ${best.name} — Runden: <b>${best.rounds}</b>
-            | Monster: <b>${best.monstersKilled || 0}</b> | Bosse: <b>${best.bossesKilled || 0}</b>
-          </div>
-        `;
-      }
-      html += `⏳ Online Ranking startet... (${__rankTries})`;
-      leaderboardEl.innerHTML = html;
+  // ⭐ Best-Score (lokal)
+  let best = null;
+  try { best = JSON.parse(localStorage.getItem("mbr_best_score") || "null"); } catch {}
 
-      if (__rankTries < 60) setTimeout(renderLeaderboard, 250);
-      else leaderboardEl.innerHTML =
-        `<b>${TITLE}</b><br>❌ Online Ranking nicht geladen.`;
-      return;
-    }
+  if (!window.__ONLINE_RANKING__) {
+    __rankTries++;
 
-    let arr = [];
-    try { arr = await window.__ONLINE_RANKING__.top10(); } catch { arr = []; }
-    // Top 3 erzwingen
-    arr = (arr || []).slice(0, 3);
-
-    let html = `<b>${TITLE}</b><br>`;
+    let html = "";
     if (best) {
       html += `
         <div style="margin:8px 0 12px;padding:8px;border-radius:10px;background:rgba(255,255,255,.08)">
@@ -241,17 +221,41 @@ const leaderboardEl = document.getElementById("leaderboard");
       `;
     }
 
-    if (!arr.length) {
-      html += `Noch keine Einträge.`;
-    } else {
-      html += `<ol style="margin:10px 0 0 18px;padding:0;">`;
-      for (const e of arr) {
-        html += `<li><b>${e.name}</b> — Runden: <b>${e.rounds}</b> | Monster: <b>${e.monstersKilled || 0}</b> | Bosse: <b>${e.bossesKilled || 0}</b></li>`;
-      }
-      html += `</ol>`;
-    }
+    html += `⏳ Online Ranking startet... (${__rankTries})`;
     leaderboardEl.innerHTML = html;
+
+    if (__rankTries < 60) setTimeout(renderLeaderboard, 250);
+    else leaderboardEl.innerHTML = `❌ Online Ranking nicht geladen.`;
+
+    return;
   }
+
+  let arr = [];
+  try { arr = await window.__ONLINE_RANKING__.top10(); } catch { arr = []; }
+  arr = (arr || []).slice(0, 3);
+
+  let html = "";
+  if (best) {
+    html += `
+      <div style="margin:8px 0 12px;padding:8px;border-radius:10px;background:rgba(255,255,255,.08)">
+        <b>⭐ Dein Best Score:</b> ${best.name} — Runden: <b>${best.rounds}</b>
+        | Monster: <b>${best.monstersKilled || 0}</b> | Bosse: <b>${best.bossesKilled || 0}</b>
+      </div>
+    `;
+  }
+
+  if (!arr.length) {
+    html += `Noch keine Einträge.`;
+  } else {
+    html += `<ol style="margin:10px 0 0 18px;padding:0;">`;
+    for (const e of arr) {
+      html += `<li><b>${e.name}</b> — Runden: <b>${e.rounds}</b> | Monster: <b>${e.monstersKilled || 0}</b> | Bosse: <b>${e.bossesKilled || 0}</b></li>`;
+    }
+    html += `</ol>`;
+  }
+
+  leaderboardEl.innerHTML = html;
+}
 
   // ---------------- GAME STATE ----------------
   let playerName = "";
