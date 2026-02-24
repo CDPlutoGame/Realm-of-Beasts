@@ -13,7 +13,6 @@ let editMode = false;
 let zTop = 1000;
 
 /* ================= CSS ================= */
-
 function ensureCSS() {
   if (document.getElementById("layoutEditCss")) return;
 
@@ -26,6 +25,7 @@ body.layoutApplied #app{
 body.layoutApplied .window,
 body.layoutApplied .admin-draggable{
   position:absolute !important;
+  box-sizing: border-box;
 }
 
   /* Fenster + Admin-Leiste */
@@ -63,7 +63,6 @@ body.layoutApplied .admin-draggable{
 `;
   document.head.appendChild(style);
 }
-
 /* ================= Helpers ================= */
 
 function winList() {
@@ -109,19 +108,19 @@ function freezeWindowsToAbsolute() {
 function setEditMode(on) {
   editMode = !!on;
 
+  // Layout (Positionen) IMMER aktiv lassen
+  document.body.classList.add("layoutApplied");
+
   if (editMode) {
-    // erst messen, dann absolute aktivieren
-    freezeWindowsToAbsolute();
     document.body.classList.add("layoutEdit");
-    bindWindows(); // sicherheitshalber nochmal binden
+    freezeWindowsToAbsolute();
+    bindWindows();
   } else {
     document.body.classList.remove("layoutEdit");
   }
 
-  console.log("🧩 Layout-Edit:", editMode ? "AN" : "AUS");
-  refreshAdminButtons();
+  refreshAdminButtons?.();
 }
-
 /* ================= Save / Load ================= */
 
 function captureLayout() {
@@ -300,10 +299,10 @@ function init() {
     setEditMode(!editMode);
   });
 
-  loadLayout();
-  bindWindows();
-  observeNewWindows();
-  waitForAdminReady();
+ loadLayout();
+ document.body.classList.add("layoutApplied");
+ bindWindows();
+ observeNewWindows();
 
   console.log("✅ admin init done");
 }
