@@ -263,28 +263,19 @@ button:disabled{
 
 #statusPanel{
   padding: 10px;
-  font-size: 10px;
+  font-size: 12px;      /* Textgröße */
   line-height: 1.25;
   background: rgba(20,20,20,0.85);
 }
 
-/* Titel */
-#statusPanel h3{
-  font-size: 14px;
-  margin-bottom: 8px;
-  font-weight: 700;
+/* HUD-Inhalt im Status (bei dir: #hud) */
+#hud{
+  font-size: inherit;
 }
 
-/* Zeilen etwas klarer getrennt */
-#statusPanel div{
-  margin-bottom: 6px;
-  display: block;   /* statt flex */
-  align-items: center;
-  gap: 6px;
-}
-
-/* Emojis kleiner & gleichmäßig */
-#statusPanel img{
-  width: 10px;
-  height: 15px;
+/* Emojis getrennt skalieren */
+#hud .emoji{
+  font-size: 10px;      /* <- Emoji-Größe */
+  display: inline-block;
+  width: 14px;          /* sorgt für saubere Ausrichtung */
 }
