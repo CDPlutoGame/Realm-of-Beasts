@@ -1,83 +1,101 @@
 /* =========================
-   REALM OF BEASTS - CLEAN FINAL
+   REALM OF BEASTS
+   ONE LAYOUT (Mobile Style for ALL)
    ========================= */
 
 :root{
-  --gap: 14px;
-  --radius: 14px;
-  --panel-bg: rgba(20,20,20,.88);
-  --border: rgba(255,150,150,.15);
-  --text: rgba(255,255,255,.92);
+  --gap:14px;
+  --radius:14px;
+  --panel-bg:rgba(20,20,20,.88);
+  --border:rgba(255,150,150,.15);
+  --text:rgba(255,255,255,.92);
 }
 
-/* ===== Base ===== */
-
-*{ box-sizing: border-box; }
+*{ box-sizing:border-box; }
 
 body{
   margin:0;
-  font-family: system-ui, sans-serif;
-  color: var(--text);
-  background: url("images/dungeon.png") center/cover fixed no-repeat;
-}
-
-h1{
-  text-align:center;
-  margin:15px 0;
+  font-family:system-ui,sans-serif;
+  color:var(--text);
+  background:url("images/dungeon.png") center/cover fixed no-repeat;
 }
 
 /* =========================
-   DESKTOP LAYOUT
+   TOP BAR
+   ========================= */
+
+#topBar{
+  position:fixed;
+  top:10px;
+  right:10px;
+  display:flex;
+  gap:8px;
+  z-index:10000;
+}
+
+#topBar button{
+  padding:8px 12px;
+  border-radius:8px;
+  border:none;
+  background:#b22222;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+#topBar button:hover{
+  background:#ff3030;
+}
+
+/* =========================
+   MAIN APP
    ========================= */
 
 #app{
-  width: 1700px;
-  max-width: 95%;
-  margin: 20px auto;
-  display: grid;
-  grid-template-columns: 400px 1fr;
-  gap: 14px;
+  width:100%;
+  max-width:900px;
+  margin:80px auto 40px auto;
+  display:flex;
+  flex-direction:column;
+  gap:var(--gap);
+  padding:0 10px;
 }
 
-
-/* obere Reihe */
-#fightPanel { grid-column: 1; }
-#log        { grid-column: 2; }
-
-/* darunter volle Breite */
-#controlsPanel { grid-column: 1 / -1; }
-#board         { grid-column: 1 / -1; }
-#leaderboardPanel { grid-column: 1 / -1; }
-
-/* =========================
-   PANELS
-   ========================= */
-
-.window{
-  background: var(--panel-bg);
-  border-radius: var(--radius);
+/* Alle Panels gleich */
+#statusPanel,
+#shop,
+#fightPanel,
+#log,
+#controlsPanel,
+#board,
+#leaderboardPanel{
+  background:var(--panel-bg);
+  border-radius:var(--radius);
   border:1px solid var(--border);
   padding:14px;
 }
 
 /* =========================
-   FIGHT PANEL FIX
+   REIHENFOLGE FIXIEREN
    ========================= */
 
-#fightPanel{
-  min-height: 220px;
-}
+#statusPanel{ order:1; }
+#shop{ order:2; }
+#fightPanel{ order:3; }
+#log{ order:4; }
+#controlsPanel{ order:5; }
+#board{ order:6; }
+#leaderboardPanel{ order:7; }
 
 /* =========================
-   BOARD
+   LOG FIX
    ========================= */
 
-#board{
-  display:grid;
-  grid-template-columns: repeat(10, 70px);
-  grid-auto-rows: 70px;
-  gap:6px;
-  width:max-content;
+#log{
+  height:200px;
+  max-height:200px;
+  overflow-y:auto;
+  white-space:pre-wrap;
 }
 
 /* =========================
@@ -86,7 +104,7 @@ h1{
 
 #controlsRow{
   display:grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns:1fr 1fr;
   gap:10px;
 }
 
@@ -105,14 +123,29 @@ button:hover{
 }
 
 /* =========================
-   LOG FIX
+   BOARD
    ========================= */
 
-#log{
-  height:220px;
-  max-height:220px;
-  overflow-y:auto;
-  white-space:pre-wrap;
+#board{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:6px;
+}
+
+.tile{
+  background:rgba(255,255,255,.05);
+  border-radius:8px;
+  padding:6px;
+  text-align:center;
+  font-size:14px;
+}
+
+/* =========================
+   FIGHT PANEL
+   ========================= */
+
+#fightPanel{
+  min-height:160px;
 }
 
 /* =========================
@@ -122,57 +155,4 @@ button:hover{
 #leaderboardPanel{
   max-height:260px;
   overflow-y:auto;
-}
-
-/* =========================
-   MOBILE VERSION
-   ========================= */
-
-@media (max-width: 980px){
-
-  #app{
-    flex-direction: column;
-  }
-
-  #leftCol,
-  #rightCol{
-    width:100%;
-  }
-
-  /* ✅ MOBILE REIHENFOLGE (FIX UND ENDGÜLTIG)
-
-     Status
-     Shop
-     Kampffenster
-     Log
-     Buttons
-     Board
-     Ranking
-  */
-
-  #statusPanel{ order:1; }
-  #shop{ order:2; }
-
-  #fightPanel{ order:3; }
-
-  #log{ order:4; }
-
-  #controlsPanel{ order:5; }
-
-  #board{ 
-    order:6;
-    grid-template-columns: repeat(6, 1fr);
-    width:100%;
-  }
-
-  #leaderboardPanel{ order:7; }
-
-  #controlsRow{
-    grid-template-columns: 1fr 1fr;
-  }
-
-  #log{
-    height:180px;
-    max-height:180px;
-  }
 }
