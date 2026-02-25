@@ -34,24 +34,24 @@ h1{
   width: 1700px;
   max-width: 95%;
   margin: 20px auto;
-  display: flex;
-  gap: var(--gap);
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 14px;
 }
 
 /* Columns */
 
 #leftCol{
-  width: 400px;
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: 14px;
 }
 
+
 #rightCol{
-  flex:1;
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: 14px;
 }
 
 /* =========================
