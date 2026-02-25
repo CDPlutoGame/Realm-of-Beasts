@@ -875,13 +875,57 @@ menuWindow.style.border = "1px solid rgba(255,255,255,0.15)";
 menuWindow.style.boxShadow = "0 0 20px rgba(0,0,0,0.5)";
 menuWindow.style.display = "none"; // 👈 wichtig (startet geschlossen)
 
-// erstmal leer
-menuWindow.innerHTML = `
-  <div style="text-align:center;opacity:.7;">
-    📜 Helden-Menü
-  </div>
-`;
+function renderMenu() {
 
+  if (!playerName) {
+
+    // 🔒 NICHT eingeloggt
+    menuWindow.innerHTML = `
+      <button id="menuLogin" style="width:100%;margin-bottom:8px;">
+        🔑 Login
+      </button>
+      <button id="menuSound" style="width:100%;">
+        🔊 Sound
+      </button>
+    `;
+
+    document.getElementById("menuLogin").onclick = () => {
+      openLoginWindow(); // deine bestehende Login Funktion
+      menuWindow.style.display = "none";
+    };
+
+  } else {
+
+    // 👤 Eingeloggt
+    menuWindow.innerHTML = `
+      <button id="menuChangeName" style="width:100%;margin-bottom:8px;">
+        ✏️ Benutzername ändern
+      </button>
+      <button id="menuLogout" style="width:100%;margin-bottom:8px;">
+        🚪 Logout
+      </button>
+      <button id="menuSound" style="width:100%;">
+        🔊 Sound
+      </button>
+    `;
+
+    document.getElementById("menuLogout").onclick = () => {
+      logout(); // deine bestehende Logout Funktion
+      menuWindow.style.display = "none";
+    };
+
+    document.getElementById("menuChangeName").onclick = () => {
+      // kommt im nächsten Schritt
+      alert("Name ändern kommt gleich 😄");
+    };
+  }
+
+  document.getElementById("menuSound").onclick = () => {
+    soundMuted = !soundMuted;
+    if (!soundMuted) playRandomMusic();
+    else bgMusic.pause();
+  };
+}
 menuWrapper.appendChild(menuButton);
 menuWrapper.appendChild(menuWindow);
 document.body.appendChild(menuWrapper);
@@ -892,5 +936,7 @@ let menuOpen = false;
 menuButton.onclick = () => {
   menuOpen = !menuOpen;
   menuWindow.style.display = menuOpen ? "block" : "none";
+
+  if (menuOpen) renderMenu();
 };
 })();
