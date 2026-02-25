@@ -139,8 +139,6 @@ button:disabled{ opacity:.5; }
     order: 4;
   }
 
-}
-
   /* Board kleiner auf Handy */
   #board{
     grid-template-columns: repeat(6, 1fr);
