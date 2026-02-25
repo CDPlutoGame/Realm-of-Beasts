@@ -6,7 +6,6 @@ import {
   query,
   orderByChild,
   limitToLast,
-  push,
   set,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
