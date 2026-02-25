@@ -184,3 +184,88 @@ button{
   font-weight:bold;
   cursor:pointer;
 }
+/* =========================
+   LOGIN OVERLAY
+   ========================= */
+
+.overlay{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(6px);
+
+  display: none;              /* WICHTIG */
+  justify-content: center;
+  align-items: center;
+
+  z-index: 99999;
+}
+
+.loginBox{
+  background: linear-gradient(145deg,#1a1a1a,#2c1b12);
+  border: 3px solid #b8860b;
+  border-radius: 18px;
+  padding: 35px;
+  width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: 
+    0 0 25px rgba(255,140,0,0.4),
+    inset 0 0 15px rgba(0,0,0,0.7);
+  text-align: center;
+}
+
+.loginTitle{
+  margin: 0;
+  font-size: 26px;
+  color: gold;
+  text-shadow: 
+    0 0 10px orange,
+    0 0 20px darkorange;
+}
+
+.loginBox input{
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid #b8860b;
+  background: #111;
+  color: gold;
+  font-size: 14px;
+  outline: none;
+}
+
+.loginBox input::placeholder{
+  color: #c9a23f;
+}
+
+.loginButtons{
+  display: flex;
+  gap: 12px;
+}
+
+.loginButtons button{
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid #b8860b;
+  background: linear-gradient(145deg,#5a0000,#8b0000);
+  color: gold;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.loginButtons button:hover{
+  transform: scale(1.05);
+  box-shadow: 0 0 15px orange;
+}
+
+.loginError{
+  color: #ff4d4d;
+  font-size: 14px;
+}
