@@ -73,6 +73,30 @@ const firebaseConfig = {
   <script type="module" src="ranking.js"></script>
   <script type="module" src="game.js"></script>
   <script type="module" src="admin.js"></script>
+  
+  
+<script src="game.js"></script>
+
+<!-- 🔥 DUNGEON LOGIN OVERLAY -->
+<div id="loginOverlay" class="overlay" style="display:none;">
+  <div class="loginBox">
+    <div class="dragonFrameTop">🐉</div>
+
+    <h2 class="loginTitle">Realm Login</h2>
+
+    <input type="email" id="loginEmail" placeholder="📧 Email" />
+    <input type="password" id="loginPassword" placeholder="🔒 Passwort" />
+
+    <div class="loginButtons">
+      <button id="loginConfirm">⚔️ Betreten</button>
+      <button id="loginCancel">❌ Abbrechen</button>
+    </div>
+
+    <p id="loginError" class="loginError"></p>
+
+    <div class="dragonFrameBottom">🔥</div>
+  </div>
+</div>
 
 </body>
 </html>
