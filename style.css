@@ -94,7 +94,10 @@ body::before{
 #log         { grid-column: 2; grid-row: 2; }
 
 /* Row 3 */
-#leaderboardPanel{ grid-column: 1 / -1; grid-row: 3; }
+#leaderboardPanel{ 
+   margin-top: -4px;
+   grid-column: 1;  
+   grid-row: 3; }
 
 /* ===== Generic Panel Look ===== */
 .window,
