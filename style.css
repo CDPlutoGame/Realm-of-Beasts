@@ -209,15 +209,16 @@ button{
   left: 0;
   width: 100vw;
   height: 100vh;
-
   background: rgba(0,0,0,0.85);
   backdrop-filter: blur(6px);
-
-  display: none;              /* WICHTIG */
+  display: none;
   justify-content: center;
   align-items: center;
-
   z-index: 99999;
+}
+
+.overlay.active {
+  display: flex;
 }
 
 .loginBox{
