@@ -112,31 +112,45 @@ button{
 }
 button:disabled{ opacity:.5; }
 
-/* =========================
-   MOBILE LAYOUT
-========================= */
-@media (max-width: 768px) {
+/* =========================================
+   📱 MOBILE LAYOUT (WIE DU ES WILLST)
+   ========================================= */
 
-  #app {
-    display: flex;
-    flex-direction: column;
+@media (max-width: 980px){
+
+  #app{
+    grid-template-columns: 1fr;
   }
 
-  #rightCol {
-    display: flex;
-    flex-direction: column;
+  #leftCol{
+    width:100%;
   }
 
-  #controlsPanel {
-    order: 3;
+  #rightCol{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows:auto auto auto auto;
+    gap:12px;
   }
 
-  #log {
-    order: 2;
+  /* Row 1 */
+  #statusPanel{ grid-column:1; grid-row:1; }
+  #board{ grid-column:2; grid-row:1; }
+
+  /* Row 2 */
+  #shop{ grid-column:1; grid-row:2; }
+  #log{ grid-column:2; grid-row:2; }
+
+  /* Row 3 - Buttons full width */
+  #controlsPanel{
+    grid-column:1 / -1;
+    grid-row:3;
   }
 
-  #leaderboardPanel {
-    order: 4;
+  /* Row 4 - Ranking full width */
+  #leaderboardPanel{
+    grid-column:1 / -1;
+    grid-row:4;
   }
 
   /* Board kleiner auf Handy */
