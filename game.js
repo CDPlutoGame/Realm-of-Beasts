@@ -847,7 +847,7 @@ function renderMenu() {
     `;
 
     document.getElementById("menuLogin").onclick = () => {
-      document.getElementById("loginOverlay").classList.add("active");
+      document.getElementById("loginOverlay").style.display = "flex";
       menuWindow.style.display = "none";
     };
 
