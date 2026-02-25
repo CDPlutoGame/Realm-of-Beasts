@@ -14,42 +14,38 @@
   <h1 id="gameTitle">Realm of Beaasts</h1>
 
   <!-- Top Buttons -->
-  <div id="topBar" class="admin-draggable">
+  <div id="topBar">
     <button id="loginBtn">Login</button>
     <button id="resetBtn">Passwort zurücksetzen</button>
     <button id="logoutBtn" style="display:none;">Logout</button>
     <button id="saveLayoutBtn" style="display:none;">Layout speichern</button>
     <button id="toggleEditBtn" style="display:none;">Layout bearbeiten</button>
   </div>
-  
-  <!-- Game Layout -->
+
+  <!-- =========================
+       GAME GRID
+       ========================= -->
   <div id="app">
-    
-    <!-- LINKS -->
-    <div id="leftCol">
-      <div id="statusPanel" class="window"></div>
-      <div id="shop" class="window"></div>
-      <!-- ✅ KEIN leaderboardPanel links (sonst doppelt) -->
+
+    <!-- ROW 1 -->
+    <div id="statusPanel"></div>
+    <div id="board"></div>
+
+    <!-- ROW 2 -->
+    <div id="shop"></div>
+    <pre id="log"></pre>
+
+    <!-- BUTTON ROW -->
+    <div id="controlsPanel">
+      <div id="controlsRow"></div>
     </div>
 
-    <!-- RECHTS -->
-    <div id="rightCol">
-      <div id="fightPanel" class="window"></div>
-
-      <!-- Buttons -->
-      <div id="controlsPanel" class="window">
-        <div id="controlsRow"></div>
-      </div>
-
-      <!-- ✅ Bestenliste direkt unter den Buttons -->
-      <div id="leaderboardPanel" class="window">
-        <h3>🏆 Bestenliste (Top 3 – Online)</h3>
-        <div id="leaderboard"></div>
-      </div>
-
-      <div id="board" class="window"></div>
-      <pre id="log" class="window"></pre>
+    <!-- RANKING ROW -->
+    <div id="leaderboardPanel">
+      <h3>🏆 Bestenliste (Top 3 – Online)</h3>
+      <div id="leaderboard"></div>
     </div>
+
   </div>
 
   <!-- Firebase Setup -->
@@ -59,14 +55,13 @@
     import { getDatabase } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyD3Z_HFQ04XVsbAnL3XCqf_6bkX3Cc21oc",
+      apiKey: "YOUR_KEY",
       authDomain: "realm-of-beaasts.firebaseapp.com",
       databaseURL: "https://realm-of-beaasts-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "realm-of-beaasts",
       storageBucket: "realm-of-beaasts.firebasestorage.app",
       messagingSenderId: "723138830522",
-      appId: "1:723138830522:web:b3ec8a3d8947c25ec66283",
-      measurementId: "G-084J12EZHN"
+      appId: "1:723138830522:web:b3ec8a3d8947c25ec66283"
     };
 
     const fbApp = initializeApp(firebaseConfig);
@@ -79,5 +74,6 @@
   <script type="module" src="ranking.js"></script>
   <script type="module" src="game.js"></script>
   <script type="module" src="admin.js"></script>
+
 </body>
 </html>
