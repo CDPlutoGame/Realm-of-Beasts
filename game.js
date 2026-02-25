@@ -880,10 +880,24 @@ function renderMenu() {
     });
 };
 
-    document.getElementById("menuChangeName").onclick = () => {
-      // kommt im nächsten Schritt
-      alert("Name ändern kommt gleich 😄");
-    };
+   document.getElementById("menuChangeName").onclick = () => {
+  const newName = prompt("Neuen Benutzernamen eingeben (max 24 Zeichen):", playerName);
+  if (!newName) return;
+
+  const clean = newName.trim().slice(0, 24);
+  if (!clean) return;
+
+  // Lokal speichern
+  localStorage.setItem("mbr_display_name", clean);
+
+  // Globale Variable aktualisieren
+  playerName = clean;
+
+  // HUD neu rendern
+  updateHud();
+
+  menuWindow.style.display = "none";
+};
   }
 
   document.getElementById("menuSound").onclick = () => {
