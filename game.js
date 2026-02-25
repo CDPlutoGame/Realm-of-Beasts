@@ -595,6 +595,7 @@ function makeMonsterByType(type) {
 
     spinButton.disabled = true;
     attackButton.disabled = true;
+    newRoundButton.disabled = false; // ✅ jetzt darf man neue Runde drücken
 
     const payload = {
       name: playerName || "Unknown",
@@ -726,34 +727,44 @@ function attack() {
   }
 
   // ---------------- RESET RUN ----------------
-  async function resetRunKeepMeta() {
-    rounds = 0;
-    playerHp = meta.maxHpBase;
-    playerPos = 0;
-    inFight = false;
-    runOver = false;
-    monster = null;
-    monstersKilled = 0;
-    bossesKilled = 0;
+ async function resetRunKeepMeta() {
 
-    stopAutoSpin();
-    stopAutoAttack();
-
-    spinButton.disabled = false;
-    attackButton.disabled = true;
-
-    generateBoard();
-    renderBoard();
-
-    updateHud(); renderShop(); refreshUsePotionButton();
-    setFightPanelIdle();
-    await renderLeaderboard();
-
-    safeLog("✅ Neue Runde gestartet. Drück 'Drehen'.");
-
-    if (meta.autoSpinStage > 0) startAutoSpin();
-    if (meta.autoAttackStage > 0) startAutoAttack();
+  // ❌ Wenn Spiel noch läuft → nichts tun
+  if (!runOver) {
+    safeLog("❌ Du kannst nur nach Game Over eine neue Runde starten.");
+    return;
   }
+
+  rounds = 0;
+  playerHp = meta.maxHpBase;
+  playerPos = 0;
+  inFight = false;
+  runOver = false;
+  monster = null;
+  monstersKilled = 0;
+  bossesKilled = 0;
+
+  stopAutoSpin();
+  stopAutoAttack();
+
+  spinButton.disabled = false;
+  attackButton.disabled = true;
+  newRoundButton.disabled = true; // 🔒 sofort sperren
+
+  generateBoard();
+  renderBoard();
+  updateHud();
+  renderShop();
+  refreshUsePotionButton();
+  setFightPanelIdle();
+
+  await renderLeaderboard();
+
+  safeLog("✅ Neue Runde gestartet. Drück 'Drehen'.");
+
+  if (meta.autoSpinStage > 0) startAutoSpin();
+  if (meta.autoAttackStage > 0) startAutoAttack();
+}
 
   // ---------------- HOOKS ----------------
   spinButton.onclick = spin;
@@ -763,7 +774,8 @@ function attack() {
 
   // ---------------- INIT ----------------
   attackButton.disabled = true;
-
+  newRoundButton.disabled = true; // 🔒 Start gesperrt
+  
   function loadUserFromStorage() {
     const n = loadAnyName();
     playerName = n;
@@ -778,6 +790,7 @@ function attack() {
       __lastSeenName = n;
       playerName = n;
       meta = n ? loadProfile(n) : { ...DEFAULT_META };
+      runOver = true;
       resetRunKeepMeta().catch(()=>{});
       safeLog(n ? `✅ Eingeloggt als "${n}". Drück 'Drehen'.` : "🔒 Bitte anmelden.");
     }
