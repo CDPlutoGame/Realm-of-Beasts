@@ -48,11 +48,11 @@ h1{
 }
 
 
-#rightCol{
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
+#fightPanel { grid-column: 1; }
+#log        { grid-column: 2; }
+#controlsPanel { grid-column: 1 / -1; }
+#board      { grid-column: 1 / -1; }
+#leaderboardPanel { grid-column: 1 / -1; }
 
 /* =========================
    PANELS
