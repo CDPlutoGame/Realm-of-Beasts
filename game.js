@@ -844,7 +844,7 @@ if (!playerName) {
     <button id="menuSound" style="width:100%;">
       🔊 Sound
     </button>
-  `;
+  };
 
   document.getElementById("menuLogin").onclick = () => {
     document.getElementById("loginOverlay").classList.add("active");
