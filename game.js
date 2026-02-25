@@ -115,6 +115,7 @@ const boardEl = document.getElementById("board");
 const leaderboardPanel = document.getElementById("leaderboardPanel");
 leaderboardPanel.classList.add("window");
 const leaderboardEl = document.getElementById("leaderboard");
+  
   // ---------------- SOUND (tap-to-start, mobile safe) ----------------
   const MUSIC_LIST = ["sounds/music/bg1.mp3","sounds/music/bg2.mp3","sounds/music/bg3.mp3"];
   const SFX_HIT_SRC = "sounds/hit.mp3";
@@ -466,23 +467,59 @@ function updateHud() {
   }
 
   // ---------------- ENEMIES ----------------
-  function enemyLevel() { return Math.floor(rounds / ENEMY_BUFF_EVERY); }
-  function makeMonsterByType(type) {
-    const lvl = enemyLevel();
-    let base;
-    if (type === "monster_easy") base = { kind:"mob", name:"Froschling", hp:10, atk:3, icon:"🐸" };
-    else if (type === "monster_medium") base = { kind:"mob", name:"Wolfsjäger", hp:18, atk:5, icon:"🐺" };
-    else base = { kind:"mob", name:"Bärenwächter", hp:30, atk:8, icon:"🐻" };
+function makeMonsterByType(type) {
+  const lvl = enemyLevel();
+  let base;
 
-    const hp = base.hp + lvl * ENEMY_HP_BUFF;
-    const atk = base.atk + lvl * ENEMY_ATK_BUFF;
-    return { ...base, hp, maxHp: hp, atk };
+  if (type === "monster_easy") {
+    base = { 
+      kind: "mob",
+      name: "Froschling",
+      hp: 50,      // mehr Grund-Leben
+      atk: 5,      // immer 5 Schaden
+      icon: "🐸"
+    };
   }
+  else if (type === "monster_medium") {
+    base = { 
+      kind: "mob",
+      name: "Wolfsjäger",
+      hp: 100,
+      atk: 12,
+      icon: "🐺"
+    };
+  }
+  else {
+    base = { 
+      kind: "mob",
+      name: "Bärenwächter",
+      hp: 180,
+      atk: 20,
+      icon: "🐻"
+    };
+  }
+
+  // 🔥 klare Skalierung pro Level
+  const hp = base.hp + lvl * 40;   // viel mehr Leben pro Stufe
+  const atk = base.atk + lvl * 4;  // Schaden steigt langsam mit
+
+  return { ...base, hp, maxHp: hp, atk };
+}
   function makeBossForRound(r) {
-    const idx = Math.floor(r / 10);
-    const hp = idx * 1000;
-    return { kind:"boss", name:`DRACHENBOSS Runde ${r}`, hp, maxHp: hp, atk: 35 + idx * 10, icon:"🐉" };
-  }
+  const idx = Math.floor(r / 10); // 1,2,3,...
+
+  const hp = 800 + idx * 400;    // Mehr Leben, aber nicht explodierend
+  const atk = idx * 20;          // 20 / 40 / 60 / 80 ...
+
+  return { 
+    kind: "boss",
+    name: `DRACHENBOSS Runde ${r}`,
+    hp: hp,
+    maxHp: hp,
+    atk: atk,
+    icon: "🐉"
+  };
+}
 
   // ---------------- FIGHT PANEL ----------------
   function setFightPanelIdle() {
@@ -593,29 +630,34 @@ function updateHud() {
     safeLog("💀 Game Over! Shop ist aktiv.");
   }
 
-  function attack() {
-    if (!inFight || !monster) return;
+function attack() {
+  if (!inFight || !monster) return;
 
-    const playerDmg = Math.max(1, meta.attackPower + (Math.floor(Math.random() * 5) - 2));
-    monster.hp -= playerDmg;
+  // ✅ Spieler macht festen Schaden
+  const playerDmg = meta.attackPower;
+  monster.hp -= playerDmg;
 
-    playHit(0.25);
-    renderFightPanel();
+  playHit(0.25);
+  renderFightPanel();
 
-    if (monster.hp <= 0) return endFightWin();
+  if (monster.hp <= 0) return endFightWin();
 
-    const enemyDmg = Math.floor(Math.random() * monster.atk) + 1;
-    playerHp -= enemyDmg;
+  // ✅ Gegner macht festen Schaden
+  const enemyDmg = monster.atk;
+  playerHp -= enemyDmg;
 
-    if (playerHp <= 0) {
-      playerHp = 0;
-      updateHud();
-      return gameOver();
-    }
-
-    updateHud(); renderShop(); refreshUsePotionButton();
-    safeLog(`⚔️ Du machst ${playerDmg} Schaden.\n💀 Gegner macht ${enemyDmg} Schaden.`);
+  if (playerHp <= 0) {
+    playerHp = 0;
+    updateHud();
+    return gameOver();
   }
+
+  updateHud();
+  renderShop();
+  refreshUsePotionButton();
+
+  safeLog(`⚔️ Du machst ${playerDmg} Schaden.\n💀 Gegner macht ${enemyDmg} Schaden.`);
+}
 
   function usePotion() {
     if (meta.potions <= 0) return;
