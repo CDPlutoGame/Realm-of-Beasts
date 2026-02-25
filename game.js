@@ -697,7 +697,9 @@ function attack() {
 
     const t = tiles[playerPos];
 
-    if (String(t).startsWith("monster_")) {
+ if (t === "monster_easy" || 
+    t === "monster_medium" || 
+    t === "monster_hard") {
       renderBoard();
       updateHud(); renderShop(); refreshUsePotionButton();
       safeLog(`⚔️ Kampf! Runde ${rounds}`);
