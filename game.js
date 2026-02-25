@@ -1,3 +1,4 @@
+console.log("GAME JS STARTET");
 // ===== Monster Browser Game (ONLINE) - stable + SOUND + mobile safe =====
 (() => {
   if (window.__MBR_LOADED__) return;
