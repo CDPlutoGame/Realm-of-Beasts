@@ -39,13 +39,6 @@ h1{
   gap: 14px;
 }
 
-/* Columns */
-
-#rightCol{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
 
 /* obere Reihe */
 #fightPanel { grid-column: 1; }
