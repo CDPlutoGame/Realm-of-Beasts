@@ -1,5 +1,5 @@
 /* =========================
-   REALM OF BEASTS - CLEAN UI (FEHLERFREI)
+   REALM OF BEASTS - CLEAN UI (FINAL)
    ========================= */
 
 :root{
@@ -19,7 +19,6 @@
   --gap: 12px;
 
   --left-w: 250px;     /* linke Spalte Breite */
-  --board-max: 720px;  /* optional */
 }
 
 /* ===== Base ===== */
@@ -37,7 +36,7 @@ body{
   background-attachment: fixed;
 }
 
-/* leichter “Dark overlay” für Lesbarkeit */
+/* Dark overlay */
 body::before{
   content:"";
   position: fixed;
@@ -47,7 +46,7 @@ body::before{
   z-index: -1;
 }
 
-/* ===== Titel (mittig, ohne absolute) ===== */
+/* ===== Titel (mittig) ===== */
 #gameTitle{
   text-align: center;
   font-size: 48px;
@@ -58,11 +57,11 @@ body::before{
   margin: 22px 0 10px 0;
 }
 
-/* ===== App zentrieren (sauber) ===== */
+/* ===== App (zentriert) ===== */
 #app{
   width: 1400px;
   max-width: 95%;
-  margin: 0 auto 0 auto;     /* horizontal mittig */
+  margin: 0 auto;
   display: grid;
   grid-template-columns: var(--left-w) 1fr;
   gap: var(--gap);
@@ -81,7 +80,7 @@ body::before{
 /* ===== Right Column: 2x2 Grid (gleich groß) ===== */
 #rightCol{
   display: grid;
-  grid-template-columns: 1fr 1fr;  /* links/rechts gleich breit */
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
   align-items: stretch;
 }
@@ -109,7 +108,7 @@ body::before{
   background: var(--panel-bg);
   border: 1px solid var(--panel-br);
   border-radius: var(--radius);
-  padding: 10px; /* kompakt */
+  padding: 10px;
   box-shadow: 0 14px 28px var(--panel-shadow);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -204,30 +203,84 @@ button:disabled{ opacity: .55; cursor: not-allowed; }
   overflow: auto;
 }
 
-/* ===== Board (kompakt) ===== */
-#board{
-  background: rgba(17,17,17,.80);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
+/* =========================
+   BOARD – BETTER LOOK (RPG)
+   ========================= */
 
+/* Grund-Board Grid */
+#board{
   display: grid !important;
   grid-template-columns: repeat(10, 34px) !important;
   grid-auto-rows: 34px !important;
-  gap: 6px;
-  padding: 10px;
+
+  gap: 7px;
+  padding: 12px;
 
   width: max-content;
   max-width: none !important;
+
+  background: linear-gradient(180deg, rgba(8,8,8,.78), rgba(20,20,20,.70));
+  border: 1px solid rgba(255,180,120,.14);
+  box-shadow: 0 18px 40px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.05);
+  border-radius: 14px;
+
   font-size: 16px;
   line-height: 1;
 }
+
+/* Tiles */
 #board .tile{
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  position: relative;
+  width: 34px;
+  height: 34px;
   border-radius: 10px;
+
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.18));
+  border: 1px solid rgba(255,255,255,.06);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 -2px 6px rgba(0,0,0,.35);
+
+  transition: transform .08s ease, border-color .15s ease, box-shadow .15s ease;
 }
-.tile{ width: auto !important; }
+
+#board .tile:hover{
+  transform: translateY(-1px);
+  border-color: rgba(255,190,130,.22);
+  box-shadow:
+    0 8px 18px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+/* Nummer Ecke */
+#board .tile .tileNum{
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  font-size: 10px;
+  opacity: .55;
+}
+
+/* Icon Mitte */
+#board .tile .tileIcon{
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Player Highlight */
+#board .tile.player{
+  border-color: rgba(255,215,120,.45);
+  box-shadow:
+    0 0 0 2px rgba(255,215,120,.14),
+    0 0 22px rgba(255,140,0,.20),
+    inset 0 1px 0 rgba(255,255,255,.12);
+  background: linear-gradient(180deg, rgba(255,160,60,.14), rgba(0,0,0,.18));
+}
 
 /* ===== Leaderboard ===== */
 #leaderboard{
@@ -257,18 +310,13 @@ button:disabled{ opacity: .55; cursor: not-allowed; }
   #app{ grid-template-columns: 1fr; }
   #leftCol{ width: 100%; }
 
-  #rightCol{
-    grid-template-columns: 1fr;
-  }
-  #fightPanel,#board,#controlsPanel,#log,#leaderboardPanel{
-    grid-column: 1 / -1;
-  }
+  #rightCol{ grid-template-columns: 1fr; }
+  #fightPanel,#board,#controlsPanel,#log,#leaderboardPanel{ grid-column: 1 / -1; }
 }
 @media (max-width: 520px){
   #controlsRow{ grid-template-columns: 1fr; }
   #board{
     grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
-    font-size: 16px;
     gap: 6px;
   }
 }
