@@ -12,9 +12,7 @@ import { ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-dat
 
 console.log("✅ auth.js geladen");
 
-// kommt aus index.html (da setzt du window.auth / window.db)
-const auth = window.auth;
-const db = window.db;
+import { auth, db } from "./firebase.js";
 
 const CURRENT_NAME_KEY = "mbr_current_name_online_v10";
 
