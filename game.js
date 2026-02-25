@@ -915,21 +915,26 @@ if (nameOverlay && nameInput && nameConfirm && nameCancel && nameError) {
     nameError.textContent = "";
   };
 
-  nameConfirm.onclick = () => {
-    const newName = nameInput.value.trim().slice(0, 24);
+  nameCancel.onclick = () => {
+  nameOverlay.style.display = "none";
+  nameError.textContent = "";
+};
 
-    if (!newName) {
-      nameError.textContent = "Name darf nicht leer sein.";
-      return;
-    }
+nameConfirm.onclick = () => {
+  const newName = nameInput.value.trim().slice(0, 24);
 
-    localStorage.setItem("mbr_display_name", newName);
-    playerName = newName;
-    updateHud();
+  if (!newName) {
+    nameError.textContent = "Name darf nicht leer sein.";
+    return;
+  }
 
-    nameOverlay.classList.remove("active");
-    nameInput.value = "";
-    nameError.textContent = "";
-  };
+  localStorage.setItem("mbr_display_name", newName);
+  playerName = newName;
+  updateHud();
+
+  nameOverlay.style.display = "none";
+  nameInput.value = "";
+  nameError.textContent = "";
+ };
 }
 })();
