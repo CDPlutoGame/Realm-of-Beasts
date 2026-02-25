@@ -24,17 +24,33 @@ const toNum = (x) => {
 };
 
 async function submitScore(payload) {
+  const name = String(payload?.name || "Unknown").slice(0, 24);
+
   const data = {
-    name: String(payload?.name || "Unknown").slice(0, 24),
+    name,
     rounds: toNum(payload?.rounds),
     monstersKilled: toNum(payload?.monstersKilled),
     bossesKilled: toNum(payload?.bossesKilled),
     ts: Date.now(),
     createdAt: serverTimestamp()
   };
-  const entryRef = push(ref(db, "ranking"));
-  await set(entryRef, data);
-  return true;
+
+  const playerRef = ref(db, "ranking/" + name);
+
+  // Prüfen ob es schon einen Eintrag gibt
+  const snap = await get(playerRef);
+
+  if (!snap.exists()) {
+    // Spieler existiert noch nicht → speichern
+    await set(playerRef, data);
+  } else {
+    const existing = snap.val();
+
+    // Nur überschreiben wenn besser
+    if (data.rounds > toNum(existing.rounds)) {
+      await set(playerRef, data);
+    }
+  }
 }
 
 async function top10() {
