@@ -94,7 +94,8 @@ body::before{
 #log         { grid-column: 2; grid-row: 2; }
 
 /* Row 3 */
-#leaderboardPanel{ 
+#leaderboardPanel{  
+   padding: 18px;
    margin-top: -4px;
    grid-column: 1;  
    grid-row: 3; }
