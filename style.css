@@ -122,61 +122,43 @@ button:hover{
 }
 
 /* =========================
-   MOBILE VERSION
+   MOBILE FINAL FIXED ORDER
    ========================= */
 
 @media (max-width: 980px){
 
+  /* Alles untereinander */
   #app{
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto auto auto auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
   }
 
-  /* 📱 Mobile Reihenfolge:
-     Status
-     Shop
-     Kampfmonster (Board)
-     Log
-     Buttons
-     Ranking
-  */
+  /* Reihenfolge exakt festgelegt */
+  #statusPanel{ order: 1; }
+  #shop{ order: 2; }
+  #fightPanel{ order: 3; }
+  #log{ order: 4; }
+  #controlsPanel{ order: 5; }
+  #board{ order: 6; }
+  #leaderboardPanel{ order: 7; }
 
-  #statusPanel{
-    grid-column:1;
-    grid-row:1;
-  }
-
-  #shop{
-    grid-column:1;
-    grid-row:2;
-  }
-
+  /* Board mobile angepasst */
   #board{
-    grid-column:1;
-    grid-row:3;
     grid-template-columns: repeat(6, 1fr);
-    width:100%;
+    width: 100%;
   }
 
+  /* Log bleibt fix mit Scroll */
   #log{
-    grid-column:1;
-    grid-row:4;
-    height:180px;
-    max-height:180px;
-    overflow-y:auto;
+    height: 180px;
+    max-height: 180px;
+    overflow-y: auto;
   }
 
-  #controlsPanel{
-    grid-column:1;
-    grid-row:5;
-  }
-
-  #leaderboardPanel{
-    grid-column:1;
-    grid-row:6;
-  }
-
+  /* Buttons 2 nebeneinander */
   #controlsRow{
     grid-template-columns: 1fr 1fr;
   }
+
 }
