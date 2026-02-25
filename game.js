@@ -869,9 +869,9 @@ function renderMenu() {
     `;
 
     document.getElementById("menuLogout").onclick = () => {
-      logout(); // deine bestehende Logout Funktion
-      menuWindow.style.display = "none";
-    };
+    document.getElementById("logoutBtn").click(); // nutzt deine bestehende Logout-Logik
+    menuWindow.style.display = "none";
+  };
 
     document.getElementById("menuChangeName").onclick = () => {
       // kommt im nächsten Schritt
