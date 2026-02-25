@@ -41,17 +41,19 @@ h1{
 
 /* Columns */
 
-#leftCol{
-  display: flex;
-  flex-direction: column;
+#rightCol{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
 
-
+/* obere Reihe */
 #fightPanel { grid-column: 1; }
 #log        { grid-column: 2; }
+
+/* darunter volle Breite */
 #controlsPanel { grid-column: 1 / -1; }
-#board      { grid-column: 1 / -1; }
+#board         { grid-column: 1 / -1; }
 #leaderboardPanel { grid-column: 1 / -1; }
 
 /* =========================
