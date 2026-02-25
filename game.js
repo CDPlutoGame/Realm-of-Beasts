@@ -846,13 +846,9 @@ function renderMenu() {
       </button>
     `;
 
- document.getElementById("menuLogout").onclick = async () => {
-  try {
-    await window.auth.signOut();
-    menuWindow.style.display = "none";
-  } catch (err) {
-    console.error("Logout Fehler:", err);
-  }
+document.getElementById("menuLogin").onclick = () => {
+  document.getElementById("loginOverlay").style.display = "flex";
+  menuWindow.style.display = "none";
 };
 
   } else {
@@ -879,20 +875,7 @@ function renderMenu() {
 
   menuWindow.style.display = "none";
 };
-    document.getElementById("menuChangeName").onclick = () => {
-      const newName = prompt("Neuen Benutzernamen eingeben (max 24 Zeichen):", playerName);
-      if (!newName) return;
-
-      const clean = newName.trim().slice(0, 24);
-      if (!clean) return;
-
-      localStorage.setItem("mbr_display_name", clean);
-      playerName = clean;
-      updateHud();
-      menuWindow.style.display = "none";
-    };
-  }
-
+  
   document.getElementById("menuSound").onclick = () => {
     soundMuted = !soundMuted;
     if (!soundMuted) playRandomMusic();
