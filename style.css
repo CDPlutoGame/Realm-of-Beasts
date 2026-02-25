@@ -143,9 +143,9 @@ button:hover{
   #statusPanel{ order:1; }
   #board{ order:2; }
   #shop{ order:3; }
-  #log{ order:4; }
+  #leaderboardPanel{ order:4; }
   #controlsPanel{ order:5; }
-  #leaderboardPanel{ order:6; }
+  #log{ order:6; }
 
   #controlsRow{
     grid-template-columns: 1fr 1fr;
