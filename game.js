@@ -158,53 +158,6 @@ const leaderboardEl = document.getElementById("leaderboard");
     hitAudio.play().catch(()=>{});
   }
 
-  const audioBox = document.createElement("div");
-  audioBox.style.position = "fixed";
-  audioBox.style.left = "6px";
-  audioBox.style.top = "6px";
-  audioBox.style.zIndex = "10001";
-  audioBox.style.background = "rgba(0,0,0,0.45)";
-  audioBox.style.padding = "3px 5px";
-  audioBox.style.borderRadius = "6px";
-  audioBox.style.display = "flex";
-  audioBox.style.alignItems = "center";
-  audioBox.style.gap = "6px";
-  audioBox.style.border = "1px solid rgba(255,255,255,0.1)";
-
-  const soundBtn = document.createElement("button");
-  soundBtn.type = "button";
-  soundBtn.textContent = "🔇";
-  soundBtn.style.padding = "8px 14px";
-  soundBtn.style.fontSize = "18px";
-  soundBtn.style.borderRadius = "10px";
-
-  const volumeSlider = document.createElement("input");
-  volumeSlider.type = "range";
-  volumeSlider.min = "0";
-  volumeSlider.max = "1";
-  volumeSlider.step = "0.01";
-  volumeSlider.value = String(baseVolume);
-  volumeSlider.style.width = "120px";
-  volumeSlider.style.height = "6px";
-
-  audioBox.appendChild(soundBtn);
-  audioBox.appendChild(volumeSlider);
-  document.body.appendChild(audioBox);
-
-  soundBtn.onclick = () => {
-    soundMuted = !soundMuted;
-    soundBtn.textContent = soundMuted ? "🔇" : "🔊";
-    if (!soundMuted) playRandomMusic();
-    else bgMusic.pause();
-  };
-  volumeSlider.addEventListener("input", () => {
-    baseVolume = parseFloat(volumeSlider.value);
-    bgMusic.volume = baseVolume;
-  });
-  document.addEventListener("pointerdown", () => {
-    if (!soundMuted && bgMusic.paused) playRandomMusic();
-  }, { once: true });
-
   // ---------------- ONLINE RANKING ----------------
 let __rankTries = 0;
 
