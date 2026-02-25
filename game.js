@@ -23,17 +23,51 @@
   const ATK_UPGRADE_AMOUNT = 5;
   const ATK_PRICE_INCREASE = 5;
 
-  const DEFAULT_META = {
-    gold: 0,
-    potions: 0,
-    maxHpBase: 30,
-    attackPower: 5,
-    maxHpPrice: 100,
-    attackPowerPrice: 100,
-    bossesDefeated: 0,
-    autoSpinStage: 0,
-    autoAttackStage: 0,
-  };
+ const DEFAULT_META = {
+  gold: 0,
+  potions: 0,
+  maxHpBase: 30,
+  attackPower: 5,
+  maxHpPrice: 100,
+  attackPowerPrice: 100,
+  bossesDefeated: 0,
+  autoSpinStage: 0,
+  autoAttackStage: 0,
+  prestigeLevel: 0
+};
+
+// 👇 HIER einfügen (Schritt 3)
+
+const db = window.db;
+const auth = window.auth;
+
+async function loadMetaFromCloud() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const snap = await window.firebaseGet(
+    window.firebaseRef(db, "users/" + user.uid + "/meta")
+  );
+
+  if (snap.exists()) {
+    meta = { ...DEFAULT_META, ...snap.val() };
+  } else {
+    await saveMetaToCloud();
+  }
+}
+
+async function saveMetaToCloud() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  await window.firebaseSet(
+    window.firebaseRef(db, "users/" + user.uid + "/meta"),
+    meta
+  );
+}
+
+window.loadMetaFromCloud = loadMetaFromCloud;
+window.saveMetaToCloud = saveMetaToCloud;
 
   // ---------------- HELPERS ----------------
   function ensureEl(id, tag = "div", parent = document.body) {
@@ -823,21 +857,21 @@ menuButton.style.cursor = "pointer";
 
 const menuWindow = document.createElement("div");
 menuWindow.style.position = "absolute";
-menuWindow.style.top = "50px";
-menuWindow.style.right = "0";
-menuWindow.style.width = "220px";
-menuWindow.style.padding = "15px";
-menuWindow.style.borderRadius = "14px";
-menuWindow.style.background = "rgba(0,0,0,0.95)";
-menuWindow.style.border = "1px solid rgba(255,255,255,0.15)";
-menuWindow.style.boxShadow = "0 0 20px rgba(0,0,0,0.5)";
-menuWindow.style.display = "none"; // 👈 wichtig (startet geschlossen)
+menu.style.top = "50px";
+menu.style.right = "0";
+menu.style.width = "220px";
+menu.style.padding = "15px";
+menu.style.borderRadius = "14px";
+menu.style.background = "rgba(0,0,0,0.95)";
+menu.style.border = "1px solid rgba(255,255,255,0.15)";
+menu.style.boxShadow = "0 0 20px rgba(0,0,0,0.5)";
+menu.style.display = "none"; // 👈 wichtig (startet geschlossen)
 
 function renderMenu() {
 
   if (!playerName) {
 
-    menuWindow.innerHTML = `
+    menu.innerHTML = `
       <button id="menuLogin" style="width:100%;margin-bottom:8px;">
         🔑 Login
       </button>
@@ -848,12 +882,12 @@ function renderMenu() {
 
     document.getElementById("menuLogin").onclick = () => {
       document.getElementById("loginOverlay").style.display = "flex";
-      menuWindow.style.display = "none";
+      menu.style.display = "none";
     };
 
   } else {
 
-    menuWindow.innerHTML = `
+    menu.innerHTML = `
       <button id="menuChangeName" style="width:100%;margin-bottom:8px;">
         ✏️ Benutzername ändern
       </button>
