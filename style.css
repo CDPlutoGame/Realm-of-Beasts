@@ -121,7 +121,7 @@ button:hover{
   background:#ff3030;
 }
 /* =========================
-   MOBILE – ALTES STANDARD LAYOUT
+   MOBILE (ALTES STABILES SYSTEM)
    ========================= */
 
 @media (max-width: 980px){
@@ -131,7 +131,7 @@ button:hover{
     grid-template-rows: auto;
   }
 
-  /* Alle Panels einfach untereinander */
+  /* Alles untereinander – KEINE festen Reihen */
   #statusPanel,
   #shop,
   #fightPanel,
@@ -139,19 +139,26 @@ button:hover{
   #log,
   #controlsPanel,
   #leaderboardPanel{
-    grid-column: 1;
+    grid-column: 1 / -1;
     grid-row: auto;
   }
 
-  /* Buttons untereinander */
+  /* Buttons 2er Reihe */
   #controlsRow{
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
-  /* Board etwas kleiner */
+  /* Board flexibel */
   #board{
     grid-template-columns: repeat(6, 1fr);
     width: 100%;
   }
 
+  /* Log bleibt fix und wächst NICHT */
+  #log{
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+}
 }
