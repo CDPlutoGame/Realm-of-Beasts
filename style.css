@@ -129,37 +129,38 @@ button:hover{
 
   #app{
     grid-template-columns: 1fr;
+    grid-template-rows: auto;
   }
 
-  /* 📱 Mobile Reihenfolge:
-     | Status |
-     | Board  |
-     | Shop   |
-     | Log    |
-     | Buttons|
-     | Ranking|
-  */
+  /* Reihenfolge festlegen */
 
   #statusPanel{ order:1; }
-  #board{ order:2; }
-  #shop{ order:3; }
-  #log{ order:4; }
-  #controlsPanel{ order:5; }
+  #shop{ order:2; }
+  #fightPanel{ order:3; }
+  #board{ order:4; }
+  #log{ order:5; }
   #leaderboardPanel{ order:6; }
 
+  /* Buttons untereinander schöner */
   #controlsRow{
     grid-template-columns: 1fr 1fr;
   }
 
+  /* Board responsive */
   #board{
     grid-template-columns: repeat(6, 1fr);
     width:100%;
   }
 
-  /* Log auch auf Mobile fix */
+  /* Log fixiert mit Scroll */
   #log{
-    height: 180px;
-    max-height: 180px;
+    max-height: 250px;
+    overflow-y: auto;
+  }
+
+  /* Ranking fix */
+  #leaderboardPanel{
+    max-height: 300px;
     overflow-y: auto;
   }
 }
