@@ -540,34 +540,33 @@ function renderFightPanel() {
   const pct = clamp(Math.round((monster.hp / monster.maxHp) * 100), 0, 100);
 
   fightPanel.innerHTML = `
-    <div style="position:relative;height:100%;display:flex;flex-direction:column;justify-content:center;text-align:center;">
+    <div style="height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:10px;">
 
-      <!-- 🆕 Runde + Feld Anzeige -->
-      <div style="
-        position:absolute;
-        top:8px;
-        left:10px;
-        font-size:12px;
-        opacity:.8;
-      ">
-        🏁 Runde: ${rounds} <br>
-        📍 Feld: ${playerPos + 1}
+      <!-- TOP INFO BAR -->
+      <div style="display:flex;justify-content:space-between;font-size:13px;opacity:.85;">
+        <div>
+          🏁 Runde: <b>${rounds}</b><br>
+          📍 Feld: <b>${playerPos + 1}</b>
+        </div>
+        <div style="text-align:right;">
+          ❤️ HP: <b>${playerHp}/${meta.maxHpBase}</b>
+        </div>
       </div>
 
-      <div style="font-size:${monster.kind === "boss" ? 62 : 52}px;line-height:1;">
-        ${monster.icon}
-      </div>
-
-      <div style="margin-top:6px;font-size:15px;font-weight:900">
-        ${monster.name}
-      </div>
-
-      <div style="margin:10px 0 6px; font-size:12px; opacity:.85;">
-        HP: ${monster.hp}/${monster.maxHp}
-      </div>
-
-      <div style="height:12px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;border:1px solid rgba(255,255,255,.12)">
-        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#ff7a18,#ff4d6d);"></div>
+      <!-- MONSTER -->
+      <div style="text-align:center;">
+        <div style="font-size:${monster.kind === "boss" ? 62 : 52}px;line-height:1;">
+          ${monster.icon}
+        </div>
+        <div style="margin-top:6px;font-size:15px;font-weight:900">
+          ${monster.name}
+        </div>
+        <div style="margin:10px 0 6px; font-size:12px; opacity:.85;">
+          HP: ${monster.hp}/${monster.maxHp}
+        </div>
+        <div style="height:12px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;border:1px solid rgba(255,255,255,.12)">
+          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#ff7a18,#ff4d6d);"></div>
+        </div>
       </div>
 
     </div>
