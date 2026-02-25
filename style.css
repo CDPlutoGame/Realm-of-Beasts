@@ -121,54 +121,24 @@ button:hover{
   background:#ff3030;
 }
 
-/* =========================
-   MOBILE VERSION FIXED
-   ========================= */
+/* =====================================
+   MOBILE FIX – REIHENFOLGE KORRIGIERT
+   ===================================== */
 
 @media (max-width: 980px){
 
   #app{
-    grid-template-columns: 1fr;
-    grid-template-rows: auto;
+    display: flex;
+    flex-direction: column;
   }
 
-  /* Reihenfolge explizit festlegen */
+  /* Reihenfolge exakt festlegen */
 
-  #statusPanel{
-    grid-column:1;
-    grid-row:1;
-  }
+  #statusPanel{ order: 1; }
+  #shop{ order: 2; }
+  #fightPanel{ order: 3; }
+  #board{ order: 4; }
+  #log{ order: 5; }
+  #leaderboardPanel{ order: 6; }
 
-  #shop{
-    grid-column:1;
-    grid-row:2;
-  }
-
-  #fightPanel{
-    grid-column:1;
-    grid-row:3;
-  }
-
-  #board{
-    grid-column:1;
-    grid-row:4;
-    width:100%;
-    grid-template-columns: repeat(6, 1fr);
-  }
-
-  #log{
-    grid-column:1;
-    grid-row:5;
-    max-height:200px;   /* bleibt fix */
-    overflow-y:auto;    /* Scroll */
-  }
-
-  #leaderboardPanel{
-    grid-column:1;
-    grid-row:6;
-  }
-
-  #controlsRow{
-    grid-template-columns: 1fr 1fr;
-  }
 }
