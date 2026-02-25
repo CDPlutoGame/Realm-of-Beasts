@@ -846,10 +846,14 @@ function renderMenu() {
       </button>
     `;
 
-    document.getElementById("menuLogin").onclick = () => {
-      document.getElementById("loginOverlay").style.display = "flex";
-      menuWindow.style.display = "none";
-    };
+ document.getElementById("menuLogout").onclick = async () => {
+  try {
+    await window.auth.signOut();
+    menuWindow.style.display = "none";
+  } catch (err) {
+    console.error("Logout Fehler:", err);
+  }
+};
 
   } else {
 
