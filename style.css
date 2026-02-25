@@ -2,7 +2,7 @@
    REALM OF BEASTS
    ONE LAYOUT (Mobile Style for ALL)
    ========================= */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&display=swap');
+
 
 :root{
   --gap:14px;
@@ -13,7 +13,7 @@
 }
 
 *{ box-sizing:border-box; }
-
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&display=swap');
 body{
   margin:0;
   font-family: 'Cinzel', serif;
