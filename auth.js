@@ -124,3 +124,22 @@ onAuthStateChanged(auth, async (user) => {
   show(logoutBtn, true);
   show(saveLayoutBtn, admin);
 });
+// ===== LOGIN RESET BUTTON (Overlay) =====
+const loginReset = document.getElementById("loginReset");
+
+loginReset?.addEventListener("click", async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const loginError = document.getElementById("loginError");
+
+  if (!email) {
+    loginError.textContent = "❌ Bitte zuerst Email eingeben";
+    return;
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    loginError.textContent = "✅ Reset-Mail gesendet (Spam prüfen)";
+  } catch (e) {
+    loginError.textContent = "❌ Reset fehlgeschlagen";
+  }
+});
