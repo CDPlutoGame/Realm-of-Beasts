@@ -851,7 +851,6 @@ function renderMenu() {
     document.getElementById("loginOverlay").style.display = "flex";
     menuWindow.style.display = "none";
 };
-    };
 
   } else {
 
