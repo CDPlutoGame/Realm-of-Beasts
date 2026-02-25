@@ -18,7 +18,7 @@
   --radius: 14px;
   --gap: 12px;
 
-  --left-w: 250px;     /* linke Spalte Breite */
+  --left-w: 400px;     /* linke Spalte Breite */
 }
 
 /* ===== Base ===== */
@@ -49,7 +49,7 @@ body::before{
 /* ===== Titel (mittig) ===== */
 #gameTitle{
   text-align: center;
-  font-size: 48px;
+  font-size: 55px;
   letter-spacing: 3px;
   color: #ffb347;
   text-shadow: 0 0 20px rgba(255,140,0,0.8);
@@ -59,7 +59,7 @@ body::before{
 
 /* ===== App (zentriert) ===== */
 #app{
-  width: 1400px;
+  width: 2000px;
   max-width: 95%;
   margin: 0 auto;
   display: grid;
@@ -168,7 +168,7 @@ button{
   background: rgba(178,34,34,.92);
   color: var(--text);
   border: 1px solid rgba(255,150,150,.18);
-  padding: 10px 12px;
+  padding: 16px 15px;
   border-radius: 12px;
   cursor: pointer;
   font-weight: 800;
@@ -210,8 +210,8 @@ button:disabled{ opacity: .55; cursor: not-allowed; }
 /* Grund-Board Grid */
 #board{
   display: grid !important;
-  grid-template-columns: repeat(10, 34px) !important;
-  grid-auto-rows: 34px !important;
+  grid-template-columns: repeat(10, 80px) !important;
+  grid-auto-rows: 80px !important;
 
   gap: 7px;
   padding: 12px;
@@ -231,8 +231,8 @@ button:disabled{ opacity: .55; cursor: not-allowed; }
 /* Tiles */
 #board .tile{
   position: relative;
-  width: 34px;
-  height: 34px;
+  width: 70px;
+  height: 70px;
   border-radius: 10px;
 
   background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.18));
@@ -268,7 +268,7 @@ button:disabled{ opacity: .55; cursor: not-allowed; }
   inset: 0;
   display: grid;
   place-items: center;
-  font-size: 16px;
+  font-size: 26px;
   line-height: 1;
 }
 
