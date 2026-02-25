@@ -1,11 +1,4 @@
-import {
-  ref,
-  get,
-  query,
-  orderByChild,
-  limitToLast,
-  set
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import import { db, firebaseRef as ref, firebaseGet as get, firebaseSet as set } from "./firebase.js";
 
 console.log("✅ ranking.js geladen");
 
