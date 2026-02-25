@@ -129,37 +129,54 @@ button:hover{
 
   #app{
     grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto auto auto;
   }
 
   /* 📱 Mobile Reihenfolge:
-     | Status |
-     | Board  |
-     | Shop   |
-     | Log    |
-     | Buttons|
-     | Ranking|
+     Status
+     Shop
+     Kampfmonster (Board)
+     Log
+     Buttons
+     Ranking
   */
 
-  #statusPanel{ order:1; }
-  #board{ order:2; }
-  #shop{ order:3; }
-  #log{ order:4; }
-  #controlsPanel{ order:5; }
-  #leaderboarsPanel{ order:6; }
+  #statusPanel{
+    grid-column:1;
+    grid-row:1;
+  }
 
-  #controlsRow{
-    grid-template-columns: 1fr 1fr;
+  #shop{
+    grid-column:1;
+    grid-row:2;
   }
 
   #board{
+    grid-column:1;
+    grid-row:3;
     grid-template-columns: repeat(6, 1fr);
     width:100%;
   }
 
-  /* Log auch auf Mobile fix */
   #log{
-    height: 180px;
-    max-height: 180px;
-    overflow-y: auto;
+    grid-column:1;
+    grid-row:4;
+    height:180px;
+    max-height:180px;
+    overflow-y:auto;
+  }
+
+  #controlsPanel{
+    grid-column:1;
+    grid-row:5;
+  }
+
+  #leaderboardPanel{
+    grid-column:1;
+    grid-row:6;
+  }
+
+  #controlsRow{
+    grid-template-columns: 1fr 1fr;
   }
 }
