@@ -47,27 +47,37 @@
   <!-- =========================
        FIREBASE SETUP
        ========================= -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+ <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import {
+    getDatabase,
+    ref as firebaseRef,
+    get as firebaseGet,
+    set as firebaseSet
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyD3Z_HFQ04XVsbAnL3XCqf_6bkX3Cc21oc",
-      authDomain: "realm-of-beaasts.firebaseapp.com",
-      databaseURL: "https://realm-of-beaasts-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "realm-of-beaasts",
-      storageBucket: "realm-of-beaasts.firebasestorage.app",
-      messagingSenderId: "723138830522",
-      appId: "1:723138830522:web:b3ec8a3d8947c25ec66283",
-      measurementId: "G-084J12EZHN"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3Z_HFQ04XVsbAnL3XCqf_6bkX3Cc21oc",
+    authDomain: "realm-of-beaasts.firebaseapp.com",
+    databaseURL: "https://realm-of-beaasts-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "realm-of-beaasts",
+    storageBucket: "realm-of-beaasts.firebasestorage.app",
+    messagingSenderId: "723138830522",
+    appId: "1:723138830522:web:b3ec8a3d8947c25ec66283",
+    measurementId: "G-084J12EZHN"
+  };
 
-    const fbApp = initializeApp(firebaseConfig);
-    window.auth = getAuth(fbApp);
-    window.db = getDatabase(fbApp);
-  </script>
+  const fbApp = initializeApp(firebaseConfig);
 
+  window.auth = getAuth(fbApp);
+  window.db = getDatabase(fbApp);
+
+  // 🔥 WICHTIG: global für game.js
+  window.firebaseRef = firebaseRef;
+  window.firebaseGet = firebaseGet;
+  window.firebaseSet = firebaseSet;
+</script>
   <!-- MODULE SCRIPTS -->
   <script type="module" src="auth.js"></script>
   <script type="module" src="ranking.js"></script>
