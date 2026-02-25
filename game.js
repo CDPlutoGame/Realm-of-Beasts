@@ -836,7 +836,7 @@ menuWindow.style.display = "none"; // 👈 wichtig (startet geschlossen)
 function renderMenu() {
 
   if (!playerName) {
-    // 🔒 Nicht eingeloggt
+
     menuWindow.innerHTML = `
       <button id="menuLogin" style="width:100%;margin-bottom:8px;">
         🔑 Login
@@ -846,14 +846,13 @@ function renderMenu() {
       </button>
     `;
 
-document.getElementById("menuLogin").onclick = () => {
-  document.getElementById("loginOverlay").style.display = "flex";
-  menuWindow.style.display = "none";
-};
+    document.getElementById("menuLogin").onclick = () => {
+      document.getElementById("loginOverlay").style.display = "flex";
+      menuWindow.style.display = "none";
+    };
 
   } else {
 
-    // 👤 Eingeloggt
     menuWindow.innerHTML = `
       <button id="menuChangeName" style="width:100%;margin-bottom:8px;">
         ✏️ Benutzername ändern
@@ -866,16 +865,24 @@ document.getElementById("menuLogin").onclick = () => {
       </button>
     `;
 
-  document.getElementById("menuChangeName").onclick = () => {
-  const overlay = document.getElementById("nameOverlay");
-  const input = document.getElementById("nameInput");
+    document.getElementById("menuChangeName").onclick = () => {
+      const overlay = document.getElementById("nameOverlay");
+      const input = document.getElementById("nameInput");
+      input.value = playerName || "";
+      overlay.style.display = "flex";
+      menuWindow.style.display = "none";
+    };
 
-  input.value = playerName || "";
-  overlay.style.display = "flex";
+    document.getElementById("menuLogout").onclick = async () => {
+      try {
+        await window.auth.signOut();
+        menuWindow.style.display = "none";
+      } catch (err) {
+        console.error("Logout Fehler:", err);
+      }
+    };
+  }
 
-  menuWindow.style.display = "none";
-};
-  
   document.getElementById("menuSound").onclick = () => {
     soundMuted = !soundMuted;
     if (!soundMuted) playRandomMusic();
