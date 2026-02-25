@@ -847,8 +847,8 @@ function renderMenu() {
       </button>
     `;
 
-    document.getElementById("menuLogin").onclick = () => {
-    document.getElementById("loginOverlay").style.display = "flex";
+    document.getElementById("menuChangeName").onclick = () => {
+    document.getElementById("nameOverlay").classList.add("active");
     menuWindow.style.display = "none";
 };
 
@@ -918,5 +918,33 @@ menuButton.onclick = () => {
   menuWindow.style.display = menuOpen ? "block" : "none";
 
   if (menuOpen) renderMenu();
+};
+  const nameOverlay = document.getElementById("nameOverlay");
+const nameInput = document.getElementById("nameInput");
+const nameConfirm = document.getElementById("nameConfirm");
+const nameCancel = document.getElementById("nameCancel");
+const nameError = document.getElementById("nameError");
+
+nameCancel.onclick = () => {
+  nameOverlay.classList.remove("active");
+  nameError.textContent = "";
+};
+
+nameConfirm.onclick = () => {
+  const newName = nameInput.value.trim().slice(0, 24);
+
+  if (!newName) {
+    nameError.textContent = "Name darf nicht leer sein.";
+    return;
+  }
+
+  localStorage.setItem("mbr_display_name", newName);
+  playerName = newName;
+
+  updateHud();
+
+  nameOverlay.classList.remove("active");
+  nameInput.value = "";
+  nameError.textContent = "";
 };
 })();
