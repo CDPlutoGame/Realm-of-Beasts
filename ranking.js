@@ -38,15 +38,24 @@ async function submitScore(payload) {
 }
 
 async function top10() {
-  // wie bei dir: nach ts holen, dann nach rounds sortieren
-  const q = query(ref(db, "ranking"), orderByChild("ts"), limitToLast(300));
+  // Direkt nach rounds sortieren!
+  const q = query(
+    ref(db, "ranking"),
+    orderByChild("rounds"),
+    limitToLast(3)
+  );
+
   const snap = await get(q);
 
-  const obj = snap.exists() ? snap.val() : null;
-  const arr = obj ? Object.values(obj) : [];
+  if (!snap.exists()) return [];
 
+  const obj = snap.val();
+  const arr = Object.values(obj);
+
+  // Höchste zuerst
   arr.sort((a, b) => toNum(b?.rounds) - toNum(a?.rounds));
-  return arr.slice(0, 3);
+
+  return arr;
 }
 
 window.__ONLINE_RANKING__ = { submitScore, top10 };
