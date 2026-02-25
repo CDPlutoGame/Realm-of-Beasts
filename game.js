@@ -157,11 +157,11 @@ const leaderboardEl = document.getElementById("leaderboard");
     hitAudio.volume = Math.min(1, baseVolume + extra);
     hitAudio.play().catch(()=>{});
   }
-  window.addEventListener("load", () => {
+document.addEventListener("pointerdown", () => {
   if (!soundMuted) {
     playRandomMusic();
   }
-});
+}, { once: true });
 
   // ---------------- ONLINE RANKING ----------------
 let __rankTries = 0;
