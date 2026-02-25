@@ -98,30 +98,6 @@ body{
 }
 
 /* =========================
-   BUTTONS
-   ========================= */
-
-#controlsRow{
-  display:grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap:10px;
-}
-
-button{
-  padding:14px;
-  border-radius:10px;
-  border:none;
-  background:#b22222;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-button:hover{
-  background:#ff3030;
-}
-
-/* =========================
    MOBILE – FINAL ORDER
    ========================= */
 
