@@ -478,7 +478,7 @@ function makeMonsterByType(type) {
     base = { 
       kind: "mob",
       name: "Froschling",
-      hp: 50,      // mehr Grund-Leben
+      hp: 20,      // mehr Grund-Leben
       atk: 5,      // immer 5 Schaden
       icon: "🐸"
     };
@@ -487,7 +487,7 @@ function makeMonsterByType(type) {
     base = { 
       kind: "mob",
       name: "Wolfsjäger",
-      hp: 100,
+      hp: 50,
       atk: 12,
       icon: "🐺"
     };
@@ -496,7 +496,7 @@ function makeMonsterByType(type) {
     base = { 
       kind: "mob",
       name: "Bärenwächter",
-      hp: 180,
+      hp: 100,
       atk: 20,
       icon: "🐻"
     };
