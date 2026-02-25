@@ -23,18 +23,27 @@ const toNum = (x) => {
 };
 
 async function submitScore(payload) {
-  const name = String(payload?.name || "Unknown").slice(0, 24);
+
+  const user = auth.currentUser;
+  if (!user) return;
 
   const data = {
-    name,
-    rounds: toNum(payload?.rounds),
-    monstersKilled: toNum(payload?.monstersKilled),
-    bossesKilled: toNum(payload?.bossesKilled),
-    ts: Date.now(),
-    createdAt: serverTimestamp()
+    uid: user.uid,
+    name: payload.name,
+    rounds: payload.rounds,
+    monstersKilled: payload.monstersKilled,
+    bossesKilled: payload.bossesKilled,
+    ts: Date.now()
   };
 
-  const playerRef = ref(db, "ranking/" + name);
+  const playerRef = ref(db, "ranking/" + user.uid);
+
+  const snap = await get(playerRef);
+
+  if (!snap.exists() || payload.rounds > snap.val().rounds) {
+    await set(playerRef, data);
+  }
+}
 
   // Prüfen ob es schon einen Eintrag gibt
   const snap = await get(playerRef);
