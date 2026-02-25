@@ -534,21 +534,45 @@ function makeMonsterByType(type) {
       </div>
     `;
   }
-  function renderFightPanel() {
-    if (!monster) return setFightPanelIdle();
-    const pct = clamp(Math.round((monster.hp / monster.maxHp) * 100), 0, 100);
-    fightPanel.innerHTML = `
-      <div style="text-align:center;height:100%;display:flex;flex-direction:column;justify-content:center;">
-        <div style="font-size:${monster.kind === "boss" ? 62 : 52}px;line-height:1;">${monster.icon}</div>
-        <div style="margin-top:6px;font-size:15px;font-weight:900">${monster.name}</div>
-        <div style="margin:10px 0 6px; font-size:12px; opacity:.85;">HP: ${monster.hp}/${monster.maxHp}</div>
-        <div style="height:12px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;border:1px solid rgba(255,255,255,.12)">
-          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#ff7a18,#ff4d6d);"></div>
-        </div>
-      </div>
-    `;
-  }
+function renderFightPanel() {
+  if (!monster) return setFightPanelIdle();
 
+  const pct = clamp(Math.round((monster.hp / monster.maxHp) * 100), 0, 100);
+
+  fightPanel.innerHTML = `
+    <div style="position:relative;height:100%;display:flex;flex-direction:column;justify-content:center;text-align:center;">
+
+      <!-- 🆕 Runde + Feld Anzeige -->
+      <div style="
+        position:absolute;
+        top:8px;
+        left:10px;
+        font-size:12px;
+        opacity:.8;
+      ">
+        🏁 Runde: ${rounds} <br>
+        📍 Feld: ${playerPos + 1}
+      </div>
+
+      <div style="font-size:${monster.kind === "boss" ? 62 : 52}px;line-height:1;">
+        ${monster.icon}
+      </div>
+
+      <div style="margin-top:6px;font-size:15px;font-weight:900">
+        ${monster.name}
+      </div>
+
+      <div style="margin:10px 0 6px; font-size:12px; opacity:.85;">
+        HP: ${monster.hp}/${monster.maxHp}
+      </div>
+
+      <div style="height:12px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;border:1px solid rgba(255,255,255,.12)">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#ff7a18,#ff4d6d);"></div>
+      </div>
+
+    </div>
+  `;
+}
   // ---------------- COMBAT ----------------
   function startFight(m) {
     inFight = true;
@@ -741,7 +765,10 @@ function attack() {
 
   // ---------------- RESET RUN ----------------
  async function resetRunKeepMeta() {
-
+ 
+   // 🆕 Log löschen
+  if (logEl) logEl.textContent = "";
+   
   // ❌ Wenn Spiel noch läuft → nichts tun
   if (!runOver) {
     safeLog("❌ Du kannst nur nach Game Over eine neue Runde starten.");
