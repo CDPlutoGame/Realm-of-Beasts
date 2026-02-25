@@ -1,5 +1,5 @@
 /* =========================
-   REALM OF BEASTS - FINAL UI
+   REALM OF BEASTS - CLEAN UI (FEHLERFREI)
    ========================= */
 
 :root{
@@ -16,20 +16,20 @@
   --good: #2b8a3e;
 
   --radius: 14px;
-  --gap: 16px;
+  --gap: 12px;
 
-  --left-w: 230px;     /* linke Spalte Breite */
-  --board-max: 720px;  /* max Breite Board */
+  --left-w: 250px;     /* linke Spalte Breite */
+  --board-max: 720px;  /* optional */
 }
 
 /* ===== Base ===== */
 *{ box-sizing: border-box; }
 html, body{ height:100%; }
+
 body{
   margin: 0;
   color: var(--text);
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-
   background-image: url("images/dungeon.png");
   background-size: cover;
   background-position: center;
@@ -47,21 +47,55 @@ body::before{
   z-index: -1;
 }
 
-/* ===== Main Grid ===== */
+/* ===== Titel (mittig, ohne absolute) ===== */
+#gameTitle{
+  text-align: center;
+  font-size: 48px;
+  letter-spacing: 3px;
+  color: #ffb347;
+  text-shadow: 0 0 20px rgba(255,140,0,0.8);
+  font-weight: 900;
+  margin: 22px 0 10px 0;
+}
+
+/* ===== App zentrieren (sauber) ===== */
 #app{
+  width: 1400px;
+  max-width: 95%;
+  margin: 0 auto 0 auto;     /* horizontal mittig */
   display: grid;
   grid-template-columns: var(--left-w) 1fr;
   gap: var(--gap);
-  padding: 20px;
+  padding: 16px;
   align-items: start;
 }
 
-/* Columns */
-#leftCol, #rightCol{
+/* ===== Left Column ===== */
+#leftCol{
+  width: var(--left-w);
   display: flex;
   flex-direction: column;
   gap: var(--gap);
 }
+
+/* ===== Right Column: 2x2 Grid (gleich groß) ===== */
+#rightCol{
+  display: grid;
+  grid-template-columns: 1fr 1fr;  /* links/rechts gleich breit */
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* Row 1 */
+#fightPanel{ grid-column: 1; grid-row: 1; }
+#board     { grid-column: 2; grid-row: 1; }
+
+/* Row 2 */
+#controlsPanel{ grid-column: 1; grid-row: 2; }
+#log         { grid-column: 2; grid-row: 2; }
+
+/* Row 3 */
+#leaderboardPanel{ grid-column: 1 / -1; grid-row: 3; }
 
 /* ===== Generic Panel Look ===== */
 .window,
@@ -75,15 +109,11 @@ body::before{
   background: var(--panel-bg);
   border: 1px solid var(--panel-br);
   border-radius: var(--radius);
-  padding: 14px;
+  padding: 10px; /* kompakt */
   box-shadow: 0 14px 28px var(--panel-shadow);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
-
-/* Linke Spalte: alles exakt gleiche Breite */
-#leftCol{ width: var(--left-w); }
-#statusPanel, #shop, #leaderboardPanel{ width: 100%; }
 
 /* Überschriften */
 h1,h2,h3{
@@ -95,19 +125,39 @@ h1,h2,h3{
 #shop h3,
 #statusPanel h3{ font-size: 14px; }
 
-/* ===== Status kleiner / kompakter ===== */
+/* ===== Status ===== */
 #statusPanel{
-  font-size: 14px;
-  line-height: 1.35;
+  font-size: 12px;
+  line-height: 1.25;
+  background: rgba(20,20,20,0.85);
 }
-#statusPanel img{
-  width: 18px;
-  height: 18px;
-  vertical-align: middle;
+#hud{ font-size: inherit; }
+#hud .emoji{
+  font-size: 10px;
+  display: inline-block;
+  width: 14px;
 }
 
 /* ===== Shop ===== */
+#shop{
+  width: 100%;
+  min-height: 480px;
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.25;
+}
+#shop h3, #shop b{
+  font-size: 13px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
 #shop button{
+  display: block;
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 10.5px;
+  border-radius: 8px;
+  margin: 8px 0;
   background: rgba(43,138,62,.95);
 }
 #shop button:hover{
@@ -129,28 +179,19 @@ button:hover{
   background: rgba(255,48,48,.92);
   border-color: rgba(255,190,190,.30);
 }
-button:active{
-  transform: translateY(1px);
-}
-button:disabled{
-  opacity: .55;
-  cursor: not-allowed;
-}
+button:active{ transform: translateY(1px); }
+button:disabled{ opacity: .55; cursor: not-allowed; }
 
-/* ===== Controls Panel (4 Buttons in EINEM Kasten) ===== */
-#controlsPanel{
-  background: var(--panel-bg-2);
-}
+/* ===== Controls Panel ===== */
+#controlsPanel{ background: var(--panel-bg-2); }
 #controlsRow{
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 2 pro Zeile */
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
 /* ===== Fight Panel ===== */
-#fightPanel{
-  background: var(--panel-bg-2);
-}
+#fightPanel{ background: var(--panel-bg-2); }
 
 /* ===== Log ===== */
 #log{
@@ -160,46 +201,39 @@ button:disabled{
   font-size: 13px;
   line-height: 1.35;
   color: rgba(255,255,255,.88);
+  overflow: auto;
 }
 
-/* ===== Board (kompakt, feste Tiles) ===== */
+/* ===== Board (kompakt) ===== */
 #board{
   background: rgba(17,17,17,.80);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 12px;
 
   display: grid !important;
-  grid-template-columns: repeat(10, 34px) !important; /* feste Spalten */
-  grid-auto-rows: 34px !important;                    /* feste Zeilen */
+  grid-template-columns: repeat(10, 34px) !important;
+  grid-auto-rows: 34px !important;
   gap: 6px;
   padding: 10px;
 
-  width: max-content;          /* Board nimmt nur so viel Platz wie es braucht */
+  width: max-content;
   max-width: none !important;
-
-  font-size: 16px;             /* Emoji/Icons kleiner */
+  font-size: 16px;
   line-height: 1;
 }
-
-/* Tiles zentrieren */
 #board .tile{
   display:flex;
   align-items:center;
   justify-content:center;
   border-radius: 10px;
 }
-
-/* Tiles dürfen NICHT 100% breit erzwingen */
 .tile{ width: auto !important; }
 
 /* ===== Leaderboard ===== */
-#leaderboardPanel{
-  background: var(--panel-bg);
-}
 #leaderboard{
   max-height: 260px;
   overflow-y: auto;
-  padding: 0;                 /* Inhalt ohne extra Kasten */
+  padding: 0;
   background: transparent;
   border: none;
 }
@@ -218,153 +252,23 @@ button:disabled{
   border-radius: 12px;
 }
 
-/* ===== Responsive (Handy) ===== */
+/* ===== Responsive ===== */
 @media (max-width: 980px){
-  #app{
+  #app{ grid-template-columns: 1fr; }
+  #leftCol{ width: 100%; }
+
+  #rightCol{
     grid-template-columns: 1fr;
   }
-  #leftCol{ width: 100%; }
-  #board{ max-width: 100%; }
-}
-
-@media (max-width: 520px){
-  #controlsRow{
-    grid-template-columns: 1fr; /* Buttons untereinander */
+  #fightPanel,#board,#controlsPanel,#log,#leaderboardPanel{
+    grid-column: 1 / -1;
   }
+}
+@media (max-width: 520px){
+  #controlsRow{ grid-template-columns: 1fr; }
   #board{
     grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
     font-size: 16px;
     gap: 6px;
   }
-}
-/* =========================
-   CLEAN COMPACT SETTINGS
-   ========================= */
-
-/* Linke Spalte etwas schmaler + enger */
-:root{
-  --left-w: 250px;   /* guter Mittelwert */
-  --gap: 12px;
-}
-
-/* Panels allgemein etwas kompakter */
-#statusPanel,
-#shop,
-#leaderboardPanel,
-#fightPanel,
-#log,
-#controlsPanel{
-  padding: 10px;
-}
-
-/* =========================
-   STATUS – FINAL PROPORTION
-   ========================= */
-
-#statusPanel{
-  padding: 10px;
-  font-size: 12px;      /* Textgröße */
-  line-height: 1.25;
-  background: rgba(20,20,20,0.85);
-}
-
-/* HUD-Inhalt im Status (bei dir: #hud) */
-#hud{
-  font-size: inherit;
-}
-
-/* Emojis getrennt skalieren */
-#hud .emoji{
-  font-size: 10px;      /* <- Emoji-Größe */
-  display: inline-block;
-  width: 14px;          /* sorgt für saubere Ausrichtung */
-}
-
-/* =========================
-   SHOP – FINAL (kompakt + länger)
-   ========================= */
-#shop{
-  width: 100%;
-  min-height: 480px;   /* länger */
-  padding: 12px;       /* NICHT 114px */
-  font-size: 12px;
-  line-height: 1.25;
-}
-
-#shop h3, #shop b{
-  font-size: 13px;
-  display: inline-block;
-  margin-bottom: 8px;
-}
-
-#shop button{
-  display: block;
-  width: 100%;
-  padding: 6px 8px;
-  font-size: 10.5px;
-  border-radius: 8px;
-  margin: 8px 0;
-}
-/* ===== 2x2 GRID – GLEICHE HÖHE ===== */
-
-#rightCol{
-  display: grid !important;
-  grid-template-columns: 1fr 1fr;   /* beide Seiten gleich breit */
-  grid-template-rows: auto auto auto;
-  gap: 16px;
-  align-items: stretch;  /* wichtig! */
-}
-
-/* Row 1 */
-#fightPanel{ 
-  grid-column: 1; 
-  grid-row: 1; 
-  height: 100%;
-}
-
-#board{ 
-  grid-column: 2; 
-  grid-row: 1; 
-  height: 100%;
-}
-
-/* Row 2 */
-#controlsPanel{ 
-  grid-column: 1; 
-  grid-row: 2; 
-  height: 100%;
-}
-
-#log{ 
-  grid-column: 2; 
-  grid-row: 2; 
-  height: 100%;
-}
-
-/* Row 3 (volle Breite) */
-#leaderboardPanel{
-  grid-column: 1 / -1;
-  grid-row: 3;
-}
-
-/* Panels sollen sich strecken */
-#fightPanel,
-#board,
-#controlsPanel,
-#log{
-  display: flex;
-  flex-direction: column;
-}
-/* ===== GAME ZENTRIEREN ===== */
-
-body{
-  display: flex;
-  justify-content: center;   /* horizontal mittig */
-}
-
-/* Haupt-Container */
-#app{
-  width: 1400px;             /* fixe Breite für schönes Layout */
-  max-width: 95%;
-  margin-top: 80px;          /* Platz für Titel oben */
 }
