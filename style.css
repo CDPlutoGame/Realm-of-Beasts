@@ -1,108 +1,114 @@
 /* =========================
-   REALM OF BEASTS - FINAL LAYOUT
-   Desktop + Custom Mobile
+   REALM OF BEASTS - FINAL CLEAN LAYOUT
    ========================= */
 
 :root{
-  --text: rgba(255,255,255,.92);
-  --panel-bg: rgba(22,22,22,.85);
-  --panel-br: rgba(255,130,130,.18);
-  --radius: 14px;
   --gap: 14px;
-  --left-w: 400px;
+  --radius: 14px;
+  --panel-bg: rgba(20,20,20,.88);
+  --border: rgba(255,150,150,.15);
+  --text: rgba(255,255,255,.92);
 }
 
 /* ===== Base ===== */
-*{ box-sizing:border-box; }
+*{ box-sizing: border-box; }
+
 body{
   margin:0;
-  font-family:system-ui;
-  color:var(--text);
-  background:url("images/dungeon.png") center/cover fixed;
+  font-family: system-ui, sans-serif;
+  color: var(--text);
+  background: url("images/dungeon.png") center/cover fixed no-repeat;
 }
 
-/* ===== Title ===== */
-#gameTitle{
-  text-align:center;
-  font-size:48px;
-  margin:20px 0;
-  font-weight:900;
-  color:#ffb347;
-}
+/* =========================
+   DESKTOP LAYOUT
+   ========================= */
 
-/* ===== App Desktop ===== */
 #app{
-  width:2000px;
-  max-width:95%;
-  margin:auto;
-  display:grid;
-  grid-template-columns: var(--left-w) 1fr;
-  gap:var(--gap);
-  padding:16px;
+  width: 1700px;
+  max-width: 95%;
+  margin: 20px auto;
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  grid-template-rows:
+    auto   /* Row 1 */
+    auto   /* Row 2 */
+    auto   /* Buttons */
+    auto;  /* Ranking */
+  gap: var(--gap);
 }
 
-/* ===== Left Column ===== */
-#leftCol{
-  display:flex;
-  flex-direction:column;
-  gap:var(--gap);
-}
-
-/* ===== Right Column Desktop ===== */
-#rightCol{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:16px;
-}
-
-/* Desktop Reihenfolge */
-#fightPanel{ grid-column:1; grid-row:1; }
+/* Row 1 */
+#statusPanel{ grid-column:1; grid-row:1; }
 #board{ grid-column:2; grid-row:1; }
-#controlsPanel{ grid-column:1; grid-row:2; }
-#log{ grid-column:2; grid-row:2; }
-#leaderboardPanel{ grid-column:1; grid-row:3; }
 
-/* ===== Panels ===== */
-.window,
+/* Row 2 */
+#shop{ grid-column:1; grid-row:2; }
+#log{ 
+  grid-column:2; 
+  grid-row:2;
+
+  /* 🔒 LOG FIX */
+  height: 220px;          /* feste Höhe */
+  max-height: 220px;
+  overflow-y: auto;       /* Scroll statt größer werden */
+  white-space: pre-wrap;
+}
+
+/* Buttons */
+#controlsPanel{
+  grid-column:1 / -1;
+  grid-row:3;
+}
+
+/* Ranking */
+#leaderboardPanel{
+  grid-column:1 / -1;
+  grid-row:4;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+/* =========================
+   PANEL STYLE
+   ========================= */
+
 #statusPanel,
 #shop,
-#leaderboardPanel,
-#fightPanel,
-#log,
 #board,
-#controlsPanel{
-  background:var(--panel-bg);
-  border:1px solid var(--panel-br);
-  border-radius:var(--radius);
-  padding:12px;
+#log,
+#controlsPanel,
+#leaderboardPanel{
+  background: var(--panel-bg);
+  border-radius: var(--radius);
+  border:1px solid var(--border);
+  padding:14px;
 }
 
-/* ===== Board ===== */
+/* =========================
+   BOARD
+   ========================= */
+
 #board{
   display:grid;
   grid-template-columns: repeat(10, 70px);
-  grid-auto-rows:70px;
+  grid-auto-rows: 70px;
   gap:6px;
+  width:max-content;
 }
 
-.tile{
-  background:rgba(255,255,255,.05);
-  border-radius:8px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+/* =========================
+   BUTTONS
+   ========================= */
+
+#controlsRow{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:10px;
 }
 
-/* ===== Log ===== */
-#log{
-  min-height:150px;
-  overflow:auto;
-  white-space:pre-wrap;
-}
-
-/* ===== Buttons ===== */
 button{
-  padding:12px;
+  padding:14px;
   border-radius:10px;
   border:none;
   background:#b22222;
@@ -110,11 +116,14 @@ button{
   font-weight:bold;
   cursor:pointer;
 }
-button:disabled{ opacity:.5; }
 
-/* =========================================
-   📱 MOBILE LAYOUT (WIE DU ES WILLST)
-   ========================================= */
+button:hover{
+  background:#ff3030;
+}
+
+/* =========================
+   MOBILE VERSION
+   ========================= */
 
 @media (max-width: 980px){
 
@@ -122,44 +131,35 @@ button:disabled{ opacity:.5; }
     grid-template-columns: 1fr;
   }
 
-  #leftCol{
+  /* 📱 Mobile Reihenfolge:
+     | Status |
+     | Board  |
+     | Shop   |
+     | Log    |
+     | Buttons|
+     | Ranking|
+  */
+
+  #statusPanel{ order:1; }
+  #board{ order:2; }
+  #shop{ order:3; }
+  #log{ order:4; }
+  #controlsPanel{ order:5; }
+  #leaderboardPanel{ order:6; }
+
+  #controlsRow{
+    grid-template-columns: 1fr 1fr;
+  }
+
+  #board{
+    grid-template-columns: repeat(6, 1fr);
     width:100%;
   }
 
-  #rightCol{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows:auto auto auto auto;
-    gap:12px;
-  }
-
-  /* Row 1 */
-  #statusPanel{ grid-column:1; grid-row:1; }
-  #board{ grid-column:2; grid-row:1; }
-
-  /* Row 2 */
-  #shop{ grid-column:1; grid-row:2; }
-  #log{ grid-column:2; grid-row:2; }
-
-  /* Row 3 - Buttons full width */
-  #controlsPanel{
-    grid-column:1 / -1;
-    grid-row:3;
-  }
-
-  /* Row 4 - Ranking full width */
-  #leaderboardPanel{
-    grid-column:1 / -1;
-    grid-row:4;
-  }
-
-  /* Board kleiner auf Handy */
-  #board{
-    grid-template-columns: repeat(6, 1fr);
-    grid-auto-rows:55px;
-  }
-
-  #controlsRow{
-    grid-template-columns:1fr;
+  /* Log auch auf Mobile fix */
+  #log{
+    height: 180px;
+    max-height: 180px;
+    overflow-y: auto;
   }
 }
