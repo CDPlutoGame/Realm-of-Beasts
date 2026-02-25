@@ -2,6 +2,7 @@
    REALM OF BEASTS
    ONE LAYOUT (Mobile Style for ALL)
    ========================= */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&display=swap');
 
 :root{
   --gap:14px;
@@ -15,11 +16,16 @@
 
 body{
   margin:0;
-  font-family:system-ui,sans-serif;
-  color:var(--text);
+  font-family: 'Cinzel', serif;
+  color: var(--text);
   background:url("images/dungeon.png") center/cover fixed no-repeat;
 }
-
+h1 {
+  text-align: center;
+  font-size: 36px;
+  letter-spacing: 2px;
+  margin: 20px 0;
+}
 /* =========================
    TOP BAR
    ========================= */
