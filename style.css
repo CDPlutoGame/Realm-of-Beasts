@@ -278,3 +278,16 @@ button{
   color: #ff4d4d;
   font-size: 14px;
 }
+.loginResetBtn{
+  margin-top: 10px;
+  background: transparent;
+  border: none;
+  color: #ffcc66;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.loginResetBtn:hover{
+  color: gold;
+}
