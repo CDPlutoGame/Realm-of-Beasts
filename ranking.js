@@ -27,6 +27,10 @@ async function submitScore(payload) {
   const user = auth.currentUser;
   if (!user) return;
 
+  async function submitScore(payload) {
+  const user = auth.currentUser;
+  if (!user) return;
+
   const data = {
     uid: user.uid,
     name: payload.name,
@@ -37,14 +41,17 @@ async function submitScore(payload) {
   };
 
   const playerRef = ref(db, "ranking/" + user.uid);
-
   const snap = await get(playerRef);
 
-  if (!snap.exists() || payload.rounds > snap.val().rounds) {
+  if (!snap.exists()) {
     await set(playerRef, data);
+  } else {
+    const existing = snap.val();
+    if (toNum(data.rounds) > toNum(existing.rounds)) {
+      await set(playerRef, data);
+    }
   }
 }
-
   // Prüfen ob es schon einen Eintrag gibt
   const snap = await get(playerRef);
 
