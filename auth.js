@@ -39,34 +39,48 @@ async function isAdmin(uid) {
   }
 }
 
-// LOGIN (auto-register)
-loginBtn?.addEventListener("click", async () => {
-  const email = (prompt("Email:") || "").trim();
-  if (!email) return;
+// LOGIN (Dungeon Overlay)
+const overlay = document.getElementById("loginOverlay");
+const loginConfirm = document.getElementById("loginConfirm");
+const loginCancel = document.getElementById("loginCancel");
+const loginError = document.getElementById("loginError");
 
-  const password = prompt("Passwort:") || "";
-  if (!password) return;
+loginBtn?.addEventListener("click", () => {
+  overlay.style.display = "flex";
+  loginError.textContent = "";
+});
+
+loginCancel?.addEventListener("click", () => {
+  overlay.style.display = "none";
+});
+
+loginConfirm?.addEventListener("click", async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+
+  if (!email || !password) {
+    loginError.textContent = "❌ Bitte Email & Passwort eingeben";
+    return;
+  }
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
+    overlay.style.display = "none";
   } catch (e) {
-    // oft kommt invalid-credential auch wenn user nicht existiert ODER falsches Passwort
+
     if (e?.code === "auth/user-not-found" || e?.code === "auth/invalid-credential") {
       try {
         await createUserWithEmailAndPassword(auth, email, password);
-        alert("✅ Account erstellt & eingeloggt");
+        overlay.style.display = "none";
       } catch (e2) {
-        if (e2?.code === "auth/email-already-in-use") {
-          alert("❌ Falsches Passwort. Nutze 'Passwort zurücksetzen'.");
-          return;
-        }
-        alert("❌ Registrieren fehlgeschlagen: " + (e2?.code || e2?.message));
+        loginError.textContent = "❌ Falsches Passwort";
       }
       return;
     }
-    alert("❌ Login fehlgeschlagen: " + (e?.code || e?.message));
+
+    loginError.textContent = "❌ Login fehlgeschlagen";
   }
-});
+});;
 
 // PASSWORT RESET
 resetBtn?.addEventListener("click", async () => {
