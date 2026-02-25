@@ -95,11 +95,14 @@ body::before{
 
 /* Row 3 */
 #leaderboardPanel{  
-   padding: 18px;
-   margin-top: -4px;
-   grid-column: 1;  
-   grid-row: 3; }
+ grid-column: 1; 
+  grid-row: 3;
 
+  max-width: 1100px;     /* Länge steuern (900–1300 nach Geschmack) */
+  width: 100%;
+  margin: 0 auto;        /* mittig */
+  padding: 18px;
+}
 /* ===== Generic Panel Look ===== */
 .window,
 #statusPanel,
