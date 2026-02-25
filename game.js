@@ -467,6 +467,9 @@ function updateHud() {
   }
 
   // ---------------- ENEMIES ----------------
+  function enemyLevel() { 
+  return Math.floor(rounds / ENEMY_BUFF_EVERY); 
+}
 function makeMonsterByType(type) {
   const lvl = enemyLevel();
   let base;
