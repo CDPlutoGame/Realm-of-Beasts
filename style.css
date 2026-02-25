@@ -13,18 +13,20 @@
 }
 
 *{ box-sizing:border-box; }
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&display=swap');
-body{
-  margin:0;
-  font-family: 'Cinzel', serif;
-  color: var(--text);
-  background:url("images/dungeon.png") center/cover fixed no-repeat;
-}
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap');
+
 h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 48px;
   text-align: center;
-  font-size: 36px;
-  letter-spacing: 2px;
-  margin: 20px 0;
+  letter-spacing: 3px;
+  color: gold;
+  text-shadow:
+    0 0 5px #000,
+    0 0 10px #000,
+    2px 2px 0 #5a3a00,
+    4px 4px 0 #000;
 }
 /* =========================
    TOP BAR
