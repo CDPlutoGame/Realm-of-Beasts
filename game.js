@@ -105,6 +105,11 @@ newRoundButton.textContent = "Neue Runde";
 
 const fightPanel = document.getElementById("fightPanel");
 const logEl = document.getElementById("log");
+  function safeLog(text){
+  if (!logEl) return;
+  logEl.textContent += String(text) + "\n";
+  logEl.scrollTop = logEl.scrollHeight;
+}
 const boardEl = document.getElementById("board");
 
 const leaderboardPanel = document.getElementById("leaderboardPanel");
