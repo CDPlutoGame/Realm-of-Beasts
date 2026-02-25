@@ -867,10 +867,18 @@ function renderMenu() {
       </button>
     `;
 
-     document.getElementById("menuLogout").onclick = () => {
-      logout(); // deine bestehende Logout Funktion
+   document.getElementById("menuLogout").onclick = () => {
+  import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js")
+    .then(({ signOut }) => {
+      return signOut(window.auth);
+    })
+    .then(() => {
       menuWindow.style.display = "none";
-    };
+    })
+    .catch((err) => {
+      console.error("Logout Fehler:", err);
+    });
+};
 
     document.getElementById("menuChangeName").onclick = () => {
       // kommt im nächsten Schritt
