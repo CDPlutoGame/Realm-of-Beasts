@@ -866,17 +866,15 @@ function renderMenu() {
       </button>
     `;
 
-    document.getElementById("menuLogout").onclick = () => {
-      import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js")
-        .then(({ signOut }) => signOut(window.auth))
-        .then(() => {
-          menuWindow.style.display = "none";
-        })
-        .catch((err) => {
-          console.error("Logout Fehler:", err);
-        });
-    };
+  document.getElementById("menuChangeName").onclick = () => {
+  const overlay = document.getElementById("nameOverlay");
+  const input = document.getElementById("nameInput");
 
+  input.value = playerName || "";
+  overlay.style.display = "flex";
+
+  menuWindow.style.display = "none";
+};
     document.getElementById("menuChangeName").onclick = () => {
       const newName = prompt("Neuen Benutzernamen eingeben (max 24 Zeichen):", playerName);
       if (!newName) return;
