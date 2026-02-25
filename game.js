@@ -65,7 +65,7 @@ async function saveMetaToCloud() {
     meta
   );
 }
-
+    // 🔥 ganz wichtig – global machen
 window.loadMetaFromCloud = loadMetaFromCloud;
 window.saveMetaToCloud = saveMetaToCloud;
 
