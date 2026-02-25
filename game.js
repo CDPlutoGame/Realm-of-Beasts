@@ -919,4 +919,34 @@ menuButton.onclick = () => {
 
   if (menuOpen) renderMenu();
 };
+  const nameOverlay = document.getElementById("nameOverlay");
+const nameInput = document.getElementById("nameInput");
+const nameConfirm = document.getElementById("nameConfirm");
+const nameCancel = document.getElementById("nameCancel");
+const nameError = document.getElementById("nameError");
+
+if (nameOverlay && nameInput && nameConfirm && nameCancel && nameError) {
+
+  nameCancel.onclick = () => {
+    nameOverlay.classList.remove("active");
+    nameError.textContent = "";
+  };
+
+  nameConfirm.onclick = () => {
+    const newName = nameInput.value.trim().slice(0, 24);
+
+    if (!newName) {
+      nameError.textContent = "Name darf nicht leer sein.";
+      return;
+    }
+
+    localStorage.setItem("mbr_display_name", newName);
+    playerName = newName;
+    updateHud();
+
+    nameOverlay.classList.remove("active");
+    nameInput.value = "";
+    nameError.textContent = "";
+  };
+}
 })();
