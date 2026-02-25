@@ -20,7 +20,6 @@ const CURRENT_NAME_KEY = "mbr_current_name_online_v10";
 
 // Buttons aus index.html
 const loginBtn = document.getElementById("loginBtn");
-const resetBtn = document.getElementById("resetBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const saveLayoutBtn = document.getElementById("saveLayoutBtn");
 
@@ -106,7 +105,7 @@ onAuthStateChanged(auth, async (user) => {
     window.__IS_ADMIN__ = false;
 
     show(loginBtn, true);
-    show(resetBtn, true);
+    show(resetBtn, false);
     show(logoutBtn, false);
     show(saveLayoutBtn, false);
     return;
