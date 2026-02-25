@@ -848,8 +848,9 @@ function renderMenu() {
     `;
 
     document.getElementById("menuLogin").onclick = () => {
-      openLoginWindow(); // deine bestehende Login Funktion
-      menuWindow.style.display = "none";
+    document.getElementById("loginOverlay").style.display = "flex";
+    menuWindow.style.display = "none";
+};
     };
 
   } else {
