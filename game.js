@@ -835,22 +835,23 @@ menuWindow.style.display = "none"; // 👈 wichtig (startet geschlossen)
 
 function renderMenu() {
 
-  if (!playerName) {
+if (!playerName) {
 
-    // 🔒 NICHT eingeloggt
-    menuWindow.innerHTML = `
-      <button id="menuLogin" style="width:100%;margin-bottom:8px;">
-        🔑 Login
-      </button>
-      <button id="menuSound" style="width:100%;">
-        🔊 Sound
-      </button>
-    `;
+  menuWindow.innerHTML = `
+    <button id="menuLogin" style="width:100%;margin-bottom:8px;">
+      🔑 Login
+    </button>
+    <button id="menuSound" style="width:100%;">
+      🔊 Sound
+    </button>
+  `;
 
-    document.getElementById("menuChangeName").onclick = () => {
-    document.getElementById("nameOverlay").classList.add("active");
+  document.getElementById("menuLogin").onclick = () => {
+    document.getElementById("loginOverlay").classList.add("active");
     menuWindow.style.display = "none";
-};
+  };
+
+}
 
   } else {
 
