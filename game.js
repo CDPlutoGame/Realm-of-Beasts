@@ -616,16 +616,29 @@ function makeMonsterByType(type) {
     // Handy-safe: parken + retry
     localStorage.setItem("mbr_pending_score", JSON.stringify(payload));
 
-    const t = setInterval(() => {
-      if (!window.__ONLINE_RANKING__) return;
-      window.__ONLINE_RANKING__.submitScore(payload)
-        .then(() => {
-          localStorage.removeItem("mbr_pending_score");
-          clearInterval(t);
-          renderLeaderboard();
-        })
-        .catch(() => {});
-    }, 500);
+const t = setInterval(async () => {
+  if (!window.__ONLINE_RANKING__) return;
+
+  try {
+    const top = await window.__ONLINE_RANKING__.top10();
+
+    // Spieler schon vorhanden?
+    const existing = top.find(e => e.name === payload.name);
+
+    // Wenn nicht vorhanden → speichern
+    if (!existing) {
+      await window.__ONLINE_RANKING__.submitScore(payload);
+    } 
+    // Wenn vorhanden → nur speichern wenn besser
+    else if (payload.rounds > existing.rounds) {
+      await window.__ONLINE_RANKING__.submitScore(payload);
+    }
+
+    localStorage.removeItem("mbr_pending_score");
+    clearInterval(t);
+    renderLeaderboard();
+  } catch (err) {}
+}, 500);
 
     monster = null;
     renderFightPanel();
