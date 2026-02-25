@@ -848,4 +848,49 @@ function attack() {
 
   safeLog(playerName ? `✅ Eingeloggt als "${playerName}". Drück 'Drehen'.` : "🔒 Bitte anmelden.");
   setInterval(watchUserChange, 500);
+  // ==================== 📜 MENÜ BUTTON ====================
+
+const menuWrapper = document.createElement("div");
+menuWrapper.style.position = "fixed";
+menuWrapper.style.top = "10px";
+menuWrapper.style.right = "10px";
+menuWrapper.style.zIndex = "10005";
+
+const menuButton = document.createElement("button");
+menuButton.textContent = "📜";
+menuButton.style.fontSize = "24px";
+menuButton.style.padding = "8px 14px";
+menuButton.style.borderRadius = "12px";
+menuButton.style.cursor = "pointer";
+
+const menuWindow = document.createElement("div");
+menuWindow.style.position = "absolute";
+menuWindow.style.top = "50px";
+menuWindow.style.right = "0";
+menuWindow.style.width = "220px";
+menuWindow.style.padding = "15px";
+menuWindow.style.borderRadius = "14px";
+menuWindow.style.background = "rgba(0,0,0,0.95)";
+menuWindow.style.border = "1px solid rgba(255,255,255,0.15)";
+menuWindow.style.boxShadow = "0 0 20px rgba(0,0,0,0.5)";
+menuWindow.style.display = "none"; // 👈 wichtig (startet geschlossen)
+
+// erstmal leer
+menuWindow.innerHTML = `
+  <div style="text-align:center;opacity:.7;">
+    📜 Helden-Menü
+  </div>
+`;
+
+menuWrapper.appendChild(menuButton);
+menuWrapper.appendChild(menuWindow);
+document.body.appendChild(menuWrapper);
+
+// Toggle Funktion
+let menuOpen = false;
+
+menuButton.onclick = () => {
+  menuOpen = !menuOpen;
+  menuWindow.style.display = menuOpen ? "block" : "none";
+};
 })();
