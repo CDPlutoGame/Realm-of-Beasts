@@ -124,19 +124,34 @@ h1,h2,h3{
 #shop h3,
 #statusPanel h3{ font-size: 14px; }
 
-/* ===== Status ===== */
+/* =========================
+   STATUS – BIG VERSION
+   ========================= */
+
 #statusPanel{
-  font-size: 12px;
-  line-height: 1.25;
-  background: rgba(20,20,20,0.85);
-}
-#hud{ font-size: inherit; }
-#hud .emoji{
-  font-size: 10px;
-  display: inline-block;
-  width: 14px;
+  box-shadow:
+    0 0 25px rgba(255,140,0,0.15),
+    0 20px 40px rgba(0,0,0,.6);
+  font-size: 18px;              /* Text deutlich größer */
+  line-height: 1.6;
+  background: rgba(20,20,20,0.92);
+  padding: 20px;
 }
 
+#hud{
+  font-size: inherit;
+}
+
+#hud b{
+  font-size: 20px;              /* Werte (Zahlen) extra groß */
+  color: #ffcc66;
+}
+
+#hud .emoji{
+  font-size: 20px;              /* Emojis größer */
+  display: inline-block;
+  width: 26px;
+}
 /* ===== Shop ===== */
 #shop{
   width: 100%;
