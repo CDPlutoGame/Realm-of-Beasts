@@ -254,8 +254,8 @@ button:disabled{ opacity: .55; cursor: not-allowed; }
 /* Tiles */
 #board .tile{
   position: relative;
-  width: 70px;
-  height: 70px;
+  width: 80px;
+  height: 80px;
   border-radius: 10px;
 
   background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.18));
@@ -342,4 +342,16 @@ button:disabled{ opacity: .55; cursor: not-allowed; }
     grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
     gap: 6px;
   }
+}
+/* ===== RIGHTCOL: Row3 (Ranking) fix so hoch wie Shop ===== */
+#rightCol{
+  grid-template-rows: auto auto 480px !important; /* Row3 = 480px */
+}
+
+/* Ranking füllt die komplette Row3 */
+#leaderboardPanel{
+  height: 100% !important;
+  min-height: 480px !important;
+  max-width: none !important;   /* optional: nicht künstlich begrenzen */
+  margin: 0 !important;         /* optional: nicht “mittig schrumpfen” */
 }
