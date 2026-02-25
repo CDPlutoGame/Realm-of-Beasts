@@ -835,23 +835,21 @@ menuWindow.style.display = "none"; // 👈 wichtig (startet geschlossen)
 
 function renderMenu() {
 
-if (!playerName) {
+  if (!playerName) {
+    // 🔒 Nicht eingeloggt
+    menuWindow.innerHTML = `
+      <button id="menuLogin" style="width:100%;margin-bottom:8px;">
+        🔑 Login
+      </button>
+      <button id="menuSound" style="width:100%;">
+        🔊 Sound
+      </button>
+    `;
 
-  menuWindow.innerHTML = `
-    <button id="menuLogin" style="width:100%;margin-bottom:8px;">
-      🔑 Login
-    </button>
-    <button id="menuSound" style="width:100%;">
-      🔊 Sound
-    </button>
-  };
-
-  document.getElementById("menuLogin").onclick = () => {
-    document.getElementById("loginOverlay").classList.add("active");
-    menuWindow.style.display = "none";
-  };
-
-}
+    document.getElementById("menuLogin").onclick = () => {
+      document.getElementById("loginOverlay").classList.add("active");
+      menuWindow.style.display = "none";
+    };
 
   } else {
 
@@ -868,37 +866,29 @@ if (!playerName) {
       </button>
     `;
 
-   document.getElementById("menuLogout").onclick = () => {
-  import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js")
-    .then(({ signOut }) => {
-      return signOut(window.auth);
-    })
-    .then(() => {
+    document.getElementById("menuLogout").onclick = () => {
+      import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js")
+        .then(({ signOut }) => signOut(window.auth))
+        .then(() => {
+          menuWindow.style.display = "none";
+        })
+        .catch((err) => {
+          console.error("Logout Fehler:", err);
+        });
+    };
+
+    document.getElementById("menuChangeName").onclick = () => {
+      const newName = prompt("Neuen Benutzernamen eingeben (max 24 Zeichen):", playerName);
+      if (!newName) return;
+
+      const clean = newName.trim().slice(0, 24);
+      if (!clean) return;
+
+      localStorage.setItem("mbr_display_name", clean);
+      playerName = clean;
+      updateHud();
       menuWindow.style.display = "none";
-    })
-    .catch((err) => {
-      console.error("Logout Fehler:", err);
-    });
-};
-
-   document.getElementById("menuChangeName").onclick = () => {
-  const newName = prompt("Neuen Benutzernamen eingeben (max 24 Zeichen):", playerName);
-  if (!newName) return;
-
-  const clean = newName.trim().slice(0, 24);
-  if (!clean) return;
-
-  // Lokal speichern
-  localStorage.setItem("mbr_display_name", clean);
-
-  // Globale Variable aktualisieren
-  playerName = clean;
-
-  // HUD neu rendern
-  updateHud();
-
-  menuWindow.style.display = "none";
-};
+    };
   }
 
   document.getElementById("menuSound").onclick = () => {
