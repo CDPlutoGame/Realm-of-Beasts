@@ -120,7 +120,12 @@ const finalName = savedName || baseName;
 
 localStorage.setItem("mbr_display_name", finalName);
 localStorage.setItem(CURRENT_NAME_KEY, finalName);
-
+  
+// 🔥 CLOUD META LADEN
+  if (window.loadMetaFromCloud) {
+    await window.loadMetaFromCloud();
+  }
+  
   const admin = await isAdmin(user.uid);
   window.__IS_ADMIN__ = admin;
 
