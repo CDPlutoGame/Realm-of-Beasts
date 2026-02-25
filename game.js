@@ -173,8 +173,9 @@ const leaderboardEl = document.getElementById("leaderboard");
   const soundBtn = document.createElement("button");
   soundBtn.type = "button";
   soundBtn.textContent = "🔇";
-  soundBtn.style.padding = "2px 6px";
-  soundBtn.style.borderRadius = "6px";
+  soundBtn.style.padding = "8px 14px";
+  soundBtn.style.fontSize = "18px";
+  soundBtn.style.borderRadius = "10px";
 
   const volumeSlider = document.createElement("input");
   volumeSlider.type = "range";
@@ -182,7 +183,8 @@ const leaderboardEl = document.getElementById("leaderboard");
   volumeSlider.max = "1";
   volumeSlider.step = "0.01";
   volumeSlider.value = String(baseVolume);
-  volumeSlider.style.width = "70px";
+  volumeSlider.style.width = "120px";
+  volumeSlider.style.height = "6px";
 
   audioBox.appendChild(soundBtn);
   audioBox.appendChild(volumeSlider);
