@@ -124,8 +124,8 @@ const leaderboardEl = document.getElementById("leaderboard");
   bgMusic.preload = "auto";
   bgMusic.loop = false;
 
-  let soundMuted = true;
-  let baseVolume = 0.4;
+  let soundMuted = false;
+  let baseVolume = 0.1;
   let currentMusicIndex = -1;
 
   function pickNextRandomIndex(){
@@ -157,6 +157,11 @@ const leaderboardEl = document.getElementById("leaderboard");
     hitAudio.volume = Math.min(1, baseVolume + extra);
     hitAudio.play().catch(()=>{});
   }
+  window.addEventListener("load", () => {
+  if (!soundMuted) {
+    playRandomMusic();
+  }
+});
 
   // ---------------- ONLINE RANKING ----------------
 let __rankTries = 0;
