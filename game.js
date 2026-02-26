@@ -842,6 +842,7 @@ function attack() {
   setInterval(watchUserChange, 500);
   // ==================== 📜 MENÜ BUTTON ====================
 
+// ==================== 📜 STABILES MENÜ ====================
 const menuWrapper = document.createElement("div");
 menuWrapper.style.position = "fixed";
 menuWrapper.style.top = "10px";
@@ -863,6 +864,48 @@ menuWindow.style.width = "220px";
 menuWindow.style.padding = "15px";
 menuWindow.style.borderRadius = "14px";
 menuWindow.style.background = "rgba(0,0,0,0.95)";
+menuWindow.style.border = "1px solid rgba(255,255,255,0.15)";
+menuWindow.style.boxShadow = "0 0 20px rgba(0,0,0,0.5)";
+menuWindow.style.display = "none";
+
+menuWrapper.appendChild(menuButton);
+menuWrapper.appendChild(menuWindow);
+document.body.appendChild(menuWrapper);
+
+let menuOpen = false;
+
+function renderMenu() {
+  menuWindow.innerHTML = `
+    <button id="menuLogin" style="width:100%;margin-bottom:8px;">
+      🔑 Login
+    </button>
+    <button id="menuSound" style="width:100%;">
+      🔊 Sound
+    </button>
+  `;
+
+  document.getElementById("menuLogin").onclick = () => {
+    const overlay = document.getElementById("loginOverlay");
+    if (overlay) overlay.style.display = "flex";
+    menuWindow.style.display = "none";
+    menuOpen = false;
+  };
+
+  document.getElementById("menuSound").onclick = () => {
+    soundMuted = !soundMuted;
+    if (!soundMuted) {
+      playRandomMusic();
+    } else {
+      bgMusic.pause();
+    }
+  };
+}
+
+menuButton.onclick = () => {
+  menuOpen = !menuOpen;
+  menuWindow.style.display = menuOpen ? "block" : "none";
+  if (menuOpen) renderMenu();
+};
 menuWindow.style.border = "1px solid rgba(255,255,255,0.15)";
 menuWindow.style.boxShadow = "0 0 20px rgba(0,0,0,0.5)";
 menuWindow.style.display = "none";
