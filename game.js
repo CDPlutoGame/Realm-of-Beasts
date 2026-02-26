@@ -922,3 +922,4 @@ function renderMenu() {
     else bgMusic.pause();
   };
 }
+})();
