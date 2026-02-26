@@ -874,33 +874,6 @@ document.body.appendChild(menuWrapper);
 
 let menuOpen = false;
 
-function renderMenu() {
-  menuWindow.innerHTML = `
-    <button id="menuLogin" style="width:100%;margin-bottom:8px;">
-      🔑 Login
-    </button>
-    <button id="menuSound" style="width:100%;">
-      🔊 Sound
-    </button>
-  `;
-
-  document.getElementById("menuLogin").onclick = () => {
-    const overlay = document.getElementById("loginOverlay");
-    if (overlay) overlay.style.display = "flex";
-    menuWindow.style.display = "none";
-    menuOpen = false;
-  };
-
-  document.getElementById("menuSound").onclick = () => {
-    soundMuted = !soundMuted;
-    if (!soundMuted) {
-      playRandomMusic();
-    } else {
-      bgMusic.pause();
-    }
-  };
-}
-
 menuButton.onclick = () => {
   menuOpen = !menuOpen;
   menuWindow.style.display = menuOpen ? "block" : "none";
@@ -949,15 +922,3 @@ function renderMenu() {
     else bgMusic.pause();
   };
 }
-
-menuWrapper.appendChild(menuButton);
-menuWrapper.appendChild(menuWindow);
-document.body.appendChild(menuWrapper);
-
-let menuOpen = false;
-
-menuButton.onclick = () => {
-  menuOpen = !menuOpen;
-  menuWindow.style.display = menuOpen ? "block" : "none";
-  if (menuOpen) renderMenu();
-};
