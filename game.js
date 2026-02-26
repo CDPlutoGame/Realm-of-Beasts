@@ -945,7 +945,7 @@ if (nameOverlay && nameInput && nameConfirm && nameCancel && nameError) {
     }
 
     // speichern
-    localStorage.setItem("playerName", newName);
+   localStorage.setItem("mbr_current_name_online_v10", newName);
 
     playerName = newName;
     updateHud();
