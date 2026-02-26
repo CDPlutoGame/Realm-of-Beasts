@@ -932,41 +932,31 @@ function renderMenu() {
     else bgMusic.pause();
   };
 }
-  // ==================== NAME OVERLAY LOGIK ====================
-
-function initNameOverlay() {
-  const nameOverlay = document.getElementById("nameOverlay");
-  const nameInput = document.getElementById("nameInput");
-  const nameConfirm = document.getElementById("nameConfirm");
-  const nameCancel = document.getElementById("nameCancel");
-  const nameError = document.getElementById("nameError");
-
-  if (!nameOverlay) return;
-
-  nameCancel.addEventListener("click", () => {
+   // ==================== NAME OVERLAY LOGIK ====================
+const nameOverlay = document.getElementById("nameOverlay");
+const nameInput = document.getElementById("nameInput");
+const nameConfirm = document.getElementById("nameConfirm");
+const nameCancel = document.getElementById("nameCancel");
+const nameError = document.getElementById("nameError");
+if (nameOverlay && nameInput && nameConfirm && nameCancel && nameError) {
+  nameCancel.onclick = () => {
     nameOverlay.style.display = "none";
     nameError.textContent = "";
-  });
-
-  nameConfirm.addEventListener("click", () => {
+  };
+  nameConfirm.onclick = () => {
     const newName = nameInput.value.trim().slice(0, 24);
-
     if (!newName) {
       nameError.textContent = "Name darf nicht leer sein.";
       return;
     }
-
-    localStorage.setItem("mbr_current_name_online_v10", newName);
-
+    // speichern
+   localStorage.setItem("mbr_current_name_online_v10", newName);
     playerName = newName;
     updateHud();
-
     nameOverlay.style.display = "none";
     nameInput.value = "";
     nameError.textContent = "";
-
-    safeLog("✏️ Neuer Name gespeichert: " + newName);
-  });
+    safeLog(`✏️ Neuer Name gespeichert: ${newName}`);
+  };
 }
-
-initNameOverlay();
+})();
