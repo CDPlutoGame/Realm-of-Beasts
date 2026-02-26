@@ -1,6 +1,11 @@
 import { meta, loadMeta, saveMeta } from "./profile.js";
 // ===== Monster Browser Game (ONLINE) =====
 (async() => {
+  
+function loadAnyName() {
+  return localStorage.getItem("mbr_current_name_online_v10");
+}
+  
   if (window.__MBR_LOADED__) return;
   window.__MBR_LOADED__ = true;
 
