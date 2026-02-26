@@ -12,7 +12,14 @@ function loadAnyName() {
   
   if (window.__MBR_LOADED__) return;
   window.__MBR_LOADED__ = true;
-
+  
+  await new Promise(resolve => {
+  if (window.__AUTH_READY__) {
+    resolve();
+  } else {
+    document.addEventListener("auth-ready", resolve, { once: true });
+  }
+});
   
 // ---------------- GAME STATE ----------------
 let playerName = "";
@@ -774,27 +781,26 @@ async function watchUserChange() {
     );
   }
 }
+  
+// 🔥 Warten bis auth.js fertig ist
 await new Promise(resolve => {
-  const unsub = auth.onAuthStateChanged(async (user) => {
-
-    console.log("🔐 Auth State:", user);
-
-    if (user) {
-      console.log("📦 Lade Meta...");
-      await loadMeta();
-      console.log("✅ Meta geladen:", meta);
-    } else {
-      console.log("🚫 Kein User eingeloggt");
-    }
-
-    unsub();
+  if (window.__AUTH_READY__) {
     resolve();
-  });
+  } else {
+    document.addEventListener("auth-ready", resolve, { once: true });
+  }
 });
+
+// 🔥 Meta laden (nur wenn User existiert)
+if (auth.currentUser) {
+  await loadMeta();
+  
+  console.log("📦 Meta geladen:", meta);
+}
 
 console.log("🚀 Init startet jetzt...");
 
-// 🔥 ERST HIER darf das Spiel starten
+
 console.log("META GELADEN:", meta);
 
 await loadUserFromStorage();
