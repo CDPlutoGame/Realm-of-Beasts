@@ -1,5 +1,6 @@
-// ===== Monster Browser Game (ONLINE) - stable + SOUND + mobile safe =====
-(() => {
+import { meta, loadMeta, saveMeta } from "./profile.js";
+// ===== Monster Browser Game (ONLINE) =====
+(async() => {
   if (window.__MBR_LOADED__) return;
   window.__MBR_LOADED__ = true;
 
@@ -19,63 +20,6 @@
   const MAXHP_PRICE_INCREASE = 50;
   const ATK_UPGRADE_AMOUNT = 5;
   const ATK_PRICE_INCREASE = 5;
-
- const DEFAULT_META = {
-  gold: 0,
-  potions: 0,
-  maxHpBase: 30,
-  attackPower: 5,
-  maxHpPrice: 100,
-  attackPowerPrice: 100,
-  bossesDefeated: 0,
-  autoSpinStage: 0,
-  autoAttackStage: 0,
-  prestigeLevel: 0
-};
-
-const db = window.db;
-const auth = window.auth;
-
-async function loadMetaFromCloud() {
-  if (!window.auth) return;
-  if (!window.db) return;
-
-  const user = window.auth.currentUser;
-  if (!user) return;
-
-  try {
-    const snap = await window.firebaseGet(
-      window.firebaseRef(window.db, "users/" + user.uid + "/meta")
-    );
-
-    if (snap.exists()) {
-      meta = { ...DEFAULT_META, ...snap.val() };
-    } else {
-      await saveMetaToCloud();
-    }
-  } catch (err) {
-    console.log("Meta load skipped:", err);
-  }
-}
-async function saveMetaToCloud() {
-  if (!window.auth) return;
-  if (!window.db) return;
-
-  const user = window.auth.currentUser;
-  if (!user) return;
-
-  try {
-    await window.firebaseSet(
-      window.firebaseRef(window.db, "users/" + user.uid + "/meta"),
-      meta
-    );
-  } catch (err) {
-    console.log("Meta save skipped:", err);
-  }
-}
-    // 🔥 ganz wichtig – global machen
-window.loadMetaFromCloud = loadMetaFromCloud;
-window.saveMetaToCloud = saveMetaToCloud;
 
   // ---------------- HELPERS ----------------
   function ensureEl(id, tag = "div", parent = document.body) {
@@ -237,19 +181,6 @@ async function renderLeaderboard() {
   leaderboardEl.innerHTML = html;
 }
 
-  // ---------------- GAME STATE ----------------
-  let playerName = "";
-  let meta = { ...DEFAULT_META };
-  let rounds = 0;
-  let playerHp = 30;
-  let playerPos = 0;
-  let inFight = false;
-  let runOver = false;
-  let tiles = [];
-  let monster = null;
-  let monstersKilled = 0;
-  let bossesKilled = 0;
-
   // ---------------- AUTO SYSTEM ----------------
   let autoSpinTimer = null;
   let autoAttackTimer = null;
@@ -362,12 +293,12 @@ function updateHud() {
       </div>
     `;
 
-    document.getElementById("buyPotion").onclick = () => {
+    document.getElementById("buyPotion").onclick = async () => {
       if (!runOver) return safeLog("❌ Trank kaufen nur nach Game Over.");
       if (meta.gold < POTION_COST) return safeLog("❌ Zu wenig Gold.");
       meta.gold -= POTION_COST;
       meta.potions += 1;
-      persistIfNamed();
+     await saveMeta();
       updateHud(); renderShop(); refreshUsePotionButton();
       safeLog(`✅ Trank gekauft. Tränke: ${meta.potions}`);
     };
@@ -377,7 +308,7 @@ function updateHud() {
       if (meta.gold < HEAL10_COST) return safeLog("❌ Zu wenig Gold.");
       meta.gold -= HEAL10_COST;
       playerHp = Math.min(meta.maxHpBase, playerHp + HEAL10_AMOUNT);
-      persistIfNamed();
+     await saveMeta();
       updateHud(); renderShop(); refreshUsePotionButton();
       safeLog("✅ Sofort geheilt: +10 HP");
     };
@@ -389,7 +320,7 @@ function updateHud() {
       meta.maxHpBase += MAXHP_UPGRADE_AMOUNT;
       meta.maxHpPrice += MAXHP_PRICE_INCREASE;
       playerHp = meta.maxHpBase;
-      persistIfNamed();
+     await saveMeta();
       updateHud(); renderShop(); refreshUsePotionButton();
       safeLog(`✅ MaxHP +5 gekauft (Full Heal). Neuer Preis: ${meta.maxHpPrice}`);
     };
@@ -400,7 +331,7 @@ function updateHud() {
       meta.gold -= meta.attackPowerPrice;
       meta.attackPower += ATK_UPGRADE_AMOUNT;
       meta.attackPowerPrice += ATK_PRICE_INCREASE;
-      persistIfNamed();
+     await saveMeta();
       updateHud(); renderShop(); refreshUsePotionButton();
       safeLog(`✅ Kraft +5 gekauft. Neue Kraft: ${meta.attackPower}. Neuer Preis: ${meta.attackPowerPrice}`);
     };
@@ -421,7 +352,7 @@ function updateHud() {
       if (!canBuyAutoSpin) return safeLog("❌ Auto-Start: GameOver + Boss + Gold nötig.");
       meta.gold -= autoCost(nextSpinStage);
       meta.autoSpinStage = nextSpinStage;
-      persistIfNamed();
+     await saveMeta();
       updateHud(); renderShop();
       safeLog(`✅ Auto-Start Stufe ${meta.autoSpinStage} gekauft!`);
     };
@@ -432,7 +363,7 @@ function updateHud() {
       if (!canBuyAutoAtk) return safeLog("❌ Auto-Attack: GameOver + Boss + Gold nötig.");
       meta.gold -= autoCost(nextAtkStage);
       meta.autoAttackStage = nextAtkStage;
-      persistIfNamed();
+     await saveMeta();
       updateHud(); renderShop();
       safeLog(`✅ Auto-Attack Stufe ${meta.autoAttackStage} gekauft!`);
     };
@@ -566,7 +497,7 @@ function renderFightPanel() {
 
     if (monster?.kind === "boss") meta.bossesDefeated += 1;
     meta.gold += reward;
-    persistIfNamed();
+   await saveMeta();
 
     if (tiles[playerPos] && String(tiles[playerPos]).startsWith("monster_")) {
       tiles[playerPos] = "normal";
@@ -677,7 +608,7 @@ function attack() {
 
     meta.potions -= 1;
     playerHp = Math.min(meta.maxHpBase, playerHp + POTION_HEAL);
-    persistIfNamed();
+   await saveMeta();
 
     updateHud(); renderShop(); refreshUsePotionButton();
     safeLog(`🧪 Trank genutzt: +5 HP. Übrig: ${meta.potions}`);
@@ -722,7 +653,7 @@ function attack() {
       const g = Math.floor(Math.random() * 11) + 5;
       meta.gold += g;
       tiles[playerPos] = "normal";
-      persistIfNamed();
+     await saveMeta();
 
       renderBoard();
       updateHud(); renderShop(); refreshUsePotionButton();
@@ -808,6 +739,7 @@ function attack() {
   }
 
   loadUserFromStorage();
+  await loadMeta();
   __lastSeenName = playerName;
 
   generateBoard();
