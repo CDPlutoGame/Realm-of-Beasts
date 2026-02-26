@@ -11,9 +11,6 @@
   const AUTO_BASE_COST = 1000;
   const AUTO_STEP_COST = 500;
 
-  const PROFILES_KEY = "mbr_profiles_online_v10";
-  const CURRENT_NAME_KEY = "mbr_current_name_online_v10";
-
   const POTION_HEAL = 5;
   const POTION_COST = 5;
   const HEAL10_AMOUNT = 10;
@@ -95,34 +92,6 @@ window.saveMetaToCloud = saveMetaToCloud;
     const n = Number(x);
     return Number.isFinite(n) ? n : 0;
   }
-
-  // ---------------- STORAGE ----------------
-  function loadProfiles() {
-    try { return JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}"); }
-    catch { return {}; }
-  }
-  function saveProfiles(p) { localStorage.setItem(PROFILES_KEY, JSON.stringify(p)); }
-  function loadProfile(name) {
-    const p = loadProfiles()[name];
-    return p ? { ...DEFAULT_META, ...p } : { ...DEFAULT_META };
-  }
-  function saveProfile(name, meta) {
-    const all = loadProfiles();
-    all[name] = { ...meta };
-    saveProfiles(all);
-  }
-  function loadAnyName() {
-    return (
-      (localStorage.getItem(CURRENT_NAME_KEY) || "").trim() ||
-      (localStorage.getItem("mobileUser") || "").trim() ||
-      (localStorage.getItem("pcUser") || "").trim() ||
-      (localStorage.getItem("playerName") || "").trim()
-    );
-  }
-  function persistIfNamed() {
-    if (playerName) saveProfile(playerName, meta);
-  }
-
 // ---------------- UI ROOT (aus index.html verwenden) ----------------
 const app = document.getElementById("app");
 const leftCol = document.getElementById("leftCol");
