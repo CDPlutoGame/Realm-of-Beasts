@@ -485,7 +485,7 @@ function renderFightPanel() {
     refreshUsePotionButton();
     if (meta.autoAttackStage > 0) startAutoAttack();
   }
-  function endFightWin() {
+async function endFightWin() {
     if (monster?.kind === "boss") bossesKilled += 1;
     else if (monster) monstersKilled += 1;
 
@@ -602,7 +602,7 @@ function attack() {
   safeLog(`⚔️ Du machst ${playerDmg} Schaden.\n💀 Gegner macht ${enemyDmg} Schaden.`);
 }
 
-  function usePotion() {
+  async function usePotion() {
     if (meta.potions <= 0) return;
     if (playerHp >= meta.maxHpBase) return safeLog("❤️ Schon voll.");
 
