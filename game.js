@@ -4,6 +4,19 @@ import { meta, loadMeta, saveMeta } from "./profile.js";
   if (window.__MBR_LOADED__) return;
   window.__MBR_LOADED__ = true;
 
+  
+// ---------------- GAME STATE ----------------
+let playerName = "";
+let rounds = 0;
+let playerHp = 30;
+let playerPos = 0;
+let inFight = false;
+let runOver = false;
+let tiles = [];
+let monster = null;
+let monstersKilled = 0;
+let bossesKilled = 0;
+
   // ---------------- SETTINGS ----------------
   const boardSize = 30;
   const ENEMY_BUFF_EVERY = 2;
