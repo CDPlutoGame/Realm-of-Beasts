@@ -61,13 +61,20 @@ async function loadMetaFromCloud() {
   }
 }
 async function saveMetaToCloud() {
-  const user = auth.currentUser;
+  if (!window.auth) return;
+  if (!window.db) return;
+
+  const user = window.auth.currentUser;
   if (!user) return;
 
-  await window.firebaseSet(
-    window.firebaseRef(db, "users/" + user.uid + "/meta"),
-    meta
-  );
+  try {
+    await window.firebaseSet(
+      window.firebaseRef(window.db, "users/" + user.uid + "/meta"),
+      meta
+    );
+  } catch (err) {
+    console.log("Meta save skipped:", err);
+  }
 }
     // 🔥 ganz wichtig – global machen
 window.loadMetaFromCloud = loadMetaFromCloud;
