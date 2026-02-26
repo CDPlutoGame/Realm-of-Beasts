@@ -903,7 +903,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    localStorage.setItem("mbr_current_name_online_v10", newName);
+   localStorage.setItem("mbr_current_name_online_v10", newName);
+   localStorage.setItem("mbr_display_name", newName);
 
     playerName = newName;
     updateHud();
