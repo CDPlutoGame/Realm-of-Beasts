@@ -1,4 +1,4 @@
-import import { db, firebaseRef as ref, firebaseGet as get, firebaseSet as set } from "./firebase.js";
+import { db, firebaseRef as ref, firebaseGet as get, firebaseSet as set } from "./firebase.js";
 
 console.log("✅ ranking.js geladen");
 
