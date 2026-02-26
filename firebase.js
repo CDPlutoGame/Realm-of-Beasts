@@ -4,7 +4,10 @@ import {
   getDatabase,
   ref,
   get,
-  set
+  set,
+  query,
+  orderByChild,
+  limitToLast
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
@@ -25,3 +28,6 @@ export const db = getDatabase(app);
 export const firebaseRef = ref;
 export const firebaseGet = get;
 export const firebaseSet = set;
+export const firebaseQuery = query;
+export const firebaseOrderByChild = orderByChild;
+export const firebaseLimitToLast = limitToLast;
