@@ -110,16 +110,17 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Name fürs Spiel 
+// Name fürs Spiel
 const baseName = user.email.split("@")[0].slice(0, 24);
 
-const savedName = localStorage.getItem("mbr_display_name");
+let savedName = localStorage.getItem("mbr_display_name");
 
-const finalName = savedName || baseName;
+if (!savedName) {
+  savedName = baseName;
+  localStorage.setItem("mbr_display_name", savedName);
+}
 
-localStorage.setItem("mbr_display_name", finalName);
-localStorage.setItem(CURRENT_NAME_KEY, finalName);
-  
+localStorage.setItem(CURRENT_NAME_KEY, savedName);
   const admin = await isAdmin(user.uid);
   window.__IS_ADMIN__ = admin;
 
