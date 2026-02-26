@@ -932,31 +932,46 @@ function renderMenu() {
     else bgMusic.pause();
   };
 }
-   // ==================== NAME OVERLAY LOGIK ====================
-const nameOverlay = document.getElementById("nameOverlay");
-const nameInput = document.getElementById("nameInput");
-const nameConfirm = document.getElementById("nameConfirm");
-const nameCancel = document.getElementById("nameCancel");
-const nameError = document.getElementById("nameError");
-if (nameOverlay && nameInput && nameConfirm && nameCancel && nameError) {
-  nameCancel.onclick = () => {
+
+// ==================== NAME OVERLAY LOGIK ====================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const nameOverlay = document.getElementById("nameOverlay");
+  const nameInput = document.getElementById("nameInput");
+  const nameConfirm = document.getElementById("nameConfirm");
+  const nameCancel = document.getElementById("nameCancel");
+  const nameError = document.getElementById("nameError");
+
+  if (!nameOverlay || !nameInput || !nameConfirm || !nameCancel || !nameError) {
+    console.log("Name Overlay Elemente nicht gefunden");
+    return;
+  }
+
+  nameCancel.addEventListener("click", () => {
     nameOverlay.style.display = "none";
     nameError.textContent = "";
-  };
-  nameConfirm.onclick = () => {
+  });
+
+  nameConfirm.addEventListener("click", () => {
     const newName = nameInput.value.trim().slice(0, 24);
+
     if (!newName) {
       nameError.textContent = "Name darf nicht leer sein.";
       return;
     }
-    // speichern
-   localStorage.setItem("mbr_current_name_online_v10", newName);
+
+    localStorage.setItem("mbr_current_name_online_v10", newName);
+
     playerName = newName;
     updateHud();
+
     nameOverlay.style.display = "none";
     nameInput.value = "";
     nameError.textContent = "";
-    safeLog(`✏️ Neuer Name gespeichert: ${newName}`);
-  };
-}
+
+    safeLog("✏️ Neuer Name gespeichert: " + newName);
+  });
+
+});
 })();
