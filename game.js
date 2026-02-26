@@ -731,7 +731,7 @@ function attack() {
     if (n !== __lastSeenName) {
       __lastSeenName = n;
       playerName = n;
-      meta = n ? loadProfile(n) : { ...DEFAULT_META };
+     
       runOver = true;
       resetRunKeepMeta().catch(()=>{});
       safeLog(n ? `✅ Eingeloggt als "${n}". Drück 'Drehen'.` : "🔒 Bitte anmelden.");
