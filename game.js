@@ -842,7 +842,6 @@ function attack() {
   setInterval(watchUserChange, 500);
   // ==================== 📜 MENÜ BUTTON ====================
 
-// ==================== 📜 STABILES MENÜ ====================
 const menuWrapper = document.createElement("div");
 menuWrapper.style.position = "fixed";
 menuWrapper.style.top = "10px";
@@ -920,6 +919,42 @@ function renderMenu() {
     soundMuted = !soundMuted;
     if (!soundMuted) playRandomMusic();
     else bgMusic.pause();
+  };
+}
+  // ==================== NAME OVERLAY LOGIK ====================
+
+const nameOverlay = document.getElementById("nameOverlay");
+const nameInput = document.getElementById("nameInput");
+const nameConfirm = document.getElementById("nameConfirm");
+const nameCancel = document.getElementById("nameCancel");
+const nameError = document.getElementById("nameError");
+
+if (nameOverlay && nameInput && nameConfirm && nameCancel && nameError) {
+
+  nameCancel.onclick = () => {
+    nameOverlay.style.display = "none";
+    nameError.textContent = "";
+  };
+
+  nameConfirm.onclick = () => {
+    const newName = nameInput.value.trim().slice(0, 24);
+
+    if (!newName) {
+      nameError.textContent = "Name darf nicht leer sein.";
+      return;
+    }
+
+    // speichern
+    localStorage.setItem("playerName", newName);
+
+    playerName = newName;
+    updateHud();
+
+    nameOverlay.style.display = "none";
+    nameInput.value = "";
+    nameError.textContent = "";
+
+    safeLog(`✏️ Neuer Name gespeichert: ${newName}`);
   };
 }
 })();
