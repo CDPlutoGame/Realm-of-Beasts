@@ -856,6 +856,7 @@ menuButton.style.borderRadius = "12px";
 menuButton.style.cursor = "pointer";
 
 const menuWindow = document.createElement("div");
+menuWindow.style.position = "absolute";
 menuWindow.style.top = "50px";
 menuWindow.style.right = "0";
 menuWindow.style.width = "220px";
@@ -865,18 +866,12 @@ menuWindow.style.background = "rgba(0,0,0,0.95)";
 menuWindow.style.border = "1px solid rgba(255,255,255,0.15)";
 menuWindow.style.boxShadow = "0 0 20px rgba(0,0,0,0.5)";
 menuWindow.style.display = "none";
-  
+
 function renderMenu() {
-
   if (!playerName) {
-
     menuWindow.innerHTML = `
-      <button id="menuLogin" style="width:100%;margin-bottom:8px;">
-        🔑 Login
-      </button>
-      <button id="menuSound" style="width:100%;">
-        🔊 Sound
-      </button>
+      <button id="menuLogin" style="width:100%;margin-bottom:8px;">🔑 Login</button>
+      <button id="menuSound" style="width:100%;">🔊 Sound</button>
     `;
 
     document.getElementById("menuLogin").onclick = () => {
@@ -885,17 +880,10 @@ function renderMenu() {
     };
 
   } else {
-
-    menuwindow.innerHTML = `
-      <button id="menuChangeName" style="width:100%;margin-bottom:8px;">
-        ✏️ Benutzername ändern
-      </button>
-      <button id="menuLogout" style="width:100%;margin-bottom:8px;">
-        🚪 Logout
-      </button>
-      <button id="menuSound" style="width:100%;">
-        🔊 Sound
-      </button>
+    menuWindow.innerHTML = `
+      <button id="menuChangeName" style="width:100%;margin-bottom:8px;">✏️ Benutzername ändern</button>
+      <button id="menuLogout" style="width:100%;margin-bottom:8px;">🚪 Logout</button>
+      <button id="menuSound" style="width:100%;">🔊 Sound</button>
     `;
 
     document.getElementById("menuChangeName").onclick = () => {
@@ -907,12 +895,8 @@ function renderMenu() {
     };
 
     document.getElementById("menuLogout").onclick = async () => {
-      try {
-        await window.auth.signOut();
-        menuWindow.style.display = "none";
-      } catch (err) {
-        console.error("Logout Fehler:", err);
-      }
+      await window.auth.signOut();
+      menuWindow.style.display = "none";
     };
   }
 
@@ -922,52 +906,15 @@ function renderMenu() {
     else bgMusic.pause();
   };
 }
+
 menuWrapper.appendChild(menuButton);
 menuWrapper.appendChild(menuWindow);
 document.body.appendChild(menuWrapper);
 
-// Toggle Funktion
 let menuOpen = false;
 
 menuButton.onclick = () => {
   menuOpen = !menuOpen;
   menuWindow.style.display = menuOpen ? "block" : "none";
-
   if (menuOpen) renderMenu();
 };
-  const nameOverlay = document.getElementById("nameOverlay");
-const nameInput = document.getElementById("nameInput");
-const nameConfirm = document.getElementById("nameConfirm");
-const nameCancel = document.getElementById("nameCancel");
-const nameError = document.getElementById("nameError");
-
-if (nameOverlay && nameInput && nameConfirm && nameCancel && nameError) {
-
-  nameCancel.onclick = () => {
-    nameOverlay.classList.remove("active");
-    nameError.textContent = "";
-  };
-
-  nameCancel.onclick = () => {
-  nameOverlay.style.display = "none";
-  nameError.textContent = "";
-};
-
-nameConfirm.onclick = () => {
-  const newName = nameInput.value.trim().slice(0, 24);
-
-  if (!newName) {
-    nameError.textContent = "Name darf nicht leer sein.";
-    return;
-  }
-
-  localStorage.setItem("mbr_display_name", newName);
-  playerName = newName;
-  updateHud();
-
-  nameOverlay.style.display = "none";
-  nameInput.value = "";
-  nameError.textContent = "";
- };
-}
-})();
