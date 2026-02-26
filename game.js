@@ -287,7 +287,7 @@ function updateHud() {
   function refreshUsePotionButton() {
     usePotionButton.disabled = !(meta.potions > 0 && playerHp < meta.maxHpBase);
   }
-  function renderShop() {
+  async function renderShop() {
     const isFullHp = playerHp >= meta.maxHpBase;
     const canBuyPotion = runOver && meta.gold >= POTION_COST;
     const canBuyMaxHp  = runOver && meta.gold >= meta.maxHpPrice;
@@ -343,7 +343,7 @@ function updateHud() {
       safeLog(`✅ MaxHP +5 gekauft (Full Heal). Neuer Preis: ${meta.maxHpPrice}`);
     };
 
-    document.getElementById("buyAtk").onclick = () => {
+    document.getElementById("buyAtk").onclick = async () => {
       if (!runOver) return safeLog("❌ Kraft kaufen nur nach Game Over.");
       if (meta.gold < meta.attackPowerPrice) return safeLog("❌ Zu wenig Gold.");
       meta.gold -= meta.attackPowerPrice;
@@ -366,7 +366,7 @@ function updateHud() {
 
     btnSpin.disabled = !canBuyAutoSpin;
     btnSpin.textContent = `Auto-Start Stufe ${nextSpinStage} — ${autoCost(nextSpinStage)} Gold`;
-    btnSpin.onclick = () => {
+    btnSpin.onclick = async () => {
       if (!canBuyAutoSpin) return safeLog("❌ Auto-Start: GameOver + Boss + Gold nötig.");
       meta.gold -= autoCost(nextSpinStage);
       meta.autoSpinStage = nextSpinStage;
@@ -377,7 +377,7 @@ function updateHud() {
 
     btnAtk.disabled = !canBuyAutoAtk;
     btnAtk.textContent = `Auto-Attack Stufe ${nextAtkStage} — ${autoCost(nextAtkStage)} Gold`;
-    btnAtk.onclick = () => {
+    btnAtk.onclick = async () => {
       if (!canBuyAutoAtk) return safeLog("❌ Auto-Attack: GameOver + Boss + Gold nötig.");
       meta.gold -= autoCost(nextAtkStage);
       meta.autoAttackStage = nextAtkStage;
@@ -633,7 +633,7 @@ function attack() {
   }
 
   // ---------------- SPIN ----------------
-  function spin() {
+  async function spin() {
     if (!playerName) return safeLog("🔒 Bitte zuerst anmelden.");
     if (inFight) return;
     if (runOver) return safeLog("Game Over. Shop ist aktiv. Starte 'Neue Runde'.");
