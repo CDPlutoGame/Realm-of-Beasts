@@ -756,20 +756,35 @@ function attack() {
     }
   }
 
-  loadUserFromStorage();
-  await loadMeta();
-  __lastSeenName = playerName;
+await new Promise(resolve => {
+  const unsub = window.auth.onAuthStateChanged(async (user) => {
 
-  generateBoard();
-  renderBoard();
-  updateHud();
-  renderShop();
-  refreshUsePotionButton();
-  setFightPanelIdle();
-  renderLeaderboard();
+    if (user) {
+      await loadMeta();
+    } else {
+      await loadMeta(); // lädt DEFAULT_META
+    }
 
-  safeLog(playerName ? `✅ Eingeloggt als "${playerName}". Drück 'Drehen'.` : "🔒 Bitte anmelden.");
-  setInterval(watchUserChange, 500);
+    unsub();
+    resolve();
+  });
+});
+
+console.log("META GELADEN:", meta);
+
+loadUserFromStorage();
+__lastSeenName = playerName;
+
+generateBoard();
+renderBoard();
+updateHud();
+renderShop();
+refreshUsePotionButton();
+setFightPanelIdle();
+renderLeaderboard();
+safeLog(playerName ? `✅ Eingeloggt als "${playerName}". Drück 'Drehen'.` : "🔒 Bitte anmelden.");
+setInterval(watchUserChange, 500);
+  
   // ==================== 📜 MENÜ BUTTON ====================
 
 const menuWrapper = document.createElement("div");
