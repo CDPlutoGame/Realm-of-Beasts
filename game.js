@@ -775,14 +775,11 @@ await new Promise(resolve => {
 
     unsub();
     resolve();
-  });
-});
-
+  }); 
+  
 console.log("META GELADEN:", meta);
-
 loadUserFromStorage();
 __lastSeenName = playerName;
-
 generateBoard();
 renderBoard();
 updateHud();
@@ -790,9 +787,12 @@ renderShop();
 refreshUsePotionButton();
 setFightPanelIdle();
 renderLeaderboard();
-safeLog(playerName ? `✅ Eingeloggt als "${playerName}". Drück 'Drehen'.` : "🔒 Bitte anmelden.");
+safeLog(playerName 
+        ? `✅ Eingeloggt als "${playerName}". Drück 'Drehen'.` 
+        : "🔒 Bitte anmelden."
+       );
 setInterval(watchUserChange, 500);
-  
+  });
   // ==================== 📜 MENÜ BUTTON ====================
 
 const menuWrapper = document.createElement("div");
