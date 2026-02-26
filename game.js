@@ -752,47 +752,60 @@ function attack() {
 
   let __lastSeenName = "";
   
- async function watchUserChange() {
-    const n = loadAnyName();
-    if (n !== __lastSeenName) {
-      __lastSeenName = n;
-      playerName = n;
-     
-      runOver = true;
-      resetRunKeepMeta().catch(()=>{});
-      safeLog(n ? `✅ Eingeloggt als "${n}". Drück 'Drehen'.` : "🔒 Bitte anmelden.");
+async function watchUserChange() {
+  const n = loadAnyName();
+
+  if (n !== __lastSeenName) {
+    __lastSeenName = n;
+    playerName = n;
+
+    // 🔥 WICHTIG: Meta neu laden wenn User existiert
+    if (auth.currentUser) {
+      await loadMeta();
     }
+
+    updateHud();
+    renderShop();
+    refreshUsePotionButton();
+
+    safeLog(
+      n ? `✅ Eingeloggt als "${n}".`
+        : "🔒 Bitte anmelden."
+    );
   }
+}
 
 await new Promise(resolve => {
   const unsub = auth.onAuthStateChanged(async (user) => {
 
-    if (user) {
-      await loadMeta();
-    } else {
-      await loadMeta(); // lädt DEFAULT_META
-    }
+    await loadMeta();   // immer laden
 
     unsub();
     resolve();
-  }); 
-  
+  });
+});
+
+// 🔥 ERST HIER darf das Spiel starten
 console.log("META GELADEN:", meta);
-loadUserFromStorage();
+
+await loadUserFromStorage();
+
 __lastSeenName = playerName;
+
 generateBoard();
 renderBoard();
 updateHud();
-renderShop();
+await renderShop();
 refreshUsePotionButton();
 setFightPanelIdle();
-renderLeaderboard();
+await renderLeaderboard();
+
 safeLog(playerName 
-        ? `✅ Eingeloggt als "${playerName}". Drück 'Drehen'.` 
-        : "🔒 Bitte anmelden."
-       );
+  ? `✅ Eingeloggt als "${playerName}". Drück 'Drehen'.` 
+  : "🔒 Bitte anmelden."
+);
+
 setInterval(watchUserChange, 500);
-  });
   // ==================== 📜 MENÜ BUTTON ====================
 
 const menuWrapper = document.createElement("div");
