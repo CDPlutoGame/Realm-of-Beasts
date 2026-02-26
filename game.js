@@ -36,8 +36,6 @@
   prestigeLevel: 0
 };
 
-// 👇 HIER einfügen (Schritt 3)
-
 const db = window.db;
 const auth = window.auth;
 
