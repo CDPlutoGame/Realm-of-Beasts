@@ -2,11 +2,15 @@ import {
   db, 
   firebaseRef as ref, 
   firebaseGet as get, 
-  firebaseSet as set,
-  firebaseQuery as query,
-  firebaseOrderByChild as orderByChild,
-  firebaseLimitToLast as limitToLast
+  firebaseSet as set 
 } from "./firebase.js";
+
+import { 
+  query, 
+  orderByChild, 
+  limitToLast 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
 console.log("✅ ranking.js geladen");
 
 const auth = window.auth;
