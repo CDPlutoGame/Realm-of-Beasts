@@ -20,6 +20,7 @@ const CURRENT_NAME_KEY = "mbr_current_name_online_v10";
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const saveLayoutBtn = document.getElementById("saveLayoutBtn");
+const resetBtn = document.getElementById("resetBtn");
 
 function show(el, yes) {
   if (!el) return;
@@ -118,11 +119,6 @@ const finalName = savedName || baseName;
 
 localStorage.setItem("mbr_display_name", finalName);
 localStorage.setItem(CURRENT_NAME_KEY, finalName);
-  
-// 🔥 CLOUD META LADEN
-  if (window.loadMetaFromCloud) {
-    await window.loadMetaFromCloud();
-  }
   
   const admin = await isAdmin(user.uid);
   window.__IS_ADMIN__ = admin;
