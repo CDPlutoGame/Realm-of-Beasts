@@ -718,15 +718,15 @@ function attack() {
   attackButton.disabled = true;
   newRoundButton.disabled = true; // 🔒 Start gesperrt
   
-  function loadUserFromStorage() {
+  async function loadUserFromStorage() {
     const n = loadAnyName();
     playerName = n;
-    meta = n ? loadProfile(n) : { ...DEFAULT_META };
     playerHp = meta.maxHpBase;
   }
 
   let __lastSeenName = "";
-  function watchUserChange() {
+  
+ async function watchUserChange() {
     const n = loadAnyName();
     if (n !== __lastSeenName) {
       __lastSeenName = n;
