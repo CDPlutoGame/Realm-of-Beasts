@@ -31,3 +31,13 @@ export const firebaseSet = set;
 export const firebaseQuery = query;
 export const firebaseOrderByChild = orderByChild;
 export const firebaseLimitToLast = limitToLast;
+
+// 🔥 GLOBAL verfügbar machen für game.js
+window.auth = auth;
+window.db = db;
+window.firebaseRef = ref;
+window.firebaseGet = get;
+window.firebaseSet = set;
+window.firebaseQuery = query;
+window.firebaseOrderByChild = orderByChild;
+window.firebaseLimitToLast = limitToLast;
