@@ -778,7 +778,12 @@ async function watchUserChange() {
 await new Promise(resolve => {
   const unsub = auth.onAuthStateChanged(async (user) => {
 
-    await loadMeta();   // immer laden
+    if (user) {
+      await loadMeta();  // 🔥 NUR wenn User existiert
+      console.log("META vom Server geladen:", meta);
+    } else {
+      console.log("Kein User eingeloggt");
+    }
 
     unsub();
     resolve();
