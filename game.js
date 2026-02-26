@@ -40,20 +40,26 @@ const db = window.db;
 const auth = window.auth;
 
 async function loadMetaFromCloud() {
-  const user = auth.currentUser;
+  if (!window.auth) return;
+  if (!window.db) return;
+
+  const user = window.auth.currentUser;
   if (!user) return;
 
-  const snap = await window.firebaseGet(
-    window.firebaseRef(db, "users/" + user.uid + "/meta")
-  );
+  try {
+    const snap = await window.firebaseGet(
+      window.firebaseRef(window.db, "users/" + user.uid + "/meta")
+    );
 
-  if (snap.exists()) {
-    meta = { ...DEFAULT_META, ...snap.val() };
-  } else {
-    await saveMetaToCloud();
+    if (snap.exists()) {
+      meta = { ...DEFAULT_META, ...snap.val() };
+    } else {
+      await saveMetaToCloud();
+    }
+  } catch (err) {
+    console.log("Meta load skipped:", err);
   }
 }
-
 async function saveMetaToCloud() {
   const user = auth.currentUser;
   if (!user) return;
