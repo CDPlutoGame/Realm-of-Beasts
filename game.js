@@ -877,18 +877,15 @@ function renderMenu() {
 
 // ==================== NAME OVERLAY LOGIK ====================
 
-document.addEventListener("DOMContentLoaded", () => {
+const nameOverlay = document.getElementById("nameOverlay");
+const nameInput = document.getElementById("nameInput");
+const nameConfirm = document.getElementById("nameConfirm");
+const nameCancel = document.getElementById("nameCancel");
+const nameError = document.getElementById("nameError");
 
-  const nameOverlay = document.getElementById("nameOverlay");
-  const nameInput = document.getElementById("nameInput");
-  const nameConfirm = document.getElementById("nameConfirm");
-  const nameCancel = document.getElementById("nameCancel");
-  const nameError = document.getElementById("nameError");
-
-  if (!nameOverlay || !nameInput || !nameConfirm || !nameCancel || !nameError) {
-    console.log("Name Overlay Elemente nicht gefunden");
-    return;
-  }
+if (!nameOverlay || !nameInput || !nameConfirm || !nameCancel || !nameError) {
+  console.log("Name Overlay Elemente nicht gefunden");
+} else {
 
   nameCancel.addEventListener("click", () => {
     nameOverlay.style.display = "none";
@@ -903,8 +900,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-   localStorage.setItem("mbr_current_name_online_v10", newName);
-   localStorage.setItem("mbr_display_name", newName);
+    localStorage.setItem("mbr_current_name_online_v10", newName);
+    localStorage.setItem("mbr_display_name", newName);
 
     playerName = newName;
     updateHud();
@@ -912,9 +909,8 @@ document.addEventListener("DOMContentLoaded", () => {
     nameOverlay.style.display = "none";
     nameInput.value = "";
     nameError.textContent = "";
-
     safeLog("✏️ Neuer Name gespeichert: " + newName);
   });
 
-});
+}
 })();
