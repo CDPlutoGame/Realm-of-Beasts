@@ -774,21 +774,25 @@ async function watchUserChange() {
     );
   }
 }
-
 await new Promise(resolve => {
   const unsub = auth.onAuthStateChanged(async (user) => {
 
+    console.log("🔐 Auth State:", user);
+
     if (user) {
-      await loadMeta();  // 🔥 NUR wenn User existiert
-      console.log("META vom Server geladen:", meta);
+      console.log("📦 Lade Meta...");
+      await loadMeta();
+      console.log("✅ Meta geladen:", meta);
     } else {
-      console.log("Kein User eingeloggt");
+      console.log("🚫 Kein User eingeloggt");
     }
 
     unsub();
     resolve();
   });
 });
+
+console.log("🚀 Init startet jetzt...");
 
 // 🔥 ERST HIER darf das Spiel starten
 console.log("META GELADEN:", meta);
