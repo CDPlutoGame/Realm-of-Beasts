@@ -1,4 +1,8 @@
+import { auth } from "./firebase.js";
 import { meta, loadMeta, saveMeta } from "./profile.js";
+
+console.log("AUTH TEST:", auth);
+
 // ===== Monster Browser Game (ONLINE) =====
 (async() => {
   
@@ -761,7 +765,7 @@ function attack() {
   }
 
 await new Promise(resolve => {
-  const unsub = window.auth.onAuthStateChanged(async (user) => {
+  const unsub = auth.onAuthStateChanged(async (user) => {
 
     if (user) {
       await loadMeta();
