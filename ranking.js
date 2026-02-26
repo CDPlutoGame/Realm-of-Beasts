@@ -1,5 +1,12 @@
-import { db, firebaseRef as ref, firebaseGet as get, firebaseSet as set } from "./firebase.js";
-
+import { 
+  db, 
+  firebaseRef as ref, 
+  firebaseGet as get, 
+  firebaseSet as set,
+  firebaseQuery as query,
+  firebaseOrderByChild as orderByChild,
+  firebaseLimitToLast as limitToLast
+} from "./firebase.js";
 console.log("✅ ranking.js geladen");
 
 const auth = window.auth;
