@@ -1,8 +1,6 @@
 // profile.js
 
-export let meta = null;
-
-const DEFAULT_META = {
+export let meta = {
   gold: 0,
   potions: 0,
   maxHpBase: 30,
