@@ -549,10 +549,9 @@ async function endFightWin() {
     const payload = {
       name: playerName || "Unknown",
       rounds,
-      gold: meta.gold,
-      hp: playerHp,
       monstersKilled,
-      bossesKilled
+      bossesKilled,
+      createdAt: Date.now()
     };
 
     // ⭐ Best-Score lokal (pro Gerät)
