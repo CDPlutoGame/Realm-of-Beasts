@@ -1,4 +1,9 @@
-// profile.js
+import { auth, db } from "./firebase.js";
+import { ref, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+/* =========================
+   META OBJEKT (GLOBAL)
+========================= */
 
 export let meta = {
   gold: 0,
@@ -13,34 +18,43 @@ export let meta = {
   prestigeLevel: 0
 };
 
+/* =========================
+   META LADEN
+========================= */
+
 export async function loadMeta() {
-  if (!window.auth || !window.db) return;
+  const user = auth.currentUser;
 
-  const user = window.auth.currentUser;
-  if (!user) return;
+  if (!user) {
+    console.log("🚫 Kein User – Meta bleibt lokal");
+    return meta;
+  }
 
-  const snap = await window.firebaseGet(
-    window.firebaseRef(window.db, "users/" + user.uid + "/meta")
-  );
+  const snap = await get(ref(db, `users/${user.uid}/meta`));
 
   if (snap.exists()) {
-    meta = { ...DEFAULT_META, ...snap.val() };
+    meta = snap.val();
+    console.log("📦 Meta vom Server geladen:", meta);
   } else {
-    meta = { ...DEFAULT_META };
+    console.log("🆕 Kein Meta vorhanden – erstelle neu");
     await saveMeta();
   }
 
   return meta;
 }
 
+/* =========================
+   META SPEICHERN
+========================= */
+
 export async function saveMeta() {
-  if (!window.auth || !window.db) return;
+  const user = auth.currentUser;
 
-  const user = window.auth.currentUser;
-  if (!user) return;
+  if (!user) {
+    console.log("🚫 Kein User – Speichern übersprungen");
+    return;
+  }
 
-  await window.firebaseSet(
-    window.firebaseRef(window.db, "users/" + user.uid + "/meta"),
-    meta
-  );
+  await set(ref(db, `users/${user.uid}/meta`), meta);
+  console.log("💾 Meta gespeichert");
 }
