@@ -969,4 +969,4 @@ function initNameOverlay() {
   });
 }
 
-initNameOverlay();();
+initNameOverlay();
