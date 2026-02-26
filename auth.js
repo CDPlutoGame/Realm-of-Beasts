@@ -97,30 +97,33 @@ logoutBtn?.addEventListener("click", async () => {
   await signOut(auth);
 });
 
-// UI + Name fürs Spiel setzen
 onAuthStateChanged(auth, async (user) => {
+
   if (!user) {
     localStorage.removeItem(CURRENT_NAME_KEY);
     window.__IS_ADMIN__ = false;
-
     show(loginBtn, true);
     show(resetBtn, false);
     show(logoutBtn, false);
     show(saveLayoutBtn, false);
+
+    // 🔥 wichtig!
+    window.__AUTH_READY__ = true;
+    document.dispatchEvent(new Event("auth-ready"));
     return;
   }
 
-// Name fürs Spiel
-const baseName = user.email.split("@")[0].slice(0, 24);
+  // Name fürs Spiel
+  const baseName = user.email.split("@")[0].slice(0, 24);
+  let savedName = localStorage.getItem("mbr_display_name");
 
-let savedName = localStorage.getItem("mbr_display_name");
+  if (!savedName) {
+    savedName = baseName;
+    localStorage.setItem("mbr_display_name", savedName);
+  }
 
-if (!savedName) {
-  savedName = baseName;
-  localStorage.setItem("mbr_display_name", savedName);
-}
+  localStorage.setItem(CURRENT_NAME_KEY, savedName);
 
-localStorage.setItem(CURRENT_NAME_KEY, savedName);
   const admin = await isAdmin(user.uid);
   window.__IS_ADMIN__ = admin;
 
@@ -128,6 +131,10 @@ localStorage.setItem(CURRENT_NAME_KEY, savedName);
   show(resetBtn, false);
   show(logoutBtn, true);
   show(saveLayoutBtn, admin);
+
+  // 🔥 wichtig!
+  window.__AUTH_READY__ = true;
+  document.dispatchEvent(new Event("auth-ready"));
 });
 // ===== LOGIN RESET BUTTON (Overlay) =====
 const loginReset = document.getElementById("loginReset");
