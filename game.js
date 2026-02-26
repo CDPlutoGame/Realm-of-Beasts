@@ -1,4 +1,3 @@
-console.log("GAME JS STARTET");
 // ===== Monster Browser Game (ONLINE) - stable + SOUND + mobile safe =====
 (() => {
   if (window.__MBR_LOADED__) return;
@@ -857,22 +856,21 @@ menuButton.style.borderRadius = "12px";
 menuButton.style.cursor = "pointer";
 
 const menuWindow = document.createElement("div");
-menuWindow.style.position = "absolute";
-menu.style.top = "50px";
-menu.style.right = "0";
-menu.style.width = "220px";
-menu.style.padding = "15px";
-menu.style.borderRadius = "14px";
-menu.style.background = "rgba(0,0,0,0.95)";
-menu.style.border = "1px solid rgba(255,255,255,0.15)";
-menu.style.boxShadow = "0 0 20px rgba(0,0,0,0.5)";
-menu.style.display = "none"; // 👈 wichtig (startet geschlossen)
-
+menuWindow.style.top = "50px";
+menuWindow.style.right = "0";
+menuWindow.style.width = "220px";
+menuWindow.style.padding = "15px";
+menuWindow.style.borderRadius = "14px";
+menuWindow.style.background = "rgba(0,0,0,0.95)";
+menuWindow.style.border = "1px solid rgba(255,255,255,0.15)";
+menuWindow.style.boxShadow = "0 0 20px rgba(0,0,0,0.5)";
+menuWindow.style.display = "none";
+  
 function renderMenu() {
 
   if (!playerName) {
 
-    menu.innerHTML = `
+    menuWindow.innerHTML = `
       <button id="menuLogin" style="width:100%;margin-bottom:8px;">
         🔑 Login
       </button>
@@ -883,12 +881,12 @@ function renderMenu() {
 
     document.getElementById("menuLogin").onclick = () => {
       document.getElementById("loginOverlay").style.display = "flex";
-      menu.style.display = "none";
+      menuWindow.style.display = "none";
     };
 
   } else {
 
-    menu.innerHTML = `
+    menuwindow.innerHTML = `
       <button id="menuChangeName" style="width:100%;margin-bottom:8px;">
         ✏️ Benutzername ändern
       </button>
