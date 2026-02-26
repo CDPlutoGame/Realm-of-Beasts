@@ -316,17 +316,22 @@ function updateHud() {
       safeLog(`✅ Trank gekauft. Tränke: ${meta.potions}`);
     };
 
-    document.getElementById("buyHeal10").onclick = () => {
-      if (playerHp >= meta.maxHpBase) return safeLog("❤️ Schon voll.");
-      if (meta.gold < HEAL10_COST) return safeLog("❌ Zu wenig Gold.");
-      meta.gold -= HEAL10_COST;
-      playerHp = Math.min(meta.maxHpBase, playerHp + HEAL10_AMOUNT);
-     await saveMeta();
-      updateHud(); renderShop(); refreshUsePotionButton();
-      safeLog("✅ Sofort geheilt: +10 HP");
-    };
+    document.getElementById("buyHeal10").onclick = async () => {
+  if (playerHp >= meta.maxHpBase) return safeLog("❤️ Schon voll.");
+  if (meta.gold < HEAL10_COST) return safeLog("❌ Zu wenig Gold.");
 
-    document.getElementById("buyMaxHp").onclick = () => {
+  meta.gold -= HEAL10_COST;
+  playerHp = Math.min(meta.maxHpBase, playerHp + HEAL10_AMOUNT);
+
+  await saveMeta();
+
+  updateHud();
+  renderShop();
+  refreshUsePotionButton();
+  safeLog("✅ Sofort geheilt: +10 HP");
+};
+
+    document.getElementById("buyMaxHp").onclick = async () => {
       if (!runOver) return safeLog("❌ MaxHP kaufen nur nach Game Over.");
       if (meta.gold < meta.maxHpPrice) return safeLog("❌ Zu wenig Gold.");
       meta.gold -= meta.maxHpPrice;
