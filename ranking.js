@@ -2,7 +2,6 @@ import { db, firebaseRef as ref, firebaseGet as get, firebaseSet as set } from "
 
 console.log("✅ ranking.js geladen");
 
-const db = window.db;
 const auth = window.auth;
 
 const toNum = (x) => {
