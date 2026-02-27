@@ -13,8 +13,7 @@ export let meta = {
   maxHpPrice: 100,
   attackPowerPrice: 100,
   bossesDefeated: 0,
-  autoSpinStage: 0,
-  autoAttackStage: 0,
+  autoLevel: 0,
   prestigeLevel: 0
 };
 
