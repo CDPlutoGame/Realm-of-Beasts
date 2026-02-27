@@ -210,8 +210,8 @@ async function renderLeaderboard() {
   leaderboardEl.innerHTML = html;
 }
 
-  // ---------------- AUTO SYSTEM ----------------
-  let autoTimer = null;
+  // ---------------- AUTO SYSTEM (NEU - 1 Button) ----------------
+let autoTimer = null;
 
 function stopAuto() {
   if (autoTimer) clearInterval(autoTimer);
@@ -219,24 +219,27 @@ function stopAuto() {
 }
 
 function startAuto() {
+  if (meta.autoStage <= 0) return;
+
   stopAuto();
 
-  if (meta.autoLevel <= 0) return;
-
   autoTimer = setInterval(() => {
-
     if (runOver) return stopAuto();
 
-    // Stop bei Boss
-    if (rounds >= meta.autoLevel * 10) {
-      stopAuto();
+    // Wenn im Kampf → angreifen
+    if (inFight && monster) {
+      attack();
       return;
     }
 
+    // Wenn nicht im Kampf → drehen
     if (!inFight) {
       spin();
-    } else {
-      attack();
+    }
+
+    // Stoppen wenn Boss erreicht
+    if (rounds > 0 && rounds % 10 === 0 && inFight) {
+      stopAuto();
     }
 
   }, 400);
@@ -313,16 +316,15 @@ function updateHud() {
     const canBuyHeal10 = !isFullHp && meta.gold >= HEAL10_COST;
 
     shopEl.innerHTML = `
-      <b>🏪 Shop</b><br>
-      <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;">
-        <button id="buyPotion" ${canBuyPotion ? "" : "disabled"}>Trank +5 — 5 Gold</button>
-        <button id="buyHeal10" ${canBuyHeal10 ? "" : "disabled"}>Sofort +10 — 50 Gold</button>
-        <button id="buyMaxHp" ${canBuyMaxHp ? "" : "disabled"}>Max HP +5 — ${meta.maxHpPrice} Gold</button>
-        <button id="buyAtk" ${canBuyAtk ? "" : "disabled"}>Kraft +5 — ${meta.attackPowerPrice} Gold</button>
-        <button id="buyAutoSpin">Auto-Start</button>
-        <button id="buyAutoAttack">Auto-Attack</button>
-      </div>
-    `;
+  <b>🏪 Shop</b><br>
+  <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;">
+    <button id="buyPotion" ${canBuyPotion ? "" : "disabled"}>Trank +5 — 5 Gold</button>
+    <button id="buyHeal10" ${canBuyHeal10 ? "" : "disabled"}>Sofort +10 — 50 Gold</button>
+    <button id="buyMaxHp" ${canBuyMaxHp ? "" : "disabled"}>Max HP +5 — ${meta.maxHpPrice} Gold</button>
+    <button id="buyAtk" ${canBuyAtk ? "" : "disabled"}>Kraft +5 — ${meta.attackPowerPrice} Gold</button>
+    <button id="buyAuto">🤖 Automatik</button>
+  </div>
+`;
 
     document.getElementById("buyPotion").onclick = async () => {
       if (!runOver) return safeLog("❌ Trank kaufen nur nach Game Over.");
@@ -372,38 +374,36 @@ function updateHud() {
       safeLog(`✅ Kraft +5 gekauft. Neue Kraft: ${meta.attackPower}. Neuer Preis: ${meta.attackPowerPrice}`);
     };
 
-    const nextSpinStage = meta.autoSpinStage + 1;
-    const nextAtkStage  = meta.autoAttackStage + 1;
-    const canBuyAutoSpin =
-      runOver && (meta.bossesDefeated >= nextSpinStage) && (meta.gold >= autoCost(nextSpinStage));
-    const canBuyAutoAtk =
-      runOver && (meta.bossesDefeated >= nextAtkStage) && (meta.gold >= autoCost(nextAtkStage));
+    const btnAuto = document.getElementById("buyAuto");
 
-    const btnSpin = document.getElementById("buyAutoSpin");
-    const btnAtk  = document.getElementById("buyAutoAttack");
+const nextStage = (meta.autoStage || 0) + 1;
+const cost = 1000 * nextStage;
 
-    btnSpin.disabled = !canBuyAutoSpin;
-    btnSpin.textContent = `Auto-Start Stufe ${nextSpinStage} — ${autoCost(nextSpinStage)} Gold`;
-    btnSpin.onclick = async () => {
-      if (!canBuyAutoSpin) return safeLog("❌ Auto-Start: GameOver + Boss + Gold nötig.");
-      meta.gold -= autoCost(nextSpinStage);
-      meta.autoSpinStage = nextSpinStage;
-     await saveMeta();
-      updateHud(); renderShop();
-      safeLog(`✅ Auto-Start Stufe ${meta.autoSpinStage} gekauft!`);
-    };
+// Freischalten nur wenn Boss besiegt
+const canBuyAuto =
+  runOver &&
+  meta.bossesDefeated >= nextStage &&
+  meta.gold >= cost;
 
-    btnAtk.disabled = !canBuyAutoAtk;
-    btnAtk.textContent = `Auto-Attack Stufe ${nextAtkStage} — ${autoCost(nextAtkStage)} Gold`;
-    btnAtk.onclick = async () => {
-      if (!canBuyAutoAtk) return safeLog("❌ Auto-Attack: GameOver + Boss + Gold nötig.");
-      meta.gold -= autoCost(nextAtkStage);
-      meta.autoAttackStage = nextAtkStage;
-     await saveMeta();
-      updateHud(); renderShop();
-      safeLog(`✅ Auto-Attack Stufe ${meta.autoAttackStage} gekauft!`);
-    };
+btnAuto.disabled = !canBuyAuto;
+btnAuto.textContent = `🤖 Automatik Stufe ${nextStage} — ${cost} Gold`;
+
+btnAuto.onclick = async () => {
+  if (!canBuyAuto) {
+    safeLog("❌ Erst Boss besiegen + Game Over + genug Gold.");
+    return;
   }
+
+  meta.gold -= cost;
+  meta.autoStage = nextStage;
+
+  await saveMeta();
+
+  updateHud();
+  renderShop();
+
+  safeLog(`🤖 Automatik Stufe ${meta.autoStage} gekauft!`);
+};
 
   // ---------------- ENEMIES ----------------
   function enemyLevel() { 
@@ -823,6 +823,7 @@ safeLog(playerName
 );
 
 setInterval(watchUserChange, 500);
+
   // ==================== 📜 MENÜ BUTTON ====================
 
 const menuWrapper = document.createElement("div");
