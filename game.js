@@ -738,10 +738,9 @@ function attack() {
   await renderLeaderboard();
 
   safeLog("✅ Neue Runde gestartet. Drück 'Drehen'.");
-
-  if (meta.autoSpinStage > 0) startAutoSpin();
-  if (meta.autoAttackStage > 0) startAutoAttack();
-}
+rtAutoSpin();
+ 
+if (meta.autoStage > 0) startAuto();
 
   // ---------------- HOOKS ----------------
   spinButton.onclick = spin;
