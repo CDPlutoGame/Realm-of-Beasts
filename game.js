@@ -211,34 +211,36 @@ async function renderLeaderboard() {
 }
 
   // ---------------- AUTO SYSTEM ----------------
-  let autoSpinTimer = null;
-  let autoAttackTimer = null;
-  function autoCost(nextStage) {
-    return AUTO_BASE_COST + (nextStage - 1) * AUTO_STEP_COST;
-  }
-  function currentBossIdx() { return Math.floor(rounds / 10); }
-  function stopAutoSpin() { if (autoSpinTimer) clearInterval(autoSpinTimer); autoSpinTimer = null; }
-  function stopAutoAttack() { if (autoAttackTimer) clearInterval(autoAttackTimer); autoAttackTimer = null; }
-  function startAutoSpin() {
-    stopAutoSpin();
-    if (meta.autoSpinStage <= 0) return;
-    const maxRounds = meta.autoSpinStage * 10;
-    autoSpinTimer = setInterval(() => {
-      if (runOver || inFight) return;
-      if (rounds >= maxRounds) { stopAutoSpin(); return; }
+  let autoTimer = null;
+
+function stopAuto() {
+  if (autoTimer) clearInterval(autoTimer);
+  autoTimer = null;
+}
+
+function startAuto() {
+  stopAuto();
+
+  if (meta.autoLevel <= 0) return;
+
+  autoTimer = setInterval(() => {
+
+    if (runOver) return stopAuto();
+
+    // Stop bei Boss
+    if (rounds >= meta.autoLevel * 10) {
+      stopAuto();
+      return;
+    }
+
+    if (!inFight) {
       spin();
-    }, 350);
-  }
-  function startAutoAttack() {
-    stopAutoAttack();
-    if (meta.autoAttackStage <= 0) return;
-    autoAttackTimer = setInterval(() => {
-      if (runOver) return;
-      if (!inFight || !monster) return;
-      if (currentBossIdx() > meta.autoAttackStage) { stopAutoAttack(); return; }
+    } else {
       attack();
-    }, 450);
-  }
+    }
+
+  }, 400);
+}
 
   // ---------------- BOARD ----------------
   function pickMonsterTypeByRound() {
