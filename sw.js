@@ -1,4 +1,4 @@
-const CACHE_NAME = "realm-of-beasts-s3";
+const CACHE_NAME = "realm-of-beasts-a1";
 
 const ASSETS = [
   "./",
