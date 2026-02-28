@@ -4,9 +4,13 @@ import { meta, loadMeta, saveMeta } from "./profile.js";
 const auth = getAuth();   // ✅ DAS HIER FEHLT
 
 console.log("AUTH TEST:", auth);
+
 // ===== Monster Browser Game (ONLINE) =====
 (async() => {
-  
+
+console.log("🚀 game.js gestartet");
+alert("game.js läuft");
+ 
 function loadAnyName() {
   return localStorage.getItem("mbr_current_name_online_v10");
 }
