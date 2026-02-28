@@ -1,3 +1,8 @@
+
+window.onerror = function(msg, url, line, col, error) {
+  alert("FEHLER:\n" + msg + "\nZeile: " + line);
+};
+
 import { auth } from "./firebase.js";
 import { meta, loadMeta, saveMeta } from "./profile.js";
 
