@@ -1,9 +1,4 @@
-
-window.onerror = function(msg, url, line, col, error) {
-  alert("FEHLER:\n" + msg + "\nZeile: " + line);
-};
-
-import { auth } from "./firebase.js";
+import { signOut } from "firebase-auth-url";
 import { meta, loadMeta, saveMeta } from "./profile.js";
 
 console.log("AUTH TEST:", auth);
@@ -524,7 +519,7 @@ function renderFightPanel() {
     attackButton.disabled = false;
     renderFightPanel();
     refreshUsePotionButton();
-    if (meta.autoAttackStage > 0) startAutoAttack();
+    if (meta.autoStage > 0) startAuto();
   }
 async function endFightWin() {
     if (monster?.kind === "boss") bossesKilled += 1;
@@ -557,8 +552,8 @@ async function endFightWin() {
   function gameOver() {
     runOver = true;
     inFight = false;
-    stopAutoSpin();
-    stopAutoAttack();
+    stopAuto();
+    
 
     spinButton.disabled = true;
     attackButton.disabled = true;
