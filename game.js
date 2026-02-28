@@ -1,8 +1,9 @@
 import { getAuth, signOut } from "firebase/auth";
 import { meta, loadMeta, saveMeta } from "./profile.js";
 
-console.log("AUTH TEST:", auth);
+const auth = getAuth();   // ✅ DAS HIER FEHLT
 
+console.log("AUTH TEST:", auth);
 // ===== Monster Browser Game (ONLINE) =====
 (async() => {
   
