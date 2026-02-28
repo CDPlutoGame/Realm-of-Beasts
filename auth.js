@@ -10,8 +10,6 @@ import {
 
 import { ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-console.log("✅ auth.js geladen");
-
 import { auth, db } from "./firebase.js";
 
 const CURRENT_NAME_KEY = "mbr_current_name_online_v10";
