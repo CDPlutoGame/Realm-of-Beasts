@@ -1,3 +1,7 @@
+window.onerror = function (msg, src, line, col, err) {
+  alert("JS ERROR:\n" + msg + "\nZeile: " + line);
+};
+
 console.log("GAME STARTET");
 
 setTimeout(() => {
