@@ -742,7 +742,8 @@ if (meta.autoStage > 0) {
   startAuto();
 }
 
-  // ---------------- HOOKS ----------------
+}
+ // ---------------- HOOKS ----------------
   spinButton.onclick = spin;
   attackButton.onclick = attack;
   usePotionButton.onclick = usePotion;
