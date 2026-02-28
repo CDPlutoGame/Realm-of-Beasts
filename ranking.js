@@ -30,7 +30,7 @@ async function submitScore(payload) {
     rounds: payload.rounds,
     monstersKilled: payload.monstersKilled,
     bossesKilled: payload.bossesKilled,
-    ts: Date.now()
+    createdAt: Date.now()
   };
 
   const playerRef = ref(db, "ranking/" + user.uid);
