@@ -1,4 +1,4 @@
-import { signOut } from "firebase-auth-url";
+import { getAuth, signOut } from "firebase/auth";
 import { meta, loadMeta, saveMeta } from "./profile.js";
 
 console.log("AUTH TEST:", auth);
