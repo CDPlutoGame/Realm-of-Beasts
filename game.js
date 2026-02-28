@@ -594,8 +594,7 @@ const t = setInterval(async () => {
     else if (payload.rounds > existing.rounds) {
       await window.__ONLINE_RANKING__.submitScore(payload);
     }
-
-    localStorage.removeItem("mbr_pending_score");
+ localStorage.removeItem("mbr_pending_score");
     clearInterval(t);
     renderLeaderboard();
   } catch (err) {}
@@ -721,8 +720,7 @@ function attack() {
   monstersKilled = 0;
   bossesKilled = 0;
 
-  stopAutoSpin();
-  stopAutoAttack();
+  stopAuto();
 
   spinButton.disabled = false;
   attackButton.disabled = true;
@@ -738,9 +736,11 @@ function attack() {
   await renderLeaderboard();
 
   safeLog("✅ Neue Runde gestartet. Drück 'Drehen'.");
-rtAutoSpin();
- 
-if (meta.autoStage > 0) startAuto();
+
+// Automatik neu starten falls vorhanden
+if (meta.autoStage > 0) {
+  startAuto();
+}
 
   // ---------------- HOOKS ----------------
   spinButton.onclick = spin;
