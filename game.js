@@ -1,3 +1,9 @@
+console.log("GAME STARTET");
+
+setTimeout(() => {
+  document.body.style.background = "green";
+}, 2000);
+
 import { auth } from "./firebase.js";
 import { meta, loadMeta, saveMeta } from "./profile.js";
 
