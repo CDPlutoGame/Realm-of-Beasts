@@ -798,14 +798,26 @@ async function watchUserChange() {
   }
 }
   
-// 🔥 Warten bis auth.js fertig ist
-await new Promise(resolve => {
-  if (window.__AUTH_READY__) {
-    resolve();
-  } else {
-    document.addEventListener("auth-ready", resolve, { once: true });
-  }
-});
+// ✅ Verbessertes Warten: Prüft sofort, ob Auth schon bereit ist
+console.log("Prüfe Auth-Status...");
+if (window.__AUTH_READY__ === true) {
+  console.log("Auth war bereits fertig!");
+} else {
+  console.log("Warte auf auth-ready Event...");
+  await new Promise(resolve => {
+    document.addEventListener("auth-ready", () => {
+      console.log("Event empfangen!");
+      resolve();
+    }, { once: true });
+    
+    // Sicherheits-Timeout: Wenn nach 5 Sek. nichts passiert, trotzdem starten
+    setTimeout(() => {
+      console.warn("Timeout: Starte Spiel ohne Auth-Bestätigung");
+      resolve();
+    }, 5000);
+  });
+}
+
 
 // 🔥 Meta laden (nur wenn User existiert)
 if (auth.currentUser) {
