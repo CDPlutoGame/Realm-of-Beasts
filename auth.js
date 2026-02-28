@@ -78,7 +78,7 @@ loginConfirm?.addEventListener("click", async () => {
 
     loginError.textContent = "❌ Login fehlgeschlagen";
   }
-});;
+});
 
 // PASSWORT RESET
 resetBtn?.addEventListener("click", async () => {
