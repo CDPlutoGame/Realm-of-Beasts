@@ -1,4 +1,4 @@
-import { getAuth, signOut } from "firebase/auth";
+import { auth } from "./firebase.js";
 import { meta, loadMeta, saveMeta } from "./profile.js";
 
 const auth = getAuth();   // ✅ DAS HIER FEHLT
