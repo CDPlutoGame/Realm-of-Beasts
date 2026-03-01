@@ -7,7 +7,6 @@ let playerPos = 0;
 let currentRounds = 1;
 let inFight = false;
 let monster = null;
-let autoInterval = null;
 
 const monsterTypes = [
     { name: "Frosch", icon: "🐸", hp: 30, atk: 5, gold: 15 },
@@ -25,7 +24,9 @@ async function startFullGame() {
         document.getElementById("topBar").style.display = "flex";
     }
 
-    // Sicherstellen, dass Unlock-Variable existiert
+    // Standardwerte für Preise setzen, falls sie in der DB fehlen
+    if (meta.atkPrice === undefined) meta.atkPrice = 100;
+    if (meta.hpPrice === undefined) meta.hpPrice = 100;
     if (meta.autoUnlocked === undefined) meta.autoUnlocked = false;
 
     updateHud();
@@ -35,14 +36,13 @@ async function startFullGame() {
     
     try { await renderLeaderboard(); } catch(e) {}
 
-    // Starte Schleife (prüft ob Auto aktiv sein darf)
     startHeartbeat();
 }
 
 // --- STATUS PANEL ---
 function updateHud() {
     const statusPanel = document.getElementById("statusPanel");
-    const autoStatus = meta.autoUnlocked ? "✅ Aktiviert" : "🔒 Besiege Boss 1 zum Freischalten";
+    const autoStatus = meta.autoUnlocked ? "✅ Aktiviert" : "🔒 Besiege Boss 1 (Welle 10)";
     
     statusPanel.innerHTML = `
         <h3>📊 Helden-Status</h3>
@@ -50,14 +50,76 @@ function updateHud() {
         <p>💰 Gold: <b>${meta.gold}</b> | ⚔️ Kraft: <b>${meta.attackPower}</b></p>
         <hr>
         <p>🌊 Welle: <b>${currentRounds}</b> | 📍 Feld: <b>${playerPos + 1}</b></p>
-        <p>🤖 Auto-System: <br><small>${autoStatus}</small></p>
-        <p>💀 Kills: <b>${meta.monstersKilled || 0}</b> | 👑 Bosse: <b>${meta.bossesKilled || 0}</b></p>
+        <p>🤖 Auto: ${autoStatus}</p>
+        <p>💀 Kills: ${meta.monstersKilled || 0} | 👑 Bosse: ${meta.bossesKilled || 0}</p>
     `;
 }
 
-// --- MONSTER & BOSS SPAWN ---
+// --- SHOP (Preissystem & Tränke) ---
+function renderShop() {
+    const shop = document.getElementById("shop");
+    shop.innerHTML = `
+        <h3>🏪 Marktplatz</h3>
+        <div style="display: grid; gap: 5px;">
+            <button id="buyAtk" class="game-btn">⚔️ +10 Kraft (Price: ${meta.atkPrice} G)</button>
+            <button id="buyMaxHp" class="game-btn">❤️ +10 Max HP (Price: ${meta.hpPrice} G)</button>
+            <hr>
+            <button id="buyHeal" class="game-btn">🧪 Heiltrank +10 HP (50 G)</button>
+            <button id="potionAtk" class="game-btn">⚡ Kraft-Elexier +5 (10 G)</button>
+            <button id="potionHP" class="game-btn">💎 Vital-Elexier +10 (10 G)</button>
+        </div>
+    `;
+
+    // Permanente Upgrades (+5 Gold Preiserhöhung)
+    document.getElementById("buyAtk").onclick = async () => {
+        if (meta.gold >= meta.atkPrice) {
+            meta.gold -= meta.atkPrice;
+            meta.attackPower += 10;
+            meta.atkPrice += 5;
+            await saveMeta(); updateHud(); renderShop();
+        }
+    };
+
+    document.getElementById("buyMaxHp").onclick = async () => {
+        if (meta.gold >= meta.hpPrice) {
+            meta.gold -= meta.hpPrice;
+            meta.maxHpBase += 10;
+            meta.hp += 10;
+            meta.hpPrice += 5;
+            await saveMeta(); updateHud(); renderShop();
+        }
+    };
+
+    // Tränke (Feste Preise)
+    document.getElementById("buyHeal").onclick = async () => {
+        if (meta.gold >= 50) {
+            meta.gold -= 50;
+            meta.hp = Math.min(meta.maxHpBase, meta.hp + 10);
+            await saveMeta(); updateHud();
+        }
+    };
+
+    document.getElementById("potionAtk").onclick = async () => {
+        if (meta.gold >= 10) {
+            meta.gold -= 10;
+            meta.attackPower += 5;
+            await saveMeta(); updateHud();
+        }
+    };
+
+    document.getElementById("potionHP").onclick = async () => {
+        if (meta.gold >= 10) {
+            meta.gold -= 10;
+            meta.maxHpBase += 10;
+            meta.hp += 10;
+            await saveMeta(); updateHud();
+        }
+    };
+}
+
+// --- KAMPF & BOSS ---
 function checkTile() {
-    // BOSS LOGIK: Erscheint exakt in Welle 10 (und 20, 30...) auf Feld 30
+    // Boss alle 10 Wellen auf dem letzten Feld
     if (currentRounds % 10 === 0 && playerPos === 29) {
         const bossBonus = meta.bossesKilled * 1000;
         monster = { 
@@ -70,7 +132,6 @@ function checkTile() {
         inFight = true;
         renderFight();
     } 
-    // Normale Monster-Chance auf anderen Feldern
     else if (Math.random() < 0.30 && playerPos !== 0) {
         const randomM = monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
         monster = { ...randomM, hp: randomM.hp + (currentRounds * 2) };
@@ -81,124 +142,77 @@ function checkTile() {
 
 async function attack() {
     if (!inFight || !monster) return;
-
     monster.hp -= meta.attackPower;
     
     if (monster.hp <= 0) {
         inFight = false;
         meta.gold += monster.gold;
-        
         if (monster.name === "Drache") {
             meta.bossesKilled++;
-            // ERSTER BOSS SIEG SCHALTET AUTO FREI
             if (!meta.autoUnlocked) {
                 meta.autoUnlocked = true;
-                alert("🎊 LEGENDÄR! Du hast den Drachen besiegt und das AUTOMATIK-SYSTEM freigeschaltet!");
+                alert("AUTOMATIK FREIGESCHALTET!");
             }
-        } else {
-            meta.monstersKilled++;
-        }
-        
+        } else { meta.monstersKilled++; }
         monster = null;
-        await saveMeta();
-        updateHud();
-        setFightPanelIdle();
+        await saveMeta(); updateHud(); setFightPanelIdle();
         return;
     }
 
     meta.hp -= monster.atk;
-    
     if (meta.hp <= 0) {
-        alert("💀 BESIEGT! Zurück zum Start. (Auto-System bleibt erhalten)");
+        alert("💀 BESIEGT! Gold & Kraft bleiben erhalten.");
         meta.hp = meta.maxHpBase;
-        playerPos = 0;
-        currentRounds = 1;
-        inFight = false;
-        monster = null;
+        playerPos = 0; currentRounds = 1; inFight = false; monster = null;
     }
-    
-    await saveMeta();
-    updateHud();
-    if (inFight) renderFight();
+    await saveMeta(); updateHud(); if (inFight) renderFight();
 }
 
-// --- BEWEGUNG ---
+// --- CORE LOOPS ---
 async function move() {
     if (inFight) return;
     playerPos++;
-    if (playerPos >= 30) {
-        playerPos = 0;
-        currentRounds++;
-    }
-    renderBoard();
-    updateHud();
-    setFightPanelIdle();
-    checkTile();
+    if (playerPos >= 30) { playerPos = 0; currentRounds++; }
+    renderBoard(); updateHud(); setFightPanelIdle(); checkTile();
 }
 
-// --- AUTO-LOGIK ---
 function startHeartbeat() {
     setInterval(() => {
-        // Auto-System läuft nur wenn:
-        // 1. Freigeschaltet
-        // 2. Kein Boss-Kampf aktiv (bei Bossen muss man selbst drücken)
         if (meta.autoUnlocked) {
             if (inFight) {
-                // Stoppe Auto-Angriff wenn es ein Drache ist
-                if (monster && monster.name !== "Drache") {
-                    attack();
-                }
+                if (monster && monster.name !== "Drache") attack();
             } else {
-                // Laufe nur automatisch, wenn wir NICHT vor einem Boss stehen (Feld 29 in Welle 10)
                 const isBossNext = (currentRounds % 10 === 0 && playerPos === 28);
-                if (!isBossNext) {
-                    move();
-                }
+                if (!isBossNext) move();
             }
         }
     }, 600);
-}
-
-// --- UI / SHOP (Preise: 5 Gold) ---
-function renderShop() {
-    const shop = document.getElementById("shop");
-    shop.innerHTML = `
-        <h3>🏪 Marktplatz</h3>
-        <button id="buyAtk" class="game-btn">⚔️ +10 Kraft (5 G)</button>
-        <button id="buyMaxHp" class="game-btn">❤️ +10 Max HP (5 G)</button>
-        <button id="buyHeal" class="game-btn">🧪 Heilung (5 G)</button>
-        <p style="font-size: 0.7em; margin-top:5px;">Preise bleiben immer bei 5 Gold!</p>
-    `;
-    document.getElementById("buyAtk").onclick = async () => { if(meta.gold >= 5){ meta.gold -= 5; meta.attackPower += 10; await saveMeta(); updateHud(); } };
-    document.getElementById("buyMaxHp").onclick = async () => { if(meta.gold >= 5){ meta.gold -= 5; meta.maxHpBase += 10; meta.hp += 10; await saveMeta(); updateHud(); } };
-    document.getElementById("buyHeal").onclick = async () => { if(meta.gold >= 5){ meta.gold -= 5; meta.hp = meta.maxHpBase; await saveMeta(); updateHud(); } };
 }
 
 function renderBoard() {
     const b = document.getElementById("board"); b.innerHTML = "";
     for (let i = 0; i < 30; i++) {
         const t = document.createElement("div"); t.className = "tile";
-        t.innerHTML = i === playerPos ? "🧍" : (i === 29 ? "🐲" : "⬜");
+        t.innerHTML = i === playerPos ? "🧍" : (i === 29 ? "🏁" : "⬜");
         b.appendChild(t);
     }
 }
 
 function setFightPanelIdle() {
-    document.getElementById("fightPanel").innerHTML = `<p style="text-align:center; padding:20px;">🌿 Feld ${playerPos+1} - Sicher</p>`;
+    document.getElementById("fightPanel").innerHTML = `<p style="text-align:center; padding:15px; opacity:0.6;">🌿 Feld ${playerPos+1}</p>`;
 }
 
 function renderFight() {
     const fp = document.getElementById("fightPanel");
     fp.innerHTML = `
-        <div style="text-align: center; padding: 10px; border: 2px solid red;">
+        <div style="text-align: center; padding: 10px; border: 2px solid #555;">
             <div style="font-size: 40px;">${monster.icon}</div>
             <h4>${monster.name} (HP: ${monster.hp})</h4>
-            <button id="atkBtn" class="game-btn" style="width:100%; padding:10px;">⚔️ MANUELLER ANGRIFF</button>
+            <button id="atkBtn" class="game-btn" style="width:100%">⚔️ ANGRIFF</button>
         </div>`;
     document.getElementById("atkBtn").onclick = () => attack();
 }
 
-// --- START ---
 if (window.__AUTH_READY__) startFullGame();
 else {
     document.addEventListener("auth-ready", startFullGame);
