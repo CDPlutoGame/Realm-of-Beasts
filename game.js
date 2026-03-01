@@ -8,12 +8,11 @@ const bgMusic = new Audio("sounds/music/bg1.mp3");
 bgMusic.loop = true;
 
 const monsterTypes = {
-    frog: { name: "Frosch", icon: "🐸", hp: 30, atk: 5, gold: 15 },
-    wolf: { name: "Wolf", icon: "🐺", hp: 60, atk: 12, gold: 35 },
-    bear: { name: "Bär", icon: "🐻", hp: 120, atk: 25, gold: 75 }
+    frog: { name: "Frosch", icon: "🐸", hp: 15, atk: 5, gold: 15 },
+    wolf: { name: "Wolf", icon: "🐺", hp: 20, atk: 10, gold: 35 },
+    bear: { name: "Bär", icon: "🐻", hp: 25, atk: 15, gold: 75 }
 };
 
-// Log-Funktion
 function log(msg) {
     const logContent = document.getElementById("logContent");
     if (logContent) {
@@ -27,6 +26,12 @@ async function startFullGame() {
     if (window.__STARTED__) return; window.__STARTED__ = true;
     if (auth.currentUser) { await loadMeta(); }
     
+    // Initialisierung der Startwerte (30 HP, 5 Kraft)
+    if (meta.hp === undefined || meta.hp === 100) meta.hp = 30;
+    if (meta.maxHpBase === undefined || meta.maxHpBase === 100) meta.maxHpBase = 30;
+    if (meta.attackPower === undefined || meta.attackPower === 10) meta.attackPower = 5;
+    
+    // Shop-Preise Initialisierung
     if (meta.atkPrice === undefined) meta.atkPrice = 100;
     if (meta.hpPrice === undefined) meta.hpPrice = 100;
 
@@ -65,8 +70,6 @@ function renderShop() {
             <button onclick="window.buy('atk')" class="game-btn">⚔️ +10 Kraft (${meta.atkPrice}G)</button>
             <button onclick="window.buy('hp')" class="game-btn">❤️ +10 MaxHP (${meta.hpPrice}G)</button>
             <button onclick="window.buy('heal')" class="game-btn">🧪 Heilung (50G)</button>
-            <button onclick="window.buy('potAtk')" class="game-btn">⚡ +5 Kraft (10G)</button>
-            <button onclick="window.buy('potHP')" class="game-btn">💎 +10 MaxHP (10G)</button>
         </div>
     `;
 }
@@ -83,14 +86,6 @@ window.buy = async (type) => {
     else if (type === 'heal' && meta.gold >= 50) { 
         meta.gold -= 50; meta.hp = meta.maxHpBase; 
         log("🧪 Du fühlst dich erfrischt!");
-    }
-    else if (type === 'potAtk' && meta.gold >= 10) { 
-        meta.gold -= 10; meta.attackPower += 5; 
-        log("⚡ Trank gibt dir +5 Kraft!");
-    }
-    else if (type === 'potHP' && meta.gold >= 10) { 
-        meta.gold -= 10; meta.maxHpBase += 10; meta.hp += 10; 
-        log("💎 Trank gibt dir +10 Max HP!");
     }
     await saveMeta(); updateHud(); renderShop();
 };
@@ -125,7 +120,8 @@ function spawnMonster() {
     else pool = [monsterTypes.bear];
 
     const m = pool[Math.floor(Math.random() * pool.length)];
-    monster = {...m, hp: m.hp + (currentRounds * 2)}; 
+    // Monster Leben skaliert pro Welle um +5
+    monster = {...m, hp: m.hp + ((currentRounds - 1) * 5)}; 
     inFight = true; 
     log(`⚠️ Ein ${monster.name} taucht auf!`);
     renderFight();
@@ -142,7 +138,6 @@ async function attack() {
     if (!inFight || !monster) return;
     hitSound.play().catch(()=>{});
     
-    // Spieler schlägt
     monster.hp -= meta.attackPower;
     log(`Du triffst ${monster.name} für ${meta.attackPower}.`);
     
@@ -154,12 +149,11 @@ async function attack() {
         monster = null; await saveMeta(); updateHud(); setFightPanelIdle(); return;
     }
     
-    // Monster schlägt zurück
     meta.hp -= monster.atk;
     log(`💥 ${monster.name} trifft dich für ${monster.atk}!`);
     
     if (meta.hp <= 0) {
-        log("💀 Du bist gefallen! Zurück zum Start.");
+        log("💀 Du bist gefallen!");
         meta.hp = meta.maxHpBase; playerPos = 0; currentRounds = 1; inFight = false; monster = null;
         setFightPanelIdle();
     }
@@ -167,37 +161,4 @@ async function attack() {
 }
 
 function renderBoard() {
-    const b = document.getElementById("board"); if(!b) return;
-    b.innerHTML = "";
-    for(let i=0; i<30; i++) {
-        const t = document.createElement("div"); t.className = "tile";
-        t.style.backgroundColor = i === playerPos ? "#444" : "#222";
-        t.innerHTML = i === playerPos ? "🧍" : (i === 29 ? "🐲" : "");
-        b.appendChild(t);
-    }
-}
-
-function setFightPanelIdle() { 
-    const fp = document.getElementById("fightPanel");
-    if (!fp) return;
-    fp.innerHTML = `
-        <div style="height:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); border-radius:10px;">
-            ${!meta.autoUnlocked ? '<button onclick="window.manualMove()" class="game-btn" style="width:70%; padding:20px; font-size:1.5em; background:#4a90e2;">👣 LAUFEN</button>' : '<p style="color:lime;">🤖 Erkundung läuft...</p>'}
-        </div>`; 
-}
-
-function renderFight() {
-    const fp = document.getElementById("fightPanel");
-    if (!fp) return;
-    fp.innerHTML = `
-        <div style="text-align:center; background:rgba(0,0,0,0.7); min-height:150px; padding:15px; border-radius:10px; border: 2px solid #b32020; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <div style="font-size:50px;">${monster.icon}</div>
-            <p style="color:white; margin:5px 0;">${monster.name} (HP: ${monster.hp})</p>
-            <button onclick="window.manualAtk()" class="game-btn" style="width:80%; padding:15px; font-size:1.2em; background:#ff4d4d;">⚔️ ANGRIFF</button>
-        </div>`;
-}
-
-window.manualAtk = () => attack();
-
-if (window.__AUTH_READY__) startFullGame();
-else { document.addEventListener("auth-ready", startFullGame); setTimeout(startFullGame, 3000); }
+    const
