@@ -1,3 +1,4 @@
+// --- SPIEL-ZUSTAND ---
 let meta = { hp: 30, maxHpBase: 30, gold: 0, attackPower: 5, kills: 0, rounds: 1, hpBought: 0, atkBought: 0 };
 let playerPos = 0;
 let inFight = false;
@@ -6,17 +7,41 @@ let boardEvents = [];
 let shopOpen = false;
 
 // --- INITIALISIERUNG ---
-window.openLogin = () => { document.getElementById("loginModal").style.display = "flex"; };
-
-window.submitHeroName = () => {
-    const val = document.getElementById("heroNameInput").value.trim();
-    if (val) {
-        localStorage.setItem("playerName", val);
-        document.getElementById("loginModal").style.display = "none";
-        loadData();
-        updateUI();
+document.addEventListener("DOMContentLoaded", () => {
+    // Button im Hauptmenü
+    const initBtn = document.getElementById("initBtn");
+    if(initBtn) {
+        initBtn.onclick = () => {
+            document.getElementById("loginModal").style.display = "flex";
+        };
     }
-};
+
+    // Button im Login-Fenster
+    const finalStartBtn = document.getElementById("finalStartBtn");
+    if(finalStartBtn) {
+        finalStartBtn.onclick = () => {
+            const val = document.getElementById("heroNameInput").value.trim();
+            if (val) {
+                localStorage.setItem("playerName", val);
+                document.getElementById("loginModal").style.display = "none";
+                startGame();
+            } else {
+                alert("Bitte gib einen Namen ein!");
+            }
+        };
+    }
+
+    // Prüfen ob bereits eingeloggt
+    if (localStorage.getItem("playerName")) {
+        startGame();
+    }
+});
+
+function startGame() {
+    loadData();
+    updateUI();
+    log("Willkommen zurück, " + localStorage.getItem("playerName") + "!");
+}
 
 function loadData() {
     const m = localStorage.getItem("game_meta");
@@ -34,23 +59,24 @@ function saveData() {
 
 function log(msg) {
     const lc = document.getElementById("logContent");
-    if (lc) lc.innerHTML = `> ${msg}<br>` + lc.innerHTML;
+    if (lc) {
+        lc.innerHTML = `> ${msg}<br>` + lc.innerHTML;
+        lc.scrollTop = 0;
+    }
 }
 
-// --- MONSTER LOGIK (RUNDEN-PHASEN) ---
+// --- MONSTER LOGIK ---
 function generateBoardEvents() {
     boardEvents = new Array(30).fill(null);
     for (let i = 1; i < 30; i++) {
         const rand = Math.random();
         if (rand < 0.2) {
-            let possibleMonsters = [];
-            if (meta.rounds <= 15) possibleMonsters.push("frog"); // Leicht
-            if (meta.rounds >= 11 && meta.rounds <= 25) possibleMonsters.push("wolf"); // Mittel
-            if (meta.rounds >= 20) possibleMonsters.push("bear"); // Schwer
-
-            if (possibleMonsters.length === 0) possibleMonsters.push("frog");
-            const pick = possibleMonsters[Math.floor(Math.random() * possibleMonsters.length)];
-            boardEvents[i] = pick;
+            let possible = [];
+            if (meta.rounds <= 15) possible.push("frog");
+            if (meta.rounds >= 11 && meta.rounds <= 25) possible.push("wolf");
+            if (meta.rounds >= 20) possible.push("bear");
+            if (possible.length === 0) possible.push("frog");
+            boardEvents[i] = possible[Math.floor(Math.random() * possible.length)];
         } else if (rand < 0.3) {
             boardEvents[i] = "gold";
         }
@@ -58,7 +84,7 @@ function generateBoardEvents() {
     saveData();
 }
 
-// --- UI UPDATE ---
+// --- UI UPDATES ---
 function updateStatus() {
     const sp = document.getElementById("statusPanel");
     const name = localStorage.getItem("playerName") || "Held";
@@ -89,8 +115,11 @@ function updateStatus() {
     [btnHp, btnAtk].forEach(btn => {
         btn.disabled = !shopOpen;
         btn.style.opacity = shopOpen ? "1" : "0.3";
-        btn.style.filter = shopOpen ? "none" : "grayscale(1)";
         btn.style.cursor = shopOpen ? "pointer" : "not-allowed";
+        btn.onclick = () => {
+            const type = btn.id === "btn-hp" ? 'hp' : 'atk';
+            buyUpgrade(type);
+        };
     });
 }
 
@@ -110,8 +139,8 @@ function renderBoard() {
     }
 }
 
-// --- GAMEPLAY AKTIONEN ---
-window.move = () => {
+// --- AKTIONEN ---
+function move() {
     if (inFight) return;
     shopOpen = false; 
     let steps = Math.floor(Math.random() * 4) + 1;
@@ -123,11 +152,11 @@ window.move = () => {
         if (meta.rounds % 10 === 0) {
             let mult = meta.rounds / 10;
             monster = { name: "BOSS", icon: "🐲", hp: mult*1000, atk: mult*20, gold: mult*500, isBoss: true };
-            inFight = true; log("!!! BOSS-KAMPF !!!");
+            inFight = true; log("!!! BOSS ERSCHEINT !!!");
         } else { 
             meta.rounds++; 
             generateBoardEvents(); 
-            log(`Runde ${meta.rounds} erreicht.`); 
+            log(`Runde ${meta.rounds} beginnt.`); 
         }
     } else {
         let ev = boardEvents[playerPos];
@@ -136,15 +165,15 @@ window.move = () => {
             if(ev==="wolf") monster={name:"Wolf", icon:"🐺", hp:25, atk:6, gold:25};
             if(ev==="bear") monster={name:"Bär", icon:"🐻", hp:60, atk:12, gold:60};
             inFight = true; boardEvents[playerPos] = null;
-            log(`${monster.icon} Ein ${monster.name} lauert hier!`);
+            log(`${monster.icon} Kampf gegen ${monster.name}!`);
         } else if (ev === "gold") { 
-            meta.gold += 10; boardEvents[playerPos] = null; log("+10 Gold!"); 
+            meta.gold += 10; boardEvents[playerPos] = null; log("+10 Gold gefunden!"); 
         }
     }
     updateUI();
-};
+}
 
-window.attack = () => {
+function attack() {
     monster.hp -= meta.attackPower;
     if (monster.hp <= 0) {
         log(`Sieg! +${monster.gold} Gold.`);
@@ -154,23 +183,25 @@ window.attack = () => {
         meta.hp -= monster.atk;
         if (meta.hp <= 0) { 
             meta.hp = meta.maxHpBase; playerPos = 0; inFight = false; shopOpen = true; 
-            log("💀 DU BIST GEFALLEN! Schwarzmarkt offen."); generateBoardEvents(); 
+            log("💀 GEFALLEN! Schwarzmarkt im Lager offen."); generateBoardEvents(); 
         }
     }
     updateUI();
-};
+}
 
-window.buyUpgrade = (type) => {
+function buyUpgrade(type) {
     if (!shopOpen) return;
     let cost = type === 'hp' ? 100+(meta.hpBought*5) : 100+(meta.atkBought*5);
     if (meta.gold >= cost) {
         meta.gold -= cost;
         if (type === 'hp') { meta.maxHpBase += 5; meta.hp = meta.maxHpBase; meta.hpBought++; }
         else { meta.attackPower += 5; meta.atkBought++; }
-        log("Ware auf dem Schwarzmarkt erworben.");
-    } else { log("Zu wenig Gold!"); }
+        log("Upgrade auf dem Schwarzmarkt gekauft.");
+    } else {
+        log("Zu wenig Gold!");
+    }
     updateUI();
-};
+}
 
 function updateUI() { saveData(); updateStatus(); renderBoard(); setActionBtn(); }
 
@@ -178,12 +209,11 @@ function setActionBtn() {
     const fp = document.getElementById("fightPanel");
     if (!fp) return;
     if (inFight) {
-        fp.innerHTML = `<button onclick="attack()" class="game-btn" style="background:#b91c1c;">${monster.icon} ANGRIFF (-${meta.attackPower})</button>`;
+        fp.innerHTML = `<button id="atkBtn" class="game-btn" style="background:#b91c1c;">${monster.icon} ANGRIFF (-${meta.attackPower})</button>`;
+        document.getElementById("atkBtn").onclick = attack;
     } else {
         let label = shopOpen ? "ZURÜCK IN DIE WILDNIS" : "SPRINGEN (1-4)";
-        fp.innerHTML = `<button onclick="move()" class="game-btn" style="background:#1d4ed8;">${label}</button>`;
+        fp.innerHTML = `<button id="moveBtn" class="game-btn" style="background:#1d4ed8;">${label}</button>`;
+        document.getElementById("moveBtn").onclick = move;
     }
 }
-
-function checkAndStart() { if (localStorage.getItem("playerName")) { loadData(); updateUI(); } }
-window.addEventListener('load', checkAndStart);
