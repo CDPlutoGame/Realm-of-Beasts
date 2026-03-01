@@ -1,3 +1,17 @@
+// Prüfen, was nach der Rückkehr von Google passiert
+getRedirectResult(auth)
+    .then((result) => {
+        if (result) {
+            alert("✅ Login erkannt für: " + result.user.displayName);
+        } else {
+            console.log("Kein Resultat gefunden - normaler Seitenaufruf");
+        }
+    })
+    .catch((error) => {
+        // Das hier wird uns verraten, warum es am Handy hakt!
+        alert("❌ Firebase Fehler: " + error.code);
+    });
+
 import { auth } from "./firebase.js";
 import { 
     GoogleAuthProvider, 
