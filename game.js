@@ -26,14 +26,14 @@ async function startFullGame() {
     if (window.__STARTED__) return; window.__STARTED__ = true;
     if (auth.currentUser) { await loadMeta(); }
     
-    // Initialisierung der Startwerte (30 HP, 5 Kraft)
-    if (meta.hp === undefined || meta.hp === 100) meta.hp = 30;
-    if (meta.maxHpBase === undefined || meta.maxHpBase === 100) meta.maxHpBase = 30;
-    if (meta.attackPower === undefined || meta.attackPower === 10) meta.attackPower = 5;
+    // Startwerte setzen (30 HP, 5 Kraft)
+    if (!meta.maxHpBase || meta.maxHpBase === 100) meta.maxHpBase = 30;
+    if (!meta.hp || meta.hp > meta.maxHpBase) meta.hp = meta.maxHpBase;
+    if (!meta.attackPower || meta.attackPower === 10) meta.attackPower = 5;
     
-    // Shop-Preise Initialisierung
-    if (meta.atkPrice === undefined) meta.atkPrice = 100;
-    if (meta.hpPrice === undefined) meta.hpPrice = 100;
+    // Shop-Preise initialisieren
+    if (!meta.atkPrice) meta.atkPrice = 100;
+    if (!meta.hpPrice) meta.hpPrice = 100;
 
     updateHud(); renderShop(); renderBoard(); setFightPanelIdle();
     try { await renderLeaderboard(); } catch(e) {}
@@ -77,15 +77,15 @@ function renderShop() {
 window.buy = async (type) => {
     if (type === 'atk' && meta.gold >= meta.atkPrice) { 
         meta.gold -= meta.atkPrice; meta.attackPower += 10; meta.atkPrice += 5; 
-        log("⚔️ Kraft permanent gesteigert!");
+        log(`⚔️ Kraft gesteigert auf ${meta.attackPower}!`);
     }
     else if (type === 'hp' && meta.gold >= meta.hpPrice) { 
         meta.gold -= meta.hpPrice; meta.maxHpBase += 10; meta.hp += 10; meta.hpPrice += 5; 
-        log("❤️ Max HP permanent gesteigert!");
+        log(`❤️ Max HP gesteigert auf ${meta.maxHpBase}!`);
     }
     else if (type === 'heal' && meta.gold >= 50) { 
         meta.gold -= 50; meta.hp = meta.maxHpBase; 
-        log("🧪 Du fühlst dich erfrischt!");
+        log("🧪 Vollständig geheilt!");
     }
     await saveMeta(); updateHud(); renderShop();
 };
@@ -103,7 +103,7 @@ function gameLoop() {
 async function move() {
     if (inFight) return;
     playerPos++;
-    if (playerPos >= 30) { playerPos = 0; currentRounds++; log(`🌊 Welle ${currentRounds} beginnt!`); }
+    if (playerPos >= 30) { playerPos = 0; currentRounds++; log(`🌊 Welle ${currentRounds} erreicht!`); }
     renderBoard(); updateHud();
     if (currentRounds % 10 === 0 && playerPos === 29) spawnBoss();
     else if (Math.random() < 0.3 && playerPos !== 0) spawnMonster();
@@ -120,17 +120,17 @@ function spawnMonster() {
     else pool = [monsterTypes.bear];
 
     const m = pool[Math.floor(Math.random() * pool.length)];
-    // Monster Leben skaliert pro Welle um +5
+    // Leben skaliert: Start-HP + (Welle-1) * 5
     monster = {...m, hp: m.hp + ((currentRounds - 1) * 5)}; 
     inFight = true; 
-    log(`⚠️ Ein ${monster.name} taucht auf!`);
+    log(`⚠️ Ein ${monster.name} versperrt den Weg!`);
     renderFight();
 }
 
 function spawnBoss() {
     monster = { name: "Drache", icon: "🐲", hp: 1000 + (meta.bossesKilled*1000), atk: 30 + (meta.bossesKilled*10), gold: 1000 };
     inFight = true; 
-    log("🔥 EIN DRACHE BLOCKIERT DEN WEG!");
+    log("🔥 ACHTUNG: Der Drache ist erwacht!");
     renderFight();
 }
 
@@ -139,21 +139,21 @@ async function attack() {
     hitSound.play().catch(()=>{});
     
     monster.hp -= meta.attackPower;
-    log(`Du triffst ${monster.name} für ${meta.attackPower}.`);
+    log(`Du schlägst zu: ${meta.attackPower} Schaden.`);
     
     if (monster.hp <= 0) {
         log(`💀 ${monster.name} besiegt! +${monster.gold} Gold.`);
         inFight = false; meta.gold += monster.gold;
-        if (monster.name === "Drache") { meta.bossesKilled++; meta.autoUnlocked = true; log("👑 AUTO-MODUS FREIGESCHALTET!"); }
+        if (monster.name === "Drache") { meta.bossesKilled++; meta.autoUnlocked = true; log("👑 AUTO-MODUS AKTIVIERT!"); }
         else meta.monstersKilled++;
         monster = null; await saveMeta(); updateHud(); setFightPanelIdle(); return;
     }
     
     meta.hp -= monster.atk;
-    log(`💥 ${monster.name} trifft dich für ${monster.atk}!`);
+    log(`💥 ${monster.name} kontert: ${monster.atk} Schaden!`);
     
     if (meta.hp <= 0) {
-        log("💀 Du bist gefallen!");
+        log("💀 Oh nein! Du wurdest besiegt.");
         meta.hp = meta.maxHpBase; playerPos = 0; currentRounds = 1; inFight = false; monster = null;
         setFightPanelIdle();
     }
@@ -161,4 +161,37 @@ async function attack() {
 }
 
 function renderBoard() {
-    const
+    const b = document.getElementById("board"); if(!b) return;
+    b.innerHTML = "";
+    for(let i=0; i<30; i++) {
+        const t = document.createElement("div"); t.className = "tile";
+        t.style.backgroundColor = i === playerPos ? "#444" : "#222";
+        t.innerHTML = i === playerPos ? "🧍" : (i === 29 ? "🐲" : "");
+        b.appendChild(t);
+    }
+}
+
+function setFightPanelIdle() { 
+    const fp = document.getElementById("fightPanel");
+    if (!fp) return;
+    fp.innerHTML = `
+        <div style="height:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); border-radius:10px;">
+            ${!meta.autoUnlocked ? '<button onclick="window.manualMove()" class="game-btn" style="width:70%; padding:20px; font-size:1.5em; background:#4a90e2;">👣 LAUFEN</button>' : '<p style="color:lime; font-size:1.2em;">🤖 Automatik läuft...</p>'}
+        </div>`; 
+}
+
+function renderFight() {
+    const fp = document.getElementById("fightPanel");
+    if (!fp) return;
+    fp.innerHTML = `
+        <div style="text-align:center; background:rgba(0,0,0,0.7); min-height:150px; padding:15px; border-radius:10px; border: 2px solid #b32020; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <div style="font-size:50px;">${monster.icon}</div>
+            <p style="color:white; margin:5px 0;">${monster.name} (HP: ${monster.hp})</p>
+            <button onclick="window.manualAtk()" class="game-btn" style="width:80%; padding:15px; font-size:1.2em; background:#ff4d4d;">⚔️ ANGRIFF</button>
+        </div>`;
+}
+
+window.manualAtk = () => attack();
+
+if (window.__AUTH_READY__) startFullGame();
+else { document.addEventListener("auth-ready", startFullGame); setTimeout(startFullGame, 3000); }
