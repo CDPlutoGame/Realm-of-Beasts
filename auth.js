@@ -1,55 +1,42 @@
-import { auth } from "./firebase.js";
-import { 
-    GoogleAuthProvider, 
-    signInWithRedirect, 
-    onAuthStateChanged,
-    signOut 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+// Wir brauchen keine Firebase-Imports mehr!
 
-const provider = new GoogleAuthProvider();
+const logContent = document.getElementById("logContent");
+const statusPanel = document.getElementById("statusPanel");
 
-// 1. Die wichtigste Funktion am Handy: Beobachten des Login-Status
-onAuthStateChanged(auth, (user) => {
-    const statusPanel = document.getElementById("statusPanel");
-    const logContent = document.getElementById("logContent");
-
-    if (user) {
-        // LOGIN ERFOLGREICH
-        statusPanel.innerHTML = `
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span>👤 ${user.displayName}</span>
-                <button onclick="logout()" class="game-btn" style="background:#d93025; padding: 5px;">Logout</button>
-            </div>
-        `;
-        logContent.innerText = "✅ Willkommen, " + user.displayName + "! Dein Abenteuer beginnt.";
-        
-        // HIER kannst du jetzt andere Funktionen starten, z.B. das Board zeigen
-        document.getElementById("board").style.display = "block";
-    } else {
-        // NICHT EINGELOGGT
-        statusPanel.innerHTML = `
-            <button onclick="login()" class="game-btn" style="background:#4285F4; width:100%;">🔑 Mit Google anmelden</button>
-        `;
-        logContent.innerText = "🎮 Bitte logge dich ein.";
-        document.getElementById("board").style.display = "none";
-    }
-});
-
-// 2. Login-Funktion
-export const login = async () => {
-    try {
-        // Wir nutzen Redirect, weil Popups am Handy fast immer geblockt werden
-        await signInWithRedirect(auth, provider);
-    } catch (error) {
-        alert("Fehler beim Login-Start: " + error.message);
+// Funktion, um den Namen lokal zu speichern
+export const login = () => {
+    const userName = prompt("Wie lautet dein Heldenname?", "Spieler 1");
+    
+    if (userName) {
+        localStorage.setItem("playerName", userName);
+        updateUI(userName);
     }
 };
 
-// 3. Logout-Funktion
-export const logout = async () => {
-    await signOut(auth);
+export const logout = () => {
+    localStorage.removeItem("playerName");
     location.reload();
 };
 
+// UI aktualisieren
+function updateUI(name) {
+    if (name) {
+        statusPanel.innerHTML = `<span>👤 ${name}</span> <button onclick="logout()" class="game-btn" style="background:#d93025; padding:5px; margin-left:10px;">Logout</button>`;
+        logContent.innerText = `🎮 Willkommen, ${name}! Dein Abenteuer kann beginnen.`;
+        if(document.getElementById("board")) document.getElementById("board").style.display = "block";
+    } else {
+        statusPanel.innerHTML = `<button onclick="login()" class="game-btn" style="background:#4285F4;">🔑 Starten</button>`;
+        logContent.innerText = "🎮 Bitte gib deinen Namen ein.";
+        if(document.getElementById("board")) document.getElementById("board").style.display = "none";
+    }
+}
+
+// Beim Laden der Seite prüfen, ob schon ein Name gespeichert ist
+window.onload = () => {
+    const savedName = localStorage.getItem("playerName");
+    updateUI(savedName);
+};
+
+// Global machen für die Buttons
 window.login = login;
 window.logout = logout;
