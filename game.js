@@ -1,7 +1,7 @@
-// --- INITIALISIERUNG DER DATEN ---
+// --- SPIEL-DATEN (BALANCED) ---
 let meta = { 
-    hp: 30, 
-    maxHpBase: 30, 
+    hp: 20,              // Start-Leben jetzt auf 20
+    maxHpBase: 20, 
     money: 0, 
     attackPower: 5, 
     currentKills: 0, 
@@ -19,36 +19,22 @@ let shopOpen = false;
 
 // --- START-LOGIK ---
 window.onload = function() {
-    console.log("Spiel wird geladen...");
-    
     const initBtn = document.getElementById("initBtn");
     const loginModal = document.getElementById("loginModal");
     const finalStartBtn = document.getElementById("finalStartBtn");
 
-    if(initBtn) {
-        initBtn.onclick = () => {
-            if(loginModal) loginModal.style.display = "flex";
-        };
-    }
-
+    if(initBtn) initBtn.onclick = () => { if(loginModal) loginModal.style.display = "flex"; };
     if(finalStartBtn) {
         finalStartBtn.onclick = () => {
-            const nameInput = document.getElementById("heroNameInput");
-            const name = nameInput ? nameInput.value.trim() : "";
+            const name = document.getElementById("heroNameInput").value.trim();
             if(name) {
                 localStorage.setItem("playerName", name);
                 if(loginModal) loginModal.style.display = "none";
                 initGame();
-            } else {
-                alert("Bitte gib einen Namen ein!");
             }
         };
     }
-
-    // Wenn der Name schon existiert, direkt starten
-    if(localStorage.getItem("playerName")) {
-        initGame();
-    }
+    if(localStorage.getItem("playerName")) initGame();
 };
 
 function initGame() {
@@ -57,49 +43,39 @@ function initGame() {
     log("Willkommen im Realm!");
 }
 
-// --- SPEICHER-FUNKTIONEN ---
 function loadData() {
-    try {
-        const savedHighscore = localStorage.getItem("game_highscore");
-        if(savedHighscore) highscore = JSON.parse(savedHighscore);
+    const savedHighscore = localStorage.getItem("game_highscore");
+    if(savedHighscore) highscore = JSON.parse(savedHighscore);
 
-        const savedMeta = localStorage.getItem("game_meta_v11");
-        if(savedMeta) meta = JSON.parse(savedMeta);
-        
-        playerPos = parseInt(localStorage.getItem("game_pos_v11")) || 0;
-        
-        const savedEvents = localStorage.getItem("game_events_v11");
-        if(savedEvents) {
-            boardEvents = JSON.parse(savedEvents);
-        } else {
-            generateBoardEvents();
-        }
-    } catch(e) {
-        console.error("Fehler beim Laden:", e);
-        generateBoardEvents(); // Notfall-Generierung
-    }
+    const savedMeta = localStorage.getItem("game_meta_v12");
+    if(savedMeta) meta = JSON.parse(savedMeta);
+    
+    playerPos = parseInt(localStorage.getItem("game_pos_v12")) || 0;
+    const savedEvents = localStorage.getItem("game_events_v12");
+    if(savedEvents) boardEvents = JSON.parse(savedEvents); 
+    else generateBoardEvents();
 }
 
 function saveData() {
     if(meta.currentRound > highscore.bestRound) highscore.bestRound = meta.currentRound;
     if(meta.currentKills > highscore.bestKills) highscore.bestKills = meta.currentKills;
-    
     localStorage.setItem("game_highscore", JSON.stringify(highscore));
-    localStorage.setItem("game_meta_v11", JSON.stringify(meta));
-    localStorage.setItem("game_pos_v11", playerPos);
-    localStorage.setItem("game_events_v11", JSON.stringify(boardEvents));
+    localStorage.setItem("game_meta_v12", JSON.stringify(meta));
+    localStorage.setItem("game_pos_v12", playerPos);
+    localStorage.setItem("game_events_v12", JSON.stringify(boardEvents));
 }
 
-// --- BOARD-LOGIK (10-18 EVENTS) ---
+function log(msg) {
+    const lc = document.getElementById("logContent");
+    if(lc) lc.innerHTML = "> " + msg + "<br>" + lc.innerHTML;
+}
+
+// --- BOARD-GENERIERUNG (10-18 EVENTS) ---
 function generateBoardEvents() {
     let count = 0;
-    let attempts = 0;
-    
-    while ((count < 10 || count > 18) && attempts < 100) {
+    while (count < 10 || count > 18) {
         boardEvents = new Array(30).fill(null);
         count = 0;
-        attempts++;
-        
         for (let i = 1; i < 30; i++) {
             if (Math.random() < 0.45) {
                 count++;
@@ -107,7 +83,7 @@ function generateBoardEvents() {
                     let p = [];
                     if (meta.currentRound <= 15) p.push("frog");
                     if (meta.currentRound >= 11 && meta.currentRound <= 25) p.push("wolf");
-                    if (meta.currentRound >= 20) p.push("bear");
+                    if (meta.currentRound >= 21) p.push("bear");
                     boardEvents[i] = p.length > 0 ? p[Math.floor(Math.random() * p.length)] : "frog";
                 } else {
                     boardEvents[i] = "money_coin";
@@ -117,12 +93,97 @@ function generateBoardEvents() {
     }
 }
 
-// --- UI AKTUALISIERUNG ---
+// --- HILFSFUNKTION FÜR ZUFALLSZAHLEN ---
+function getRandom(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// --- SPIEL-AKTIONEN & GOLD-LOGIK ---
+window.playerMove = function() {
+    if(inFight) return;
+    if(shopOpen) { shopOpen = false; log("Neue Reise gestartet."); }
+    
+    let steps = getRandom(1, 4);
+    playerPos += steps;
+
+    if (playerPos >= 30) {
+        playerPos = 0;
+        if (meta.currentRound % 10 === 0) {
+            let lvl = meta.currentRound / 10;
+            // Boss Gold: 250 beim ersten, dann immer das Doppelte (250, 500, 1000...)
+            let bossGold = 250 * Math.pow(2, lvl - 1);
+            monster = { name: "EPISCHER DRACHE", hp: lvl*800, maxHp: lvl*800, atk: 15+(lvl*5), money: bossGold, isBoss: true, icon: "🐲" };
+            inFight = true;
+            log("!!! BOSS ERSCHEINT !!!");
+        } else {
+            meta.currentRound++;
+            generateBoardEvents();
+            log("Runde " + meta.currentRound);
+        }
+    } else {
+        let ev = boardEvents[playerPos];
+        if (ev && ev !== "money_coin") {
+            // Monster Gold Balancing
+            if(ev==="frog") monster={name:"Frosch", hp:12, maxHp:12, atk:2, money: getRandom(3, 8), icon:"🐸", isBoss:false};
+            if(ev==="wolf") monster={name:"Wolf", hp:30, maxHp:30, atk:7, money: getRandom(5, 10), icon:"🐺", isBoss:false};
+            if(ev==="bear") monster={name:"Bär", hp:80, maxHp:80, atk:15, money: getRandom(15, 20), icon:"🐻", isBoss:false};
+            inFight = true;
+            boardEvents[playerPos] = null;
+        } else if (ev === "money_coin") {
+            // Goldsack Balancing nach Runden
+            let coinGold = 0;
+            if (meta.currentRound <= 10) coinGold = getRandom(10, 13);
+            else if (meta.currentRound <= 20) coinGold = getRandom(13, 15);
+            else coinGold = getRandom(15, 20);
+            
+            meta.money += coinGold;
+            boardEvents[playerPos] = null;
+            log("Goldsack gefunden: +" + coinGold + " €");
+        }
+    }
+    updateUI();
+};
+
+window.attackMonster = function() {
+    if(!monster) return;
+    monster.hp -= meta.attackPower;
+    if (monster.hp <= 0) {
+        meta.money += monster.money;
+        meta.currentKills++;
+        inFight = false;
+        log("Sieg! Beute: " + monster.money + " €");
+        if(monster.isBoss) { meta.currentRound++; generateBoardEvents(); }
+    } else {
+        meta.hp -= monster.atk;
+        if (meta.hp <= 0) {
+            meta.hp = meta.maxHpBase; 
+            meta.currentRound = 1; 
+            meta.currentKills = 0; 
+            playerPos = 0; 
+            inFight = false; 
+            shopOpen = true; 
+            generateBoardEvents();
+            log("💀 Besiegt! Shop geöffnet.");
+        }
+    }
+    updateUI();
+};
+
+window.buyItem = function(type) {
+    if(!shopOpen) return;
+    let cost = type === 'hp' ? 100+(meta.hpBought*5) : 100+(meta.atkBought*5);
+    if(meta.money >= cost) {
+        meta.money -= cost;
+        if(type === 'hp') { meta.maxHpBase += 5; meta.hp = meta.maxHpBase; meta.hpBought++; }
+        else { meta.attackPower += 5; meta.atkBought++; }
+        log("Upgrade gekauft!");
+    } else { log("Nicht genug Geld!"); }
+    updateUI();
+};
+
 function updateUI() {
     saveData();
     const name = localStorage.getItem("playerName") || "Held";
-    
-    // Status Panel
     const statusPanel = document.getElementById("statusPanel");
     if(statusPanel) {
         statusPanel.innerHTML = `
@@ -139,28 +200,16 @@ function updateUI() {
         </div>`;
     }
 
-    // Battle Arena
     const arena = document.getElementById("battle-arena");
-    const hpFill = document.getElementById("enemy-hp-fill");
-    const hpText = document.getElementById("enemy-hp-text");
-    const enemyIcon = document.getElementById("enemy-icon");
-    const enemyName = document.getElementById("enemy-name");
-
     if(inFight && monster && arena) {
         arena.style.display = "block";
-        if(enemyIcon) enemyIcon.innerHTML = monster.icon;
-        if(enemyName) {
-            enemyName.innerHTML = monster.name;
-            enemyName.style.color = monster.isBoss ? "#d4af37" : "#ef4444";
-        }
+        document.getElementById("enemy-icon").innerHTML = monster.icon;
+        document.getElementById("enemy-name").innerHTML = monster.name;
         let perc = (monster.hp / monster.maxHp) * 100;
-        if(hpFill) hpFill.style.width = Math.max(0, perc) + "%";
-        if(hpText) hpText.innerHTML = `${Math.max(0, monster.hp)} / ${monster.maxHp} HP`;
-    } else if(arena) {
-        arena.style.display = "none";
-    }
+        document.getElementById("enemy-hp-fill").style.width = Math.max(0, perc) + "%";
+        document.getElementById("enemy-hp-text").innerHTML = `${Math.max(0, monster.hp)} / ${monster.maxHp} HP`;
+    } else if(arena) { arena.style.display = "none"; }
 
-    // Board zeichnen
     const boardDiv = document.getElementById("board");
     if(boardDiv) {
         boardDiv.innerHTML = "";
@@ -176,7 +225,6 @@ function updateUI() {
         }
     }
 
-    // Aktions Buttons
     const fightPanel = document.getElementById("fightPanel");
     if (fightPanel) {
         if (inFight) {
@@ -188,7 +236,6 @@ function updateUI() {
         }
     }
 
-    // Shop Buttons
     const bh = document.getElementById("btn-hp");
     const ba = document.getElementById("btn-atk");
     if(bh && ba) {
@@ -199,86 +246,4 @@ function updateUI() {
         bh.onclick = () => buyItem('hp');
         ba.onclick = () => buyItem('atk');
     }
-}
-
-// --- SPIEL-AKTIONEN ---
-window.playerMove = function() {
-    if(inFight) return;
-    if(shopOpen) { shopOpen = false; log("Neue Reise gestartet."); }
-    
-    let steps = Math.floor(Math.random() * 4) + 1;
-    playerPos += steps;
-    log("Vorwärts: " + steps);
-
-    if (playerPos >= 30) {
-        playerPos = 0;
-        if (meta.currentRound % 10 === 0) {
-            let lvl = meta.currentRound / 10;
-            monster = { name: "EPISCHER DRACHE", hp: lvl*800, maxHp: lvl*800, atk: 15+(lvl*5), money: lvl*1000, isBoss: true, icon: "🐲" };
-            inFight = true;
-            log("!!! BOSS-KAMPF !!!");
-        } else {
-            meta.currentRound++;
-            generateBoardEvents();
-            log("Runde " + meta.currentRound);
-        }
-    } else {
-        let ev = boardEvents[playerPos];
-        if (ev && ev !== "money_coin") {
-            if(ev==="frog") monster={name:"Giftfrosch", hp:12, maxHp:12, atk:2, money:15, icon:"🐸", isBoss:false};
-            if(ev==="wolf") monster={name:"Schattenwolf", hp:30, maxHp:30, atk:7, money:35, icon:"🐺", isBoss:false};
-            if(ev==="bear") monster={name:"Höhlenbär", hp:80, maxHp:80, atk:15, money:70, icon:"🐻", isBoss:false};
-            inFight = true;
-            boardEvents[playerPos] = null;
-        } else if (ev === "money_coin") {
-            meta.money += 25;
-            boardEvents[playerPos] = null;
-            log("+25 € gefunden!");
-        }
-    }
-    updateUI();
-};
-
-window.attackMonster = function() {
-    if(!monster) return;
-    monster.hp -= meta.attackPower;
-    if (monster.hp <= 0) {
-        meta.money += monster.money;
-        meta.currentKills++;
-        inFight = false;
-        log("Besiegt! +" + monster.money + " €");
-        if(monster.isBoss) { meta.currentRound++; generateBoardEvents(); }
-    } else {
-        meta.hp -= monster.atk;
-        if (meta.hp <= 0) {
-            meta.hp = meta.maxHpBase; 
-            meta.currentRound = 1; 
-            meta.currentKills = 0; 
-            playerPos = 0; 
-            inFight = false; 
-            shopOpen = true; 
-            generateBoardEvents();
-            log("💀 Besiegt! Rückzug...");
-        }
-    }
-    updateUI();
-};
-
-window.buyItem = function(type) {
-    if(!shopOpen) return;
-    let cost = type === 'hp' ? 100+(meta.hpBought*5) : 100+(meta.atkBought*5);
-    if(meta.money >= cost) {
-        meta.money -= cost;
-        if(type === 'hp') { meta.maxHpBase += 5; meta.hp = meta.maxHpBase; meta.hpBought++; }
-        else { meta.attackPower += 5; meta.atkBought++; }
-        log("Attribut verbessert!");
-    } else {
-        log("Nicht genug Geld!");
-    }
-    updateUI();
-};
-
-function log(msg) {
-    const lc = document.getElementById("logContent");
-    if(lc) lc.innerHTML = "> " + msg + "<br>" + lc.innerHTML;
 }
