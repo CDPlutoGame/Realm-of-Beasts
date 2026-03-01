@@ -9,25 +9,23 @@
 <body>
     <div id="app">
         <div id="statusPanel" class="container"></div>
-
         <div id="shop" class="container"></div>
-
         <div id="fightPanel" class="container"></div>
 
         <div id="gameLog" class="container log-container">
-            <div id="logContent">🎮 Willkommen! Klicke auf 'Laufen'.</div>
+            <div id="logContent">🎮 Willkommen im Dungeon!</div>
         </div>
 
         <div id="board" class="board-container"></div>
 
         <div id="rankingContainer" class="container">
-            <h3>🏆 Bestenliste (Top 3)</h3>
-            <div id="leaderboard">Lade Ranking...</div>
+            <h3>🏆 Top Spieler</h3>
+            <div id="leaderboard">Lade...</div>
         </div>
 
-        <div id="topBar" style="display:none;">
-            <span id="userMail"></span>
-            <button onclick="auth.signOut()">Logout</button>
+        <div id="topBar" style="display:none; padding:10px; background:#000; justify-content:space-between;">
+            <span id="userMail" style="font-size:0.8em;"></span>
+            <button onclick="auth.signOut()" style="background:none; color:red; border:none;">Logout</button>
         </div>
     </div>
 
