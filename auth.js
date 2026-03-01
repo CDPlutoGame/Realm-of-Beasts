@@ -1,153 +1,28 @@
-// auth.js  (muss als <script type="module" src="auth.js"> eingebunden sein)
+import { auth } from "./firebase.js";
+import { GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+const provider = new GoogleAuthProvider();
 
-import { ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-import { auth, db } from "./firebase.js";
-
-const CURRENT_NAME_KEY = "mbr_current_name_online_v10";
-
-// Buttons aus index.html
-const loginBtn = document.getElementById("loginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const saveLayoutBtn = document.getElementById("saveLayoutBtn");
-const resetBtn = document.getElementById("resetBtn");
-
-function show(el, yes) {
-  if (!el) return;
-  el.style.display = yes ? "inline-block" : "none";
-}
-
-async function isAdmin(uid) {
-  try {
-    const snap = await get(ref(db, `admins/${uid}`));
-    return snap.exists() && snap.val() === true;
-  } catch (e) {
-    console.log("Admin-check Fehler:", e?.code || e?.message);
-    return false;
-  }
-}
-
-// LOGIN (Dungeon Overlay)
-const overlay = document.getElementById("loginOverlay");
-const loginConfirm = document.getElementById("loginConfirm");
-const loginCancel = document.getElementById("loginCancel");
-const loginError = document.getElementById("loginError");
-
-loginBtn?.addEventListener("click", () => {
-  overlay.style.display = "flex";
-  loginError.textContent = "";
-});
-
-loginCancel?.addEventListener("click", () => {
-  overlay.style.display = "none";
-});
-
-loginConfirm?.addEventListener("click", async () => {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value;
-
-  if (!email || !password) {
-    loginError.textContent = "❌ Bitte Email & Passwort eingeben";
-    return;
-  }
-
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    overlay.style.display = "none";
-  } catch (e) {
-
-    if (e?.code === "auth/user-not-found" || e?.code === "auth/invalid-credential") {
-      try {
-        await createUserWithEmailAndPassword(auth, email, password);
-        overlay.style.display = "none";
-      } catch (e2) {
-        loginError.textContent = "❌ Falsches Passwort";
-      }
-      return;
+// Login Funktion
+export const login = async () => {
+    try {
+        await signInWithPopup(auth, provider);
+        console.log("Login erfolgreich");
+    } catch (error) {
+        console.error("Login Fehler:", error);
     }
+};
 
-    loginError.textContent = "❌ Login fehlgeschlagen";
-  }
-});
+// Logout Funktion
+export const logout = async () => {
+    try {
+        await signOut(auth);
+        location.reload(); // Seite neu laden nach Logout
+    } catch (error) {
+        console.error("Logout Fehler:", error);
+    }
+};
 
-// PASSWORT RESET
-resetBtn?.addEventListener("click", async () => {
-  const email = (prompt("Email für Reset:") || "").trim();
-  if (!email) return;
-  try {
-    await sendPasswordResetEmail(auth, email);
-    alert("✅ Reset-Mail gesendet (Spam prüfen).");
-  } catch (e) {
-    alert("❌ Reset fehlgeschlagen: " + (e?.code || e?.message));
-  }
-});
-
-// LOGOUT
-logoutBtn?.addEventListener("click", async () => {
-  await signOut(auth);
-});
-
-onAuthStateChanged(auth, async (user) => {
-
-  if (!user) {
-    localStorage.removeItem(CURRENT_NAME_KEY);
-    window.__IS_ADMIN__ = false;
-    show(loginBtn, true);
-    show(resetBtn, false);
-    show(logoutBtn, false);
-    show(saveLayoutBtn, false);
-
-    // 🔥 wichtig!
-    window.__AUTH_READY__ = true;
-    document.dispatchEvent(new Event("auth-ready"));
-    return;
-  }
-
-  // Name fürs Spiel
-  const baseName = user.email.split("@")[0].slice(0, 24);
-
-let savedName = localStorage.getItem(CURRENT_NAME_KEY);
-
-if (!savedName) {
-  savedName = baseName;
-  localStorage.setItem(CURRENT_NAME_KEY, savedName);
-}
-  const admin = await isAdmin(user.uid);
-  window.__IS_ADMIN__ = admin;
-
-  show(loginBtn, false);
-  show(resetBtn, false);
-  show(logoutBtn, true);
-  show(saveLayoutBtn, admin);
-
-  // 🔥 wichtig!
-  window.__AUTH_READY__ = true;
-  document.dispatchEvent(new Event("auth-ready"));
-});
-// ===== LOGIN RESET BUTTON (Overlay) =====
-const loginReset = document.getElementById("loginReset");
-
-loginReset?.addEventListener("click", async () => {
-  const email = document.getElementById("loginEmail").value.trim();
-  const loginError = document.getElementById("loginError");
-
-  if (!email) {
-    loginError.textContent = "❌ Bitte zuerst Email eingeben";
-    return;
-  }
-
-  try {
-    await sendPasswordResetEmail(auth, email);
-    loginError.textContent = "✅ Reset-Mail gesendet (Spam prüfen)";
-  } catch (e) {
-    loginError.textContent = "❌ Reset fehlgeschlagen";
-  }
-});
+// Global verfügbar machen für die HTML-Buttons
+window.login = login;
+window.logout = logout;
