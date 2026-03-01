@@ -39,18 +39,18 @@ window.onload = function() {
 function initGame() {
     loadData();
     updateUI();
-    log("Der Magier ist bereit!");
+    log("Willkommen im Realm!");
 }
 
 function loadData() {
     const savedHighscore = localStorage.getItem("game_highscore");
     if(savedHighscore) highscore = JSON.parse(savedHighscore);
 
-    const savedMeta = localStorage.getItem("game_meta_v7");
+    const savedMeta = localStorage.getItem("game_meta_v8");
     if(savedMeta) meta = JSON.parse(savedMeta);
     
-    playerPos = parseInt(localStorage.getItem("game_pos_v7")) || 0;
-    const savedEvents = localStorage.getItem("game_events_v7");
+    playerPos = parseInt(localStorage.getItem("game_pos_v8")) || 0;
+    const savedEvents = localStorage.getItem("game_events_v8");
     if(savedEvents) boardEvents = JSON.parse(savedEvents); 
     else generateBoardEvents();
 }
@@ -60,9 +60,9 @@ function saveData() {
     if(meta.currentKills > highscore.bestKills) highscore.bestKills = meta.currentKills;
     
     localStorage.setItem("game_highscore", JSON.stringify(highscore));
-    localStorage.setItem("game_meta_v7", JSON.stringify(meta));
-    localStorage.setItem("game_pos_v7", playerPos);
-    localStorage.setItem("game_events_v7", JSON.stringify(boardEvents));
+    localStorage.setItem("game_meta_v8", JSON.stringify(meta));
+    localStorage.setItem("game_pos_v8", playerPos);
+    localStorage.setItem("game_events_v8", JSON.stringify(boardEvents));
 }
 
 function log(msg) {
@@ -88,12 +88,12 @@ function generateBoardEvents() {
 // --- UI ---
 function updateUI() {
     saveData();
-    const name = localStorage.getItem("playerName") || "Magier";
+    const name = localStorage.getItem("playerName") || "Held";
     
     document.getElementById("statusPanel").innerHTML = `
         <div style="background:#1e1e1e; padding:10px; border-radius:10px; border:1px solid #444; text-align:left;">
             <div style="display:flex; justify-content:space-between; border-bottom:1px solid #333; padding-bottom:5px; margin-bottom:5px;">
-                <b style="color:#d4af37"><i class="fas fa-hat-wizard"></i> ${name}</b>
+                <b style="color:#d4af37"><i class="fas fa-dragon"></i> ${name}</b>
                 <span style="color:#f59e0b"><i class="fas fa-coins"></i> ${meta.money} €</span>
             </div>
             <div class="stat-grid">
@@ -116,7 +116,7 @@ function updateUI() {
     for (let i = 0; i < 30; i++) {
         const t = document.createElement("div");
         t.style = "height:35px; background:#1a1a1a; border:1px solid #333; display:flex; align-items:center; justify-content:center; border-radius:4px;";
-        if (i === playerPos) t.innerHTML = "🧙"; 
+        if (i === playerPos) t.innerHTML = "🧙"; // Wir lassen das Icon, aber es wird im Text nicht mehr als Magier bezeichnet
         else if (boardEvents[i] === "frog") t.innerHTML = "🐸";
         else if (boardEvents[i] === "wolf") t.innerHTML = "🐺";
         else if (boardEvents[i] === "bear") t.innerHTML = "🐻";
@@ -129,7 +129,7 @@ function updateUI() {
         let color = monster.isBoss ? "#f59e0b" : "#b91c1c";
         fp.innerHTML = `<button class="game-btn" style="background:${color};" onclick="attackMonster()">ANGRIFF (${monster.hp} HP)</button>`;
     } else {
-        const btnText = shopOpen ? "NEUER LAUF" : "TELEPORTIEREN (1-4)";
+        const btnText = shopOpen ? "NEUER VERSUCH" : "VORWÄRTS (1-4)";
         fp.innerHTML = `<button class="game-btn" style="background:#1d4ed8;" onclick="playerMove()">${btnText}</button>`;
     }
 
@@ -146,22 +146,17 @@ function updateUI() {
 // --- AKTIONEN ---
 window.playerMove = function() {
     if(inFight) return;
-    if(shopOpen) { shopOpen = false; log("Magie regeneriert! Neuer Run."); }
+    if(shopOpen) { shopOpen = false; log("Neue Reise gestartet."); }
 
     let steps = Math.floor(Math.random() * 4) + 1;
     playerPos += steps;
-    log("Teleport: " + steps);
+    log("Du rückst vor: " + steps);
 
     if (playerPos >= 30) {
         playerPos = 0;
         if (meta.currentRound % 10 === 0) {
             let level = meta.currentRound / 10;
-            monster = { 
-                hp: level * 800, 
-                atk: 15 + (level * 5), 
-                money: level * 1000, 
-                isBoss: true 
-            };
+            monster = { hp: level * 800, atk: 15 + (level * 5), money: level * 1000, isBoss: true };
             inFight = true;
             log("!!! BOSS ERSCHEINT !!!");
         } else {
@@ -178,9 +173,9 @@ window.playerMove = function() {
             inFight = true;
             boardEvents[playerPos] = null;
         } else if (ev === "money_coin") {
-            meta.money += 25; // Bonus Geld
+            meta.money += 25;
             boardEvents[playerPos] = null;
-            log("+25 € erhalten!");
+            log("+25 € gefunden!");
         }
     }
     updateUI();
@@ -192,16 +187,16 @@ window.attackMonster = function() {
         meta.money += monster.money;
         meta.currentKills++;
         inFight = false;
-        log("Sieg! +" + monster.money + " € erhalten.");
+        log("Sieg! +" + monster.money + " €");
         if(monster.isBoss) {
             meta.currentRound++;
             generateBoardEvents();
-            log("Boss gefallen! Stufe erhöht.");
+            log("Der Boss wurde bezwungen!");
         }
     } else {
         meta.hp -= monster.atk;
         if (meta.hp <= 0) {
-            log("💀 KO! Magie erschöpft.");
+            log("💀 Besiegt! Rückzug zum Schwarzmarkt.");
             saveData(); 
             meta.hp = meta.maxHpBase;
             meta.currentRound = 1;
@@ -222,7 +217,7 @@ window.buyItem = function(type) {
         meta.money -= cost;
         if(type === 'hp') { meta.maxHpBase += 5; meta.hp = meta.maxHpBase; meta.hpBought++; }
         else { meta.attackPower += 5; meta.atkBought++; }
-        log("Attribut verstärkt!");
+        log("Held verstärkt!");
     } else { log("Zu wenig Geld!"); }
     updateUI();
 };
