@@ -1,95 +1,37 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Realm of Beasts</title>
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="style.css" />
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Realm of Beasts</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="app">
+        <div id="statusPanel" class="container"></div>
 
-  <h1 id="gameTitle">Realm of Beasts</h1>
+        <div id="shop" class="container"></div>
 
-  <!-- TOP BAR -->
-  <div id="topBar" style="display:none;">
-    <button id="loginBtn">Login</button>
-    <button id="logoutBtn" style="display:none;">Logout</button>
-    <button id="resetBtn">Passwort zurücksetzen</button>
-    <button id="saveLayoutBtn" style="display:none;">Layout speichern</button>
-    <button id="toggleEditBtn" style="display:none;">Layout bearbeiten</button>
-  </div>
+        <div id="fightPanel" class="container"></div>
 
-  <!-- =========================
-       GAME AREA
-       ========================= -->
-  <div id="app">
+        <div id="gameLog" class="container log-container">
+            <div id="logContent">🎮 Willkommen! Klicke auf 'Laufen'.</div>
+        </div>
 
-    <div id="statusPanel" class="window"></div>
-    <div id="shop" class="window"></div>
-    <div id="fightPanel" class="window"></div>
-    <pre id="log" class="window"></pre>
+        <div id="board" class="board-container"></div>
 
-    <div id="controlsPanel" class="window">
-      <div id="controlsRow"></div>
+        <div id="rankingContainer" class="container">
+            <h3>🏆 Bestenliste (Top 3)</h3>
+            <div id="leaderboard">Lade Ranking...</div>
+        </div>
+
+        <div id="topBar" style="display:none;">
+            <span id="userMail"></span>
+            <button onclick="auth.signOut()">Logout</button>
+        </div>
     </div>
 
-    <div id="board" class="window"></div>
-
-    <div id="leaderboardPanel" class="window">
-      <h3>🏆 Bestenliste (Top 3 – Online)</h3>
-      <div id="leaderboard"></div>
-    </div>
-
-  </div>
-
-  <script type="module" src="auth.js"></script>
-<script type="module" src="ranking.js"></script>
-<script type="module" src="game.js"></script>
-<script type="module" src="admin.js"></script>
-
-  <!-- =========================
-       DUNGEON LOGIN OVERLAY
-       ========================= -->
-  <div id="loginOverlay" class="overlay">
-    <div class="loginBox">
-
-      <h2 class="loginTitle">Realm Login</h2>
-
-      <input type="email" id="loginEmail" placeholder="📧 Email" />
-      <input type="password" id="loginPassword" placeholder="🔒 Passwort" />
-
-      <div class="loginButtons">
-      <button id="loginConfirm">⚔️ Betreten</button>
-      <button id="loginCancel">❌ Abbrechen</button>
-      </div>
-
-      <button id="loginReset" class="loginResetBtn">
-          🔑 Passwort vergessen?
-        </button>
-
-      <p id="loginError" class="loginError"></p>
-
-    </div>
-  </div>
-  <div id="nameOverlay" class="overlay">
-  <div class="loginBox">
-    <h2 class="loginTitle">Heldenname ändern</h2>
-
-    <input type="text"
-           id="nameInput"
-           placeholder="✏️ Neuer Benutzername (max 24 Zeichen)" />
-
-    <div class="loginButtons">
-      <button id="nameConfirm">💾 Speichern</button>
-      <button id="nameCancel">❌ Abbrechen</button>
-    </div>
-
-    <p id="nameError" class="loginError"></p>
-  </div>
-</div>
-
+    <script type="module" src="auth.js"></script>
+    <script type="module" src="game.js"></script>
 </body>
 </html>
