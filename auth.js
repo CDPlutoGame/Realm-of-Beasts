@@ -1,59 +1,66 @@
 import { auth } from "./firebase.js";
 import { 
     GoogleAuthProvider, 
-    signInWithRedirect, // Geändert von signInWithPopup
+    signInWithRedirect, 
     getRedirectResult, 
+    onAuthStateChanged,
     signOut 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const provider = new GoogleAuthProvider();
+const logContent = document.getElementById("logContent");
+const statusPanel = document.getElementById("statusPanel");
 
-// Diese Funktion prüft beim Laden der Seite, ob der User gerade vom Login zurückkommt
+// 1. Prüfen, ob der User gerade vom Login zurückkommt
 getRedirectResult(auth)
-  .then((result) => {
-    if (result) {
-      console.log("Erfolgreich eingeloggt:", result.user);
-      // Hier kannst du dein Spiel starten oder das UI updaten
-    }
-  }).catch((error) => {
-    console.error("Fehler nach dem Redirect:", error);
-  });
+    .then((result) => {
+        if (result) {
+            logContent.innerText = "✅ Login erfolgreich!";
+        }
+    })
+    .catch((error) => {
+        // Zeigt Fehler direkt am Handy-Bildschirm an
+        logContent.innerText = "❌ Fehler: " + error.code;
+        console.error("Redirect Fehler:", error);
+    });
 
+// 2. Automatisches Update, wenn sich der Login-Status ändert
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // Wenn eingeloggt: Name zeigen und Logout-Button
+        statusPanel.innerHTML = `
+            <span>👤 ${user.displayName}</span>
+            <button onclick="logout()" class="game-btn" style="background:#d93025; margin-left: 10px; padding: 5px 10px;">Logout</button>
+        `;
+        logContent.innerText = "🎮 Willkommen zurück, " + user.displayName + "!";
+    } else {
+        // Wenn nicht eingeloggt: Login-Button zeigen
+        statusPanel.innerHTML = `
+            <button onclick="login()" class="game-btn" style="background:#4285F4;">🔑 Google Login</button>
+        `;
+        logContent.innerText = "🎮 Bitte einloggen zum Spielen.";
+    }
+});
+
+// 3. Funktionen für die Buttons (Export für das Spiel)
 export const login = async () => {
+    logContent.innerText = "⏳ Verbinde mit Google...";
     try {
-        // Redirect ist am Handy viel stabiler als ein Popup
         await signInWithRedirect(auth, provider);
     } catch (error) {
-        console.error("Login Fehler:", error);
+        logContent.innerText = "❌ Login-Start Fehler: " + error.message;
     }
 };
 
 export const logout = async () => {
-    await signOut(auth);
-    location.reload();
+    try {
+        await signOut(auth);
+        location.reload();
+    } catch (error) {
+        logContent.innerText = "❌ Logout Fehler";
+    }
 };
 
+// Global machen, damit die onclick-Events im HTML funktionieren
 window.login = login;
 window.logout = logout;
-
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-// Prüft automatisch, ob ein User angemeldet ist
-onAuthStateChanged(auth, (user) => {
-    const statusPanel = document.getElementById("statusPanel");
-    const logContent = document.getElementById("logContent");
-
-    if (user) {
-        // User ist drin! Login-Button verstecken oder durch Profil ersetzen
-        statusPanel.innerHTML = `
-            <span>Willkommen, ${user.displayName}</span>
-            <button onclick="logout()" class="game-btn" style="background:#d93025; margin-left: 10px;">🚪 Logout</button>
-        `;
-        logContent.innerText = "🎮 Spiel geladen. Viel Erfolg, " + user.displayName + "!";
-        
-        // Hier könntest du jetzt deine game.js oder profile.js Funktionen starten
-    } else {
-        // Kein User da, zeige den Login-Button (Standard-HTML)
-        logContent.innerText = "🎮 Warte auf Login...";
-    }
-});
