@@ -1,11 +1,40 @@
-import { auth } from "./firebase.js";
-import { meta, loadMeta, saveMeta } from "./profile.js";
+/** * REALM OF BEAAASTS - GAME LOGIC (LOKAL)
+ */
+
+// 1. Dein Profil (Ersatz für meta/profile.js mit Firebase)
+let meta = {
+    hp: 100,
+    maxHpBase: 100,
+    gold: 0,
+    attackPower: 5,
+    autoLevel: 0
+};
 
 let playerPos = 0;
 let currentRounds = 1;
 let inFight = false;
 let monster = null;
-let shopOpen = false;
+
+// --- FUNKTIONEN ZUM SPEICHERN & LADEN (LOKAL) ---
+
+function saveMeta() {
+    localStorage.setItem("game_meta", JSON.stringify(meta));
+    localStorage.setItem("game_playerPos", playerPos);
+}
+
+function loadMeta() {
+    const savedMeta = localStorage.getItem("game_meta");
+    const savedPos = localStorage.getItem("game_playerPos");
+    
+    if (savedMeta) {
+        meta = JSON.parse(savedMeta);
+    }
+    if (savedPos) {
+        playerPos = parseInt(savedPos);
+    }
+}
+
+// --- SPIEL LOGIK ---
 
 function log(msg) {
     const logContent = document.getElementById("logContent");
@@ -14,22 +43,16 @@ function log(msg) {
     }
 }
 
-async function startFullGame() {
-    log("Lade Profil...");
-    await loadMeta();
-    updateHud();
-    renderBoard();
-    setFightPanelIdle();
-    setInterval(gameLoop, 800);
-}
-
 function updateHud() {
     const el = document.getElementById("statusPanel");
     if (!el) return;
+    
+    const playerName = localStorage.getItem("playerName") || "Held";
+    
     el.innerHTML = `
-        <div style="display:flex; justify-content:space-between;">
-            <div>❤️ HP: ${meta.hp}/${meta.maxHpBase} | 💰 Gold: ${meta.gold}</div>
-            <button onclick="logout()" style="background:none; border:none; color:grey; font-size:10px;">Logout</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#333; padding:5px; border-radius:5px;">
+            <div>👤 ${playerName} | ❤️ HP: ${meta.hp}/${meta.maxHpBase} | 💰 Gold: ${meta.gold}</div>
+            <button onclick="logout()" style="background:#555; border:none; color:white; font-size:10px; padding:3px 8px; border-radius:3px;">Logout</button>
         </div>
     `;
 }
@@ -38,69 +61,10 @@ function renderBoard() {
     const b = document.getElementById("board");
     if (!b) return;
     b.innerHTML = "";
+    // Kleines Board-Layout
+    b.style.display = "grid";
+    b.style.gridTemplateColumns = "repeat(10, 1fr)";
+    b.style.gap = "2px";
+
     for (let i = 0; i < 30; i++) {
         const t = document.createElement("div");
-        t.className = "tile";
-        t.style.background = i === playerPos ? "#444" : "#222";
-        t.innerHTML = i === playerPos ? "🧍" : "";
-        b.appendChild(t);
-    }
-}
-
-function setFightPanelIdle() {
-    const fp = document.getElementById("fightPanel");
-    if (fp) fp.innerHTML = `<button onclick="move()" class="game-btn">👣 LAUFEN</button>`;
-}
-
-window.move = async () => {
-    if (inFight) return;
-    playerPos++;
-    if (playerPos >= 30) { playerPos = 0; currentRounds++; }
-    
-    if (Math.random() < 0.3) {
-        spawnMonster();
-    } else {
-        renderBoard();
-        updateHud();
-    }
-};
-
-function spawnMonster() {
-    monster = { name: "Monster", hp: 10 + currentRounds, atk: 2, gold: 10 };
-    inFight = true;
-    document.getElementById("fightPanel").innerHTML = `
-        <div class="container" style="border:1px solid red;">
-            👾 ${monster.name} (HP: ${monster.hp})<br>
-            <button onclick="attack()" class="game-btn" style="background:red;">⚔️ ANGRIFF</button>
-        </div>
-    `;
-}
-
-window.attack = async () => {
-    monster.hp -= meta.attackPower;
-    if (monster.hp <= 0) {
-        meta.gold += monster.gold;
-        inFight = false;
-        log("Sieg!");
-        await saveMeta();
-        updateHud();
-        setFightPanelIdle();
-        renderBoard();
-    } else {
-        meta.hp -= monster.atk;
-        updateHud();
-        if (meta.hp <= 0) { log("Tod!"); meta.hp = meta.maxHpBase; }
-    }
-};
-
-function gameLoop() {
-    if (meta.autoLevel > 0 && !inFight) window.move();
-}
-
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        startFullGame();
-    } else {
-        document.getElementById("logContent").innerHTML = "Bitte einloggen...";
-    }
-});
