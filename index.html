@@ -5,27 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Realm of Beasts</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Kurzes CSS direkt hier, damit die Struktur sofort stimmt */
+        #game-container { text-align: center; padding: 10px; }
+        .game-btn { padding: 10px 20px; cursor: pointer; border-radius: 5px; border: none; font-weight: bold; }
+        #statusPanel { margin-bottom: 10px; min-height: 40px; }
+        #logContent { background: rgba(0,0,0,0.7); color: white; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        #board { display: none; margin-top: 20px; } /* Board ist am Anfang unsichtbar */
+        .controls { margin-top: 10px; }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <div id="statusPanel" class="container">
-            <button onclick="login()" class="game-btn" style="background:#4285F4;">🔑 Google Login</button>
+
+    <div id="game-container">
+        <h1>🐾 Realm of Beasts</h1>
+
+        <div id="statusPanel">
+            </div>
+
+        <div id="logContent">Lade Spieldaten...</div>
+
+        <div class="controls">
+            <button id="muteBtn" class="game-btn" style="background: #555; color: white;">🔊 Ton an</button>
         </div>
 
-        <div id="fightPanel" class="container"></div>
+        <hr>
 
-        <div id="gameLog" class="container log-container">
-            <div id="logContent">🎮 Warte auf Login...</div>
-        </div>
-
-        <div id="shop" class="container"></div>
-
-        <div id="board" class="board-container"></div>
-    </div>
-
-    <script type="module" src="firebase.js"></script>
-    <script type="module" src="auth.js"></script>
-    <script type="module" src="profile.js"></script>
-    <script type="module" src="game.js"></script>
-</body>
-</html>
+        <div id="board">
+            <h2>Dein Spielfeld</h2>
+            <div id="gameBoardContent">
+                <p>Willkommen im Kampfbereich!</p>
