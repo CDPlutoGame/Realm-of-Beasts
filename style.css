@@ -1,7 +1,73 @@
-body { background: #1a1a1a; color: white; font-family: sans-serif; margin: 0; padding: 5px; overflow-x: hidden; }
-.container { background: #2a2a2a; border-radius: 10px; padding: 10px; margin-bottom: 8px; border: 1px solid #333; }
-.game-btn { border-radius: 8px; border: none; color: white; font-weight: bold; cursor: pointer; padding: 10px; background: #b32020; transition: transform 0.1s; }
-.game-btn:active { transform: scale(0.95); }
-.board-container { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; background: #222; padding: 8px; border-radius: 10px; }
-.tile { height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-size: 1.3em; }
-.log-container { height: 90px; overflow-y: hidden; font-family: monospace; font-size: 0.8em; background: #000 !important; color: #aaa; }
+/* Grunddesign */
+body { 
+    background: #1a1a1a; 
+    color: white; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    margin: 0; 
+    padding: 10px; 
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Container-Stil für Status, Shop und Fight */
+.container { 
+    background: #2a2a2a; 
+    border-radius: 12px; 
+    padding: 12px; 
+    border: 1px solid #3d3d3d; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+/* Buttons */
+.game-btn { 
+    border-radius: 8px; 
+    border: none; 
+    color: white; 
+    font-weight: bold; 
+    cursor: pointer; 
+    padding: 12px; 
+    background: #b32020; 
+    transition: transform 0.1s, background 0.2s;
+    font-size: 0.9em;
+}
+
+.game-btn:active { 
+    transform: scale(0.95); 
+}
+
+/* Spielfeld (Board) */
+.board-container { 
+    display: grid; 
+    grid-template-columns: repeat(6, 1fr); 
+    gap: 5px; 
+    background: #222; 
+    padding: 10px; 
+    border-radius: 12px; 
+}
+
+.tile { 
+    height: 50px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    border-radius: 6px; 
+    font-size: 1.4em; 
+    background: #333;
+}
+
+/* Log-Bereich (Konsole) */
+.log-container { 
+    height: 100px; 
+    overflow-y: hidden; 
+    font-family: 'Courier New', Courier, monospace; 
+    font-size: 0.85em; 
+    background: #000 !important; 
+    color: #00ff00; /* Retro Hacker-Grün */
+    border: 1px solid #004400;
+}
+
+/* Spezielle Farben für Shop-Zustände */
+#shop h3 {
+    transition: color 0.3s;
+}
