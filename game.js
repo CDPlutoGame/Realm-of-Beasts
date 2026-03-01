@@ -1,4 +1,4 @@
-/** * REALM OF BEAAASTS - JUMP & OVERDRIVE EDITION */
+/** * REALM OF BEAAASTS - ROGUELITE SHOP EDITION */
 
 let meta = { 
     hp: 30, maxHpBase: 30, gold: 0, attackPower: 5, kills: 0, rounds: 1, hpBought: 0, atkBought: 0 
@@ -7,6 +7,7 @@ let playerPos = 0;
 let inFight = false;
 let monster = null;
 let boardEvents = [];
+let shopOpen = false; // Neu: Kontrolliert, ob der Shop gerade aktiv ist
 
 window.openLogin = () => {
     document.getElementById("loginModal").style.display = "flex";
@@ -76,114 +77,26 @@ function updateStatus() {
             </div>`;
     }
     
+    // Shop UI Logik
     document.getElementById("shopPanel").style.display = "block";
-    document.getElementById("btn-hp").innerHTML = `<i class="fas fa-heart"></i> +5 HP <span style="margin-left:auto;">${hpCost} 💰</span>`;
-    document.getElementById("btn-atk").innerHTML = `<i class="fas fa-sword"></i> +5 ATK <span style="margin-left:auto;">${atkCost} 💰</span>`;
-}
+    const btnHp = document.getElementById("btn-hp");
+    const btnAtk = document.getElementById("btn-atk");
 
-function renderBoard() {
-    const b = document.getElementById("board"); 
-    if (!b) return;
-    b.style.display = "grid"; 
-    b.style.gridTemplateColumns = "repeat(10, 1fr)"; 
-    b.style.gap = "4px"; 
-    b.innerHTML = "";
-    for (let i = 0; i < 30; i++) {
-        const t = document.createElement("div");
-        t.style = `height:35px; background:${i===playerPos?"#444":"#1a1a1a"}; border:1px solid #333; display:flex; align-items:center; justify-content:center;`;
-        if (i === playerPos) t.innerHTML = '<i class="fas fa-walking" style="color:white;"></i>';
-        else if (boardEvents[i] === "frog") t.innerHTML = "🐸";
-        else if (boardEvents[i] === "wolf") t.innerHTML = "🐺";
-        else if (boardEvents[i] === "bear") t.innerHTML = "🐻";
-        else if (boardEvents[i] === "gold") t.innerHTML = "💰";
-        b.appendChild(t);
-    }
-}
+    btnHp.innerHTML = `<i class="fas fa-heart"></i> +5 HP <span style="margin-left:auto;">${hpCost} 💰</span>`;
+    btnAtk.innerHTML = `<i class="fas fa-sword"></i> +5 ATK <span style="margin-left:auto;">${atkCost} 💰</span>`;
 
-window.move = () => {
-    if (inFight) return;
-
-    // Zufällig 1 bis 4 Schritte
-    let steps = Math.floor(Math.random() * 4) + 1;
-    log(`Du springst ${steps} Felder weit!`);
-
-    playerPos += steps;
-
-    // Check ob wir über das Ziel hinausgeschossen sind (Runden-Ende)
-    if (playerPos >= 30) {
-        playerPos = 0;
-        if (meta.rounds % 10 === 0) {
-            let bossMult = meta.rounds / 10;
-            monster = { name: "WELTEN-FRESSER", icon: "🐲", hp: bossMult*1000, atk: bossMult*20, gold: bossMult*500, isBoss: true };
-            inFight = true; 
-            log("!!! BOSS ERSCHEINT AM RUNDENENDE !!!"); 
-        } else { 
-            meta.rounds++; 
-            generateBoardEvents(); 
-            log("Nächste Runde erreicht."); 
-        }
+    // Buttons deaktivieren, wenn nicht im Shop-Modus
+    if (!shopOpen) {
+        btnHp.style.opacity = "0.3";
+        btnHp.style.cursor = "not-allowed";
+        btnHp.disabled = true;
+        btnAtk.style.opacity = "0.3";
+        btnAtk.style.cursor = "not-allowed";
+        btnAtk.disabled = true;
     } else {
-        // Wir prüfen NUR das Feld, auf dem wir landen
-        let ev = boardEvents[playerPos];
-        if (ev === "frog" || ev === "wolf" || ev === "bear") {
-            if(ev==="frog") monster={name:"Frosch", icon:"🐸", hp:10, atk:2, gold:10};
-            if(ev==="wolf") monster={name:"Wolf", icon:"🐺", hp:25, atk:6, gold:25};
-            if(ev==="bear") monster={name:"Bär", icon:"🐻", hp:60, atk:12, gold:60};
-            inFight = true; 
-            boardEvents[playerPos] = null; 
-            log(`Du landest direkt vor einem ${monster.name}!`);
-        } else if (ev === "gold") { 
-            meta.gold += 10; 
-            boardEvents[playerPos] = null; 
-            log("Gold gefunden! +10 💰"); 
-        } else {
-            log("Sicher gelandet.");
-        }
-    }
-    updateUI();
-};
-
-window.attack = () => {
-    monster.hp -= meta.attackPower;
-    if (monster.hp <= 0) {
-        log(`Besiegt! +${monster.gold} Gold.`); meta.gold += monster.gold; meta.kills++; inFight = false;
-        if (monster.isBoss) { meta.rounds++; generateBoardEvents(); }
-    } else {
-        meta.hp -= monster.atk; log(`Monster trifft: -${monster.atk} HP`);
-        if (meta.hp <= 0) { log("KO! Neustart im Lager."); meta.hp = meta.maxHpBase; playerPos = 0; inFight = false; generateBoardEvents(); }
-    }
-    updateUI();
-};
-
-window.buyUpgrade = (type) => {
-    let cost = type === 'hp' ? 100+(meta.hpBought*5) : 100+(meta.atkBought*5);
-    if (meta.gold >= cost) {
-        meta.gold -= cost;
-        if (type === 'hp') { meta.maxHpBase += 5; meta.hp = meta.maxHpBase; meta.hpBought++; }
-        else { meta.attackPower += 5; meta.atkBought++; }
-    } else log("Zu wenig Gold!");
-    updateUI();
-};
-
-function updateUI() { saveData(); updateStatus(); renderBoard(); setActionBtn(); }
-
-function setActionBtn() {
-    const fp = document.getElementById("fightPanel");
-    if (!fp) return;
-    if (inFight) {
-        fp.innerHTML = `<div style="border:2px solid #b91c1c; padding:15px; background:#200; border-radius:10px;">
-            <div style="color:#f87171; font-size:18px;">${monster.icon} ${monster.name} (${monster.hp} HP)</div>
-            <button onclick="attack()" class="game-btn" style="background:#b91c1c;">ANGRIFF (-${meta.attackPower})</button></div>`;
-    } else {
-        fp.innerHTML = `<button onclick="move()" class="game-btn" style="background:#1d4ed8;">SPRINGEN (1-4 FELDER)</button>`;
-    }
-}
-
-function checkAndStart() { 
-    if (localStorage.getItem("playerName")) { 
-        loadData(); 
-        updateUI(); 
-    } 
-}
-
-window.addEventListener('load', checkAndStart);
+        btnHp.style.opacity = "1";
+        btnHp.style.cursor = "pointer";
+        btnHp.disabled = false;
+        btnAtk.style.opacity = "1";
+        btnAtk.style.cursor = "pointer";
+        btnAtk.disabled =
