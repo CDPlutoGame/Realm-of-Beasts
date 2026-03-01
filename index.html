@@ -6,13 +6,29 @@
     <title>Realm of Beasts</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Kurzes CSS direkt hier, damit die Struktur sofort stimmt */
-        #game-container { text-align: center; padding: 10px; }
-        .game-btn { padding: 10px 20px; cursor: pointer; border-radius: 5px; border: none; font-weight: bold; }
-        #statusPanel { margin-bottom: 10px; min-height: 40px; }
-        #logContent { background: rgba(0,0,0,0.7); color: white; padding: 10px; margin: 10px 0; border-radius: 5px; }
-        #board { display: none; margin-top: 20px; } /* Board ist am Anfang unsichtbar */
-        .controls { margin-top: 10px; }
+        /* Direktes CSS für Stabilität am Handy */
+        body { background-color: #121212; color: white; font-family: sans-serif; margin: 0; padding: 0; }
+        #game-container { text-align: center; padding: 15px; max-width: 500px; margin: auto; }
+        .game-btn { padding: 12px 20px; cursor: pointer; border-radius: 8px; border: none; font-weight: bold; font-size: 16px; margin: 5px; }
+        #statusPanel { margin-bottom: 15px; min-height: 50px; }
+        #logContent { 
+            background: rgba(0,0,0,0.8); 
+            color: #00ff00; 
+            padding: 10px; 
+            margin: 15px 0; 
+            border-radius: 8px; 
+            font-family: monospace; 
+            font-size: 12px;
+            height: 80px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            text-align: left;
+        }
+        #board { display: none; margin-top: 20px; }
+        #fightPanel { margin-top: 20px; min-height: 120px; }
+        .controls { margin-bottom: 10px; }
+        hr { border: 0; border-top: 1px solid #333; margin: 20px 0; }
+        .tile { border-radius: 4px; transition: background 0.3s; }
     </style>
 </head>
 <body>
@@ -21,17 +37,44 @@
         <h1>🐾 Realm of Beasts</h1>
 
         <div id="statusPanel">
-            </div>
-
-        <div id="logContent">Lade Spieldaten...</div>
+            <button onclick="login()" class="game-btn" style="background:#4285F4; color:white;">🔑 STARTEN</button>
+        </div>
 
         <div class="controls">
-            <button id="muteBtn" class="game-btn" style="background: #555; color: white;">🔊 Ton an</button>
+            <button id="muteBtn" class="game-btn" style="background: #444; color: white; font-size: 14px;">🔊 Ton an</button>
         </div>
+
+        <div id="logContent">> Warte auf Helden...</div>
 
         <hr>
 
         <div id="board">
-            <h2>Dein Spielfeld</h2>
-            <div id="gameBoardContent">
-                <p>Willkommen im Kampfbereich!</p>
+            </div>
+
+        <div id="fightPanel">
+            </div>
+
+    </div>
+
+    <script type="module" src="auth.js"></script>
+    <script type="module" src="game.js"></script>
+
+    <script>
+        // Ton-Logik (einfach gehalten)
+        const muteBtn = document.getElementById('muteBtn');
+        let isMuted = false;
+
+        if (muteBtn) {
+            muteBtn.addEventListener('click', () => {
+                isMuted = !isMuted;
+                muteBtn.innerText = isMuted ? "🔇 Ton aus" : "🔊 Ton an";
+                muteBtn.style.background = isMuted ? "#222" : "#444";
+                
+                // Signal an game.js senden
+                const event = new CustomEvent('toggleMute', { detail: isMuted });
+                window.dispatchEvent(event);
+            });
+        }
+    </script>
+</body>
+</html>
