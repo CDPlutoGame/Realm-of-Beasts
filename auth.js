@@ -35,3 +35,25 @@ export const logout = async () => {
 
 window.login = login;
 window.logout = logout;
+
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+// Prüft automatisch, ob ein User angemeldet ist
+onAuthStateChanged(auth, (user) => {
+    const statusPanel = document.getElementById("statusPanel");
+    const logContent = document.getElementById("logContent");
+
+    if (user) {
+        // User ist drin! Login-Button verstecken oder durch Profil ersetzen
+        statusPanel.innerHTML = `
+            <span>Willkommen, ${user.displayName}</span>
+            <button onclick="logout()" class="game-btn" style="background:#d93025; margin-left: 10px;">🚪 Logout</button>
+        `;
+        logContent.innerText = "🎮 Spiel geladen. Viel Erfolg, " + user.displayName + "!";
+        
+        // Hier könntest du jetzt deine game.js oder profile.js Funktionen starten
+    } else {
+        // Kein User da, zeige den Login-Button (Standard-HTML)
+        logContent.innerText = "🎮 Warte auf Login...";
+    }
+});
