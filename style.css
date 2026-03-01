@@ -1,28 +1,49 @@
-body { background: #1a1a1a; color: white; font-family: sans-serif; margin: 0; padding: 10px; }
-.container { background: #2a2a2a; border-radius: 12px; padding: 12px; margin-bottom: 8px; border: 1px solid #333; }
-
-/* Log-Feld (Grüne Schrift auf Schwarz) */
-.log-container { 
-    height: 100px; 
-    overflow-y: hidden; 
-    background: #000 !important; 
-    color: #00ff00; 
-    font-family: monospace; 
-    font-size: 0.85em;
-    border: 1px solid #004400;
+/* --- GRUNDEINSTELLUNGEN --- */
+:root {
+    --bg-color: #121212;
+    --container-bg: rgba(30, 30, 30, 0.9);
+    --border-color: #444;
+    --text-color: #e0e0e0;
+    --accent-color: lime;
+    --danger-color: #ff4d4d;
+    --action-color: #4285F4; /* Google Blau */
 }
 
-/* Spielfeld Gitter */
-.board-container { 
-    display: grid; 
-    grid-template-columns: repeat(6, 1fr); 
-    gap: 5px; 
-    background: #222; 
-    padding: 10px; 
-    border-radius: 12px; 
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent; /* Verhindert blauen Klick-Rahmen auf Handy */
 }
-.tile { height: 45px; display: flex; align-items: center; justify-content: center; background: #333; border-radius: 6px; font-size: 1.3em; }
 
-/* Buttons */
-.game-btn { background: #b32020; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-.game-btn:active { transform: scale(0.95); }
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    overflow: hidden; /* Verhindert Scrollen der gesamten Seite */
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+}
+
+/* --- HAUPTCONTAINER (Füllt das Handy-Display) --- */
+#app {
+    width: 100%;
+    max-width: 480px; /* Begrenzung für Tablets/PC */
+    height: 100vh;
+    display: flex;
+    flex-direction: column; /* Elemente untereinander */
+    padding: 10px;
+    gap: 8px; /* Abstand zwischen den Containern */
+}
+
+/* --- ALLGEMEINE CONTAINER STYLES --- */
+.container {
+    background-color: var(--container-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+/* --- STATUS PANEL (HP, Gold, Sound) ---
