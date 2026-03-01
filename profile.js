@@ -1,7 +1,7 @@
 import { db, auth } from "./firebase.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Das "Herz" deines Charakters
+// Deine Charakter-Werte
 export let meta = {
     hp: 30,
     maxHpBase: 30,
@@ -12,20 +12,24 @@ export let meta = {
     autoLevel: 0,
     atkPrice: 100,
     hpPrice: 100,
-    autoPrice: 1000
+    autoPrice: 1000,
+    email: ""
 };
 
-// Lädt die Daten vom Server
+// Lädt dein Profil beim Start
 export async function loadMeta() {
     if (!auth.currentUser) return;
+    
     const userDoc = doc(db, "users", auth.currentUser.uid);
     try {
         const snap = await getDoc(userDoc);
         if (snap.exists()) {
-            // Falls Daten existieren, überschreibe die Standardwerte
-            meta = { ...meta, ...snap.data() };
+            // Daten vom Server laden und in 'meta' schreiben
+            const data = snap.data();
+            Object.assign(meta, data);
         } else {
-            // Neuer Spieler? Dann erstelle den ersten Eintrag
+            // Neuer Spieler: Email speichern und ersten Save erstellen
+            meta.email = auth.currentUser.email;
             await saveMeta();
         }
     } catch (e) {
@@ -33,13 +37,15 @@ export async function loadMeta() {
     }
 }
 
-// Speichert die Daten auf dem Server
+// Speichert nur deine Charakter-Daten
 export async function saveMeta() {
     if (!auth.currentUser) return;
+    
     const userDoc = doc(db, "users", auth.currentUser.uid);
     try {
+        // Wir speichern das gesamte meta-Objekt direkt in dein User-Dokument
         await setDoc(userDoc, meta, { merge: true });
     } catch (e) {
-        console.error("Fehler beim Speichern des Profils:", e);
+        console.error("Fehler beim Speichern:", e);
     }
 }
