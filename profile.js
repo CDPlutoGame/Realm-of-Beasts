@@ -1,28 +1,45 @@
 import { db, auth } from "./firebase.js";
-import { ref, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+// Das "Herz" deines Charakters
 export let meta = {
-    gold: 0, hp: 100, maxHpBase: 100, attackPower: 10,
-    atkPrice: 100, hpPrice: 100,
-    monstersKilled: 0, bossesKilled: 0,
-    autoUnlocked: false
+    hp: 30,
+    maxHpBase: 30,
+    gold: 0,
+    attackPower: 5,
+    monstersKilled: 0,
+    bossesKilled: 0,
+    autoLevel: 0,
+    atkPrice: 100,
+    hpPrice: 100,
+    autoPrice: 1000
 };
 
+// Lädt die Daten vom Server
 export async function loadMeta() {
     if (!auth.currentUser) return;
-    const userRef = ref(db, 'users/' + auth.currentUser.uid);
+    const userDoc = doc(db, "users", auth.currentUser.uid);
     try {
-        const snapshot = await get(userRef);
-        if (snapshot.exists()) {
-            meta = { ...meta, ...snapshot.val() };
+        const snap = await getDoc(userDoc);
+        if (snap.exists()) {
+            // Falls Daten existieren, überschreibe die Standardwerte
+            meta = { ...meta, ...snap.data() };
+        } else {
+            // Neuer Spieler? Dann erstelle den ersten Eintrag
+            await saveMeta();
         }
-    } catch (e) { console.error("Load Error", e); }
+    } catch (e) {
+        console.error("Fehler beim Laden des Profils:", e);
+    }
 }
 
+// Speichert die Daten auf dem Server
 export async function saveMeta() {
     if (!auth.currentUser) return;
-    const userRef = ref(db, 'users/' + auth.currentUser.uid);
+    const userDoc = doc(db, "users", auth.currentUser.uid);
     try {
-        await set(userRef, meta);
-    } catch (e) { console.error("Save Error", e); }
+        await setDoc(userDoc, meta, { merge: true });
+    } catch (e) {
+        console.error("Fehler beim Speichern des Profils:", e);
+    }
 }
