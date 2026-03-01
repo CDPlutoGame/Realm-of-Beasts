@@ -7,17 +7,16 @@ const hitSound = new Audio("sounds/hit.mp3");
 const bgMusic = new Audio("sounds/music/bg1.mp3");
 bgMusic.loop = true;
 
-const monsterTypes = [
-    { name: "Frosch", icon: "🐸", hp: 30, atk: 5, gold: 15 },
-    { name: "Wolf", icon: "🐺", hp: 60, atk: 12, gold: 35 },
-    { name: "Bär", icon: "🐻", hp: 120, atk: 25, gold: 75 }
-];
+const monsterTypes = {
+    frog: { name: "Frosch", icon: "🐸", hp: 30, atk: 5, gold: 15 },
+    wolf: { name: "Wolf", icon: "🐺", hp: 60, atk: 12, gold: 35 },
+    bear: { name: "Bär", icon: "🐻", hp: 120, atk: 25, gold: 75 }
+};
 
 async function startFullGame() {
     if (window.__STARTED__) return; window.__STARTED__ = true;
     if (auth.currentUser) { await loadMeta(); document.getElementById("topBar").style.display = "flex"; }
     
-    // Standardwerte setzen falls leer
     if (meta.atkPrice === undefined) meta.atkPrice = 100;
     if (meta.hpPrice === undefined) meta.hpPrice = 100;
 
@@ -38,7 +37,11 @@ function updateHud() {
                 <p style="margin:2px 0;">❤️ HP: ${meta.hp}/${meta.maxHpBase} | 💰 Gold: ${meta.gold}</p>
                 <p style="margin:2px 0;">⚔️ Kraft: ${meta.attackPower} | 🌊 Welle: ${currentRounds}</p>
             </div>
-            ${!meta.autoUnlocked ? '<button onclick="window.manualMove()" class="game-btn" style="width:auto; padding:10px 20px;">👣 LAUFEN</button>' : '<span style="color:lime;">🤖 AUTO</span>'}
+            <div style="text-align:right;">
+                <span style="color:${meta.autoUnlocked ? 'lime' : 'orange'}; font-weight:bold;">
+                    ${meta.autoUnlocked ? '🤖 AUTO AKTIV' : '🔒 AUTO AUS'}
+                </span>
+            </div>
         </div>
     `;
 }
@@ -67,11 +70,6 @@ window.buy = async (type) => {
     await saveMeta(); updateHud(); renderShop();
 };
 
-// MANUELLES LAUFEN (Der "Dreh"-Ersatz)
-window.manualMove = () => {
-    if (!inFight) move();
-};
-
 function gameLoop() {
     if (!meta.autoUnlocked) return;
     if (inFight) {
@@ -91,9 +89,28 @@ async function move() {
     else if (Math.random() < 0.3 && playerPos !== 0) spawnMonster();
 }
 
+window.manualMove = () => { if (!inFight) move(); };
+
+// --- NEUE LOGIK FÜR MONSTER-VERTEILUNG ---
 function spawnMonster() {
-    const m = monsterTypes[Math.floor(Math.random()*monsterTypes.length)];
-    monster = {...m, hp: m.hp + (currentRounds*2)}; inFight = true; renderFight();
+    let pool = [];
+    
+    if (currentRounds <= 10) {
+        pool = [monsterTypes.frog];
+    } else if (currentRounds >= 11 && currentRounds <= 14) {
+        pool = [monsterTypes.frog, monsterTypes.wolf];
+    } else if (currentRounds >= 15 && currentRounds <= 20) {
+        pool = [monsterTypes.wolf];
+    } else if (currentRounds === 21) {
+        pool = [monsterTypes.wolf, monsterTypes.bear];
+    } else {
+        pool = [monsterTypes.bear];
+    }
+
+    const m = pool[Math.floor(Math.random() * pool.length)];
+    monster = {...m, hp: m.hp + (currentRounds * 2)}; 
+    inFight = true; 
+    renderFight();
 }
 
 function spawnBoss() {
@@ -115,8 +132,9 @@ async function attack() {
     
     meta.hp -= monster.atk;
     if (meta.hp <= 0) {
-        alert("Besiegt! Du fängst von vorne an, behältst aber deine Kraft.");
+        alert("Besiegt!");
         meta.hp = meta.maxHpBase; playerPos = 0; currentRounds = 1; inFight = false; monster = null;
+        setFightPanelIdle();
     }
     await saveMeta(); updateHud(); if(inFight) renderFight();
 }
@@ -126,26 +144,31 @@ function renderBoard() {
     b.innerHTML = "";
     for(let i=0; i<30; i++) {
         const t = document.createElement("div"); t.className = "tile";
-        t.style.border = i === playerPos ? "2px solid yellow" : "1px solid #444";
-        t.innerHTML = i === playerPos ? "🧍" : (i === 29 ? "🐲" : "⬜");
+        t.style.backgroundColor = i === playerPos ? "#444" : "#222";
+        t.innerHTML = i === playerPos ? "🧍" : (i === 29 ? "🐲" : "");
         b.appendChild(t);
     }
 }
 
 function setFightPanelIdle() { 
-    document.getElementById("fightPanel").innerHTML = `
-        <div style="height:100%; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); border-radius:10px;">
-            <p style="font-size:1.2em;">🌿 Der Weg ist sicher...</p>
+    const fp = document.getElementById("fightPanel");
+    if (!fp) return;
+    fp.innerHTML = `
+        <div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); border-radius:10px; padding:20px;">
+            <p style="font-size:1.2em; color:white; margin-bottom:15px;">🌿 Der Weg ist frei...</p>
+            ${!meta.autoUnlocked ? '<button onclick="window.manualMove()" class="game-btn" style="width:70%; padding:20px; font-size:1.5em; background:#4a90e2;">👣 LAUFEN</button>' : ''}
         </div>`; 
 }
 
 function renderFight() {
-    document.getElementById("fightPanel").innerHTML = `
-        <div style="text-align:center; background:rgba(0,0,0,0.7); height:100%; padding:20px; border-radius:10px; border: 2px solid #b32020;">
+    const fp = document.getElementById("fightPanel");
+    if (!fp) return;
+    fp.innerHTML = `
+        <div style="text-align:center; background:rgba(0,0,0,0.7); height:100%; padding:20px; border-radius:10px; border: 2px solid #b32020; display:flex; flex-direction:column; justify-content:center; align-items:center;">
             <div style="font-size:60px; margin-bottom:10px;">${monster.icon}</div>
             <h2 style="margin:0; color:#ff4d4d;">${monster.name}</h2>
-            <p>Gegner Leben: <b>${monster.hp}</b></p>
-            <button onclick="window.manualAtk()" class="game-btn" style="width:80%; padding:15px; font-size:1.2em; background:#ff4d4d;">⚔️ ANGRIFF</button>
+            <p style="color:white;">Leben: <b style="color:#ff4d4d;">${monster.hp}</b></p>
+            <button onclick="window.manualAtk()" class="game-btn" style="width:80%; padding:20px; font-size:1.5em; background:#ff4d4d;">⚔️ ANGRIFF</button>
         </div>`;
 }
 
