@@ -1,66 +1,27 @@
-import { 
-  db, 
-  firebaseRef as ref, 
-  firebaseGet as get, 
-  firebaseSet as set 
-} from "./firebase.js";
+import { db, auth } from "./firebase.js";
+import { ref, set, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { meta } from "./profile.js";
 
-import { 
-  query, 
-  orderByChild, 
-  limitToLast 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+export async function renderLeaderboard() {
+    const lbEl = document.getElementById("leaderboard");
+    if (!lbEl || !auth.currentUser) return;
 
-console.log("✅ ranking.js geladen");
+    // Update eigenen Score vor dem Laden
+    const myName = auth.currentUser.email.split('@')[0];
+    await set(ref(db, 'ranking/' + auth.currentUser.uid), {
+        name: myName,
+        monstersKilled: meta.monstersKilled || 0,
+        bossesKilled: meta.bossesKilled || 0
+    });
 
-const auth = window.auth;
-
-const toNum = (x) => {
-  const n = Number(x);
-  return Number.isFinite(n) ? n : 0;
-};
-
-async function submitScore(payload) {
-  const user = auth.currentUser;
-  if (!user) return;
-
-  const data = {
-    uid: user.uid,
-    name: payload.name,
-    rounds: payload.rounds,
-    monstersKilled: payload.monstersKilled,
-    bossesKilled: payload.bossesKilled,
-    createdAt: Date.now()
-  };
-
-  const playerRef = ref(db, "ranking/" + user.uid);
-  const snap = await get(playerRef);
-
-  if (!snap.exists()) {
-    await set(playerRef, data);
-  } else {
-    const existing = snap.val();
-    if (toNum(data.rounds) > toNum(existing.rounds)) {
-      await set(playerRef, data);
-    }
-  }
+    const rankingRef = query(ref(db, 'ranking'), orderByChild('monstersKilled'), limitToLast(5));
+    const snapshot = await get(rankingRef);
+    
+    let html = "<ul>";
+    const data = [];
+    snapshot.forEach(child => { data.push(child.val()); });
+    data.reverse().forEach((user, i) => {
+        html += `<li>${i+1}. ${user.name}: 👾 ${user.monstersKilled} | 👑 ${user.bossesKilled}</li>`;
+    });
+    lbEl.innerHTML = html + "</ul>";
 }
-
-async function top10() {
-  const q = query(
-    ref(db, "ranking"),
-    orderByChild("rounds"),
-    limitToLast(3)
-  );
-
-  const snap = await get(q);
-  if (!snap.exists()) return [];
-
-  const arr = Object.values(snap.val());
-  arr.sort((a, b) => toNum(b.rounds) - toNum(a.rounds));
-  return arr;
-}
-
-window.__ONLINE_RANKING__ = { submitScore, top10 };
-
-console.log("✅ __ONLINE_RANKING__ bereit");
