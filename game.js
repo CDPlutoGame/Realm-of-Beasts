@@ -26,14 +26,16 @@ async function startFullGame() {
     if (window.__STARTED__) return; window.__STARTED__ = true;
     if (auth.currentUser) { await loadMeta(); }
     
-    // Startwerte setzen (30 HP, 5 Kraft)
+    // Startwerte (30 HP, 5 Kraft)
     if (!meta.maxHpBase || meta.maxHpBase === 100) meta.maxHpBase = 30;
     if (!meta.hp || meta.hp > meta.maxHpBase) meta.hp = meta.maxHpBase;
     if (!meta.attackPower || meta.attackPower === 10) meta.attackPower = 5;
     
-    // Shop-Preise initialisieren
+    // Preise initialisieren
     if (!meta.atkPrice) meta.atkPrice = 100;
     if (!meta.hpPrice) meta.hpPrice = 100;
+    if (!meta.autoPrice) meta.autoPrice = 1000; // Startpreis für Auto-System
+    if (meta.autoLevel === undefined) meta.autoLevel = 0; // 0 = gesperrt
 
     updateHud(); renderShop(); renderBoard(); setFightPanelIdle();
     try { await renderLeaderboard(); } catch(e) {}
@@ -53,8 +55,8 @@ function updateHud() {
                 <p style="margin:2px 0;">⚔️ Kraft: ${meta.attackPower} | 🌊 Welle: ${currentRounds}</p>
             </div>
             <div style="text-align:right;">
-                <span style="color:${meta.autoUnlocked ? 'lime' : 'orange'}; font-weight:bold;">
-                    ${meta.autoUnlocked ? '🤖 AUTO' : '🔒 MANUELL'}
+                <span style="color:${meta.autoLevel > 0 ? 'lime' : 'orange'}; font-weight:bold;">
+                    ${meta.autoLevel > 0 ? '🤖 AUTO Lv.' + meta.autoLevel : '🔒 MANUELL'}
                 </span>
             </div>
         </div>
@@ -64,12 +66,20 @@ function updateHud() {
 function renderShop() {
     const shop = document.getElementById("shop");
     if (!shop) return;
+    
+    // Auto-Button wird nur angezeigt, wenn mindestens 1 Boss besiegt wurde
+    let autoButton = "";
+    if (meta.bossesKilled > 0) {
+        autoButton = `<button onclick="window.buy('auto')" class="game-btn" style="background:#4caf50;">🤖 Auto Upgr. (${meta.autoPrice}G)</button>`;
+    }
+
     shop.innerHTML = `
         <h3 style="margin-top:0;">🏪 Shop</h3>
         <div style="display:flex; flex-wrap:wrap; gap:5px;">
             <button onclick="window.buy('atk')" class="game-btn">⚔️ +10 Kraft (${meta.atkPrice}G)</button>
             <button onclick="window.buy('hp')" class="game-btn">❤️ +10 MaxHP (${meta.hpPrice}G)</button>
             <button onclick="window.buy('heal')" class="game-btn">🧪 Heilung (50G)</button>
+            ${autoButton}
         </div>
     `;
 }
@@ -77,21 +87,25 @@ function renderShop() {
 window.buy = async (type) => {
     if (type === 'atk' && meta.gold >= meta.atkPrice) { 
         meta.gold -= meta.atkPrice; meta.attackPower += 10; meta.atkPrice += 5; 
-        log(`⚔️ Kraft gesteigert auf ${meta.attackPower}!`);
+        log("⚔️ Kraft gesteigert!");
     }
     else if (type === 'hp' && meta.gold >= meta.hpPrice) { 
         meta.gold -= meta.hpPrice; meta.maxHpBase += 10; meta.hp += 10; meta.hpPrice += 5; 
-        log(`❤️ Max HP gesteigert auf ${meta.maxHpBase}!`);
+        log("❤️ Max HP gesteigert!");
     }
     else if (type === 'heal' && meta.gold >= 50) { 
         meta.gold -= 50; meta.hp = meta.maxHpBase; 
         log("🧪 Vollständig geheilt!");
     }
+    else if (type === 'auto' && meta.gold >= meta.autoPrice) {
+        meta.gold -= meta.autoPrice; meta.autoLevel++; meta.autoPrice += 1000;
+        log(`🤖 Auto-System auf Level ${meta.autoLevel} verbessert!`);
+    }
     await saveMeta(); updateHud(); renderShop();
 };
 
 function gameLoop() {
-    if (!meta.autoUnlocked) return;
+    if (meta.autoLevel === 0) return;
     if (inFight) {
         if (monster && monster.name !== "Drache") attack();
     } else {
@@ -103,7 +117,7 @@ function gameLoop() {
 async function move() {
     if (inFight) return;
     playerPos++;
-    if (playerPos >= 30) { playerPos = 0; currentRounds++; log(`🌊 Welle ${currentRounds} erreicht!`); }
+    if (playerPos >= 30) { playerPos = 0; currentRounds++; log(`🌊 Welle ${currentRounds}!`); }
     renderBoard(); updateHud();
     if (currentRounds % 10 === 0 && playerPos === 29) spawnBoss();
     else if (Math.random() < 0.3 && playerPos !== 0) spawnMonster();
@@ -120,17 +134,16 @@ function spawnMonster() {
     else pool = [monsterTypes.bear];
 
     const m = pool[Math.floor(Math.random() * pool.length)];
-    // Leben skaliert: Start-HP + (Welle-1) * 5
     monster = {...m, hp: m.hp + ((currentRounds - 1) * 5)}; 
     inFight = true; 
-    log(`⚠️ Ein ${monster.name} versperrt den Weg!`);
+    log(`⚠️ Ein ${monster.name} taucht auf!`);
     renderFight();
 }
 
 function spawnBoss() {
     monster = { name: "Drache", icon: "🐲", hp: 1000 + (meta.bossesKilled*1000), atk: 30 + (meta.bossesKilled*10), gold: 1000 };
     inFight = true; 
-    log("🔥 ACHTUNG: Der Drache ist erwacht!");
+    log("🔥 DER DRACHE ERSCHEINT!");
     renderFight();
 }
 
@@ -139,21 +152,19 @@ async function attack() {
     hitSound.play().catch(()=>{});
     
     monster.hp -= meta.attackPower;
-    log(`Du schlägst zu: ${meta.attackPower} Schaden.`);
     
     if (monster.hp <= 0) {
         log(`💀 ${monster.name} besiegt! +${monster.gold} Gold.`);
         inFight = false; meta.gold += monster.gold;
-        if (monster.name === "Drache") { meta.bossesKilled++; meta.autoUnlocked = true; log("👑 AUTO-MODUS AKTIVIERT!"); }
+        if (monster.name === "Drache") { meta.bossesKilled++; log("👑 Boss besiegt! Auto-Upgrade im Shop verfügbar."); }
         else meta.monstersKilled++;
-        monster = null; await saveMeta(); updateHud(); setFightPanelIdle(); return;
+        monster = null; await saveMeta(); updateHud(); renderShop(); setFightPanelIdle(); return;
     }
     
     meta.hp -= monster.atk;
-    log(`💥 ${monster.name} kontert: ${monster.atk} Schaden!`);
     
     if (meta.hp <= 0) {
-        log("💀 Oh nein! Du wurdest besiegt.");
+        log("💀 Du bist gestorben!");
         meta.hp = meta.maxHpBase; playerPos = 0; currentRounds = 1; inFight = false; monster = null;
         setFightPanelIdle();
     }
@@ -176,7 +187,7 @@ function setFightPanelIdle() {
     if (!fp) return;
     fp.innerHTML = `
         <div style="height:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); border-radius:10px;">
-            ${!meta.autoUnlocked ? '<button onclick="window.manualMove()" class="game-btn" style="width:70%; padding:20px; font-size:1.5em; background:#4a90e2;">👣 LAUFEN</button>' : '<p style="color:lime; font-size:1.2em;">🤖 Automatik läuft...</p>'}
+            ${meta.autoLevel === 0 ? '<button onclick="window.manualMove()" class="game-btn" style="width:70%; padding:20px; font-size:1.5em; background:#4a90e2;">👣 LAUFEN</button>' : '<p style="color:lime;">🤖 Automatik aktiv...</p>'}
         </div>`; 
 }
 
