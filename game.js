@@ -1,3 +1,5 @@
+/** * REALM OF BEAAASTS - JUMP & OVERDRIVE EDITION */
+
 let meta = { 
     hp: 30, maxHpBase: 30, gold: 0, attackPower: 5, kills: 0, rounds: 1, hpBought: 0, atkBought: 0 
 };
@@ -5,6 +7,19 @@ let playerPos = 0;
 let inFight = false;
 let monster = null;
 let boardEvents = [];
+
+window.openLogin = () => {
+    document.getElementById("loginModal").style.display = "flex";
+};
+
+window.submitHeroName = () => {
+    const val = document.getElementById("heroNameInput").value.trim();
+    if (val) {
+        localStorage.setItem("playerName", val);
+        document.getElementById("loginModal").style.display = "none";
+        checkAndStart();
+    }
+};
 
 function loadData() {
     const m = localStorage.getItem("game_meta");
@@ -60,14 +75,19 @@ function updateStatus() {
                 </div>
             </div>`;
     }
-    const buttons = document.getElementById("shopPanel").getElementsByTagName("button");
-    buttons[0].innerHTML = `<i class="fas fa-heart"></i> +5 HP <span style="margin-left:auto;">${hpCost} 💰</span>`;
-    buttons[1].innerHTML = `<i class="fas fa-sword"></i> +5 ATK <span style="margin-left:auto;">${atkCost} 💰</span>`;
+    
+    document.getElementById("shopPanel").style.display = "block";
+    document.getElementById("btn-hp").innerHTML = `<i class="fas fa-heart"></i> +5 HP <span style="margin-left:auto;">${hpCost} 💰</span>`;
+    document.getElementById("btn-atk").innerHTML = `<i class="fas fa-sword"></i> +5 ATK <span style="margin-left:auto;">${atkCost} 💰</span>`;
 }
 
 function renderBoard() {
-    const b = document.getElementById("board"); if (!b) return;
-    b.style.display = "grid"; b.style.gridTemplateColumns = "repeat(10, 1fr)"; b.style.gap = "4px"; b.innerHTML = "";
+    const b = document.getElementById("board"); 
+    if (!b) return;
+    b.style.display = "grid"; 
+    b.style.gridTemplateColumns = "repeat(10, 1fr)"; 
+    b.style.gap = "4px"; 
+    b.innerHTML = "";
     for (let i = 0; i < 30; i++) {
         const t = document.createElement("div");
         t.style = `height:35px; background:${i===playerPos?"#444":"#1a1a1a"}; border:1px solid #333; display:flex; align-items:center; justify-content:center;`;
@@ -80,32 +100,45 @@ function renderBoard() {
     }
 }
 
-window.login = () => { document.getElementById("loginModal").style.display = "flex"; };
-window.submitHeroName = () => {
-    const val = document.getElementById("heroNameInput").value.trim();
-    if (val) { localStorage.setItem("playerName", val); document.getElementById("loginModal").style.display = "none"; checkAndStart(); }
-};
-
 window.move = () => {
     if (inFight) return;
-    let steps = Math.floor(Math.random() * 3) + 1;
-    log(`Du rennst ${steps} Schritte...`);
-    for(let s = 0; s < steps; s++) {
-        playerPos++;
-        if (playerPos >= 30) {
-            playerPos = 0;
-            if (meta.rounds % 10 === 0) {
-                monster = { name: "WELTEN-FRESSER", icon: "🐲", hp: (meta.rounds/10)*1000, atk: (meta.rounds/10)*20, gold: (meta.rounds/10)*500, isBoss: true };
-                inFight = true; log("!!! BOSS ALARM !!!"); break;
-            } else { meta.rounds++; generateBoardEvents(); log("Neue Runde!"); }
+
+    // Zufällig 1 bis 4 Schritte
+    let steps = Math.floor(Math.random() * 4) + 1;
+    log(`Du springst ${steps} Felder weit!`);
+
+    playerPos += steps;
+
+    // Check ob wir über das Ziel hinausgeschossen sind (Runden-Ende)
+    if (playerPos >= 30) {
+        playerPos = 0;
+        if (meta.rounds % 10 === 0) {
+            let bossMult = meta.rounds / 10;
+            monster = { name: "WELTEN-FRESSER", icon: "🐲", hp: bossMult*1000, atk: bossMult*20, gold: bossMult*500, isBoss: true };
+            inFight = true; 
+            log("!!! BOSS ERSCHEINT AM RUNDENENDE !!!"); 
+        } else { 
+            meta.rounds++; 
+            generateBoardEvents(); 
+            log("Nächste Runde erreicht."); 
         }
+    } else {
+        // Wir prüfen NUR das Feld, auf dem wir landen
         let ev = boardEvents[playerPos];
         if (ev === "frog" || ev === "wolf" || ev === "bear") {
             if(ev==="frog") monster={name:"Frosch", icon:"🐸", hp:10, atk:2, gold:10};
             if(ev==="wolf") monster={name:"Wolf", icon:"🐺", hp:25, atk:6, gold:25};
             if(ev==="bear") monster={name:"Bär", icon:"🐻", hp:60, atk:12, gold:60};
-            inFight = true; boardEvents[playerPos] = null; break;
-        } else if (ev === "gold") { meta.gold += 10; boardEvents[playerPos] = null; log("+10 Gold!"); }
+            inFight = true; 
+            boardEvents[playerPos] = null; 
+            log(`Du landest direkt vor einem ${monster.name}!`);
+        } else if (ev === "gold") { 
+            meta.gold += 10; 
+            boardEvents[playerPos] = null; 
+            log("Gold gefunden! +10 💰"); 
+        } else {
+            log("Sicher gelandet.");
+        }
     }
     updateUI();
 };
@@ -113,11 +146,11 @@ window.move = () => {
 window.attack = () => {
     monster.hp -= meta.attackPower;
     if (monster.hp <= 0) {
-        log(`Sieg! +${monster.gold} Gold.`); meta.gold += monster.gold; meta.kills++; inFight = false;
+        log(`Besiegt! +${monster.gold} Gold.`); meta.gold += monster.gold; meta.kills++; inFight = false;
         if (monster.isBoss) { meta.rounds++; generateBoardEvents(); }
     } else {
         meta.hp -= monster.atk; log(`Monster trifft: -${monster.atk} HP`);
-        if (meta.hp <= 0) { log("KO!"); meta.hp = meta.maxHpBase; playerPos = 0; inFight = false; generateBoardEvents(); }
+        if (meta.hp <= 0) { log("KO! Neustart im Lager."); meta.hp = meta.maxHpBase; playerPos = 0; inFight = false; generateBoardEvents(); }
     }
     updateUI();
 };
@@ -135,15 +168,22 @@ window.buyUpgrade = (type) => {
 function updateUI() { saveData(); updateStatus(); renderBoard(); setActionBtn(); }
 
 function setActionBtn() {
-    const fp = document.getElementById("fightPanel"); if (!fp) return;
+    const fp = document.getElementById("fightPanel");
+    if (!fp) return;
     if (inFight) {
         fp.innerHTML = `<div style="border:2px solid #b91c1c; padding:15px; background:#200; border-radius:10px;">
             <div style="color:#f87171; font-size:18px;">${monster.icon} ${monster.name} (${monster.hp} HP)</div>
-            <button onclick="attack()" class="game-btn" style="background:#b91c1c;">SCHLAG (-${meta.attackPower})</button></div>`;
+            <button onclick="attack()" class="game-btn" style="background:#b91c1c;">ANGRIFF (-${meta.attackPower})</button></div>`;
     } else {
-        fp.innerHTML = `<button onclick="move()" class="game-btn" style="background:#1d4ed8;">VORRÜCKEN (1-3)</button>`;
+        fp.innerHTML = `<button onclick="move()" class="game-btn" style="background:#1d4ed8;">SPRINGEN (1-4 FELDER)</button>`;
     }
 }
 
-function checkAndStart() { if (localStorage.getItem("playerName")) { loadData(); updateUI(); } }
+function checkAndStart() { 
+    if (localStorage.getItem("playerName")) { 
+        loadData(); 
+        updateUI(); 
+    } 
+}
+
 window.addEventListener('load', checkAndStart);
