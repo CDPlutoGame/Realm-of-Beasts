@@ -3,33 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Realm of Beasts | Fantasy RPG</title>
+    <title>Realm of Beasts | Epic RPG</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { background-color: #0a0a0a; color: #e0e0e0; font-family: sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; }
-        #game-container { text-align: center; padding: 15px; max-width: 450px; width: 100%; background: #111; min-height: 100vh; }
-        h1 { color: #d4af37; text-shadow: 2px 2px 4px #000; font-size: 24px; }
+        #game-container { text-align: center; padding: 15px; max-width: 450px; width: 100%; background: #111; min-height: 100vh; position: relative; }
+        h1 { color: #d4af37; text-shadow: 2px 2px 4px #000; font-size: 24px; margin: 10px 0; }
         .game-btn { padding: 15px; cursor: pointer; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); font-weight: bold; font-size: 14px; margin: 5px 0; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; color: white; text-transform: uppercase; }
-        #statusPanel { margin-bottom: 10px; }
         #logContent { background: #000; color: #4ade80; padding: 10px; margin: 10px 0; border-radius: 8px; font-family: monospace; font-size: 12px; height: 80px; overflow-y: auto; border: 1px solid #333; text-align: left; }
         #board { display: none; margin-top: 15px; background: #000; padding: 8px; border-radius: 10px; border: 1px solid #333; }
         #fightPanel { margin-top: 15px; min-height: 120px; }
         #shopPanel { background: #1a1a1a; padding: 15px; border-radius: 12px; border: 2px solid #333; margin-top: 20px; }
         .shop-title { color: #ffd700; margin-top: 0; font-size: 16px; text-transform: uppercase; }
         hr { border: 0; border-top: 1px solid #222; margin: 20px 0; }
-        .controls { position: absolute; top: 10px; right: 10px; }
-        #muteBtn { width: 35px; height: 35px; border-radius: 50%; padding: 0; background: #222; border: 1px solid #444; color: white; }
+        
+        /* Epic Login Modal */
+        #loginModal { display:none; position:fixed; z-index:999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter: blur(5px); align-items:center; justify-content:center; }
+        .modal-box { background:#1a1a1a; padding:30px; border:2px solid #d4af37; border-radius:15px; width:85%; max-width:350px; text-align:center; box-shadow: 0 0 25px rgba(212,175,55,0.4); }
+        #heroNameInput { width:100%; padding:12px; margin:15px 0; background:#000; border:1px solid #444; color:white; border-radius:5px; text-align:center; font-size:16px; box-sizing: border-box; }
     </style>
 </head>
 <body>
+
+    <div id="loginModal">
+        <div class="modal-box">
+            <h2 style="color:#d4af37; margin-top:0;"><i class="fas fa-scroll"></i> Helden-Ruf</h2>
+            <p style="color:#aaa;">Wie lautet dein Name, Reisender?</p>
+            <input type="text" id="heroNameInput" placeholder="Name..." maxlength="12">
+            <button onclick="submitHeroName()" class="game-btn" style="background: linear-gradient(180deg, #d4af37 0%, #a8871a 100%); color:black;">
+                ABENTEUER STARTEN
+            </button>
+        </div>
+    </div>
+
     <div id="game-container">
-        <div class="controls"><button id="muteBtn">🔊</button></div>
         <h1><i class="fas fa-dragon"></i> Realm of Beasts</h1>
 
         <div id="statusPanel">
-            <button onclick="login()" class="game-btn" style="background:#4285F4;">
-                <i class="fas fa-key"></i> ABENTEUER STARTEN
-            </button>
+            <button onclick="login()" class="game-btn" style="background:#4285F4;">STARTEN</button>
         </div>
 
         <div id="logContent">> Warte auf Helden...</div>
@@ -39,26 +50,11 @@
 
         <div id="shopPanel">
             <h3 class="shop-title"><i class="fas fa-hammer"></i> Permanentes Training</h3>
-            <button onclick="buyUpgrade('hp')" class="game-btn" style="background: #166534;">
-                <i class="fas fa-heart"></i> +5 MAX HP <span style="margin-left:auto;">100 <i class="fas fa-coins"></i></span>
-            </button>
-            <button onclick="buyUpgrade('atk')" class="game-btn" style="background: #991b1b;">
-                <i class="fas fa-khanda"></i> +5 ANGRIFF <span style="margin-left:auto;">100 <i class="fas fa-coins"></i></span>
-            </button>
+            <button onclick="buyUpgrade('hp')" class="game-btn" style="background: #166534;"></button>
+            <button onclick="buyUpgrade('atk')" class="game-btn" style="background: #991b1b;"></button>
         </div>
     </div>
 
-    <script type="module" src="auth.js"></script>
-    <script type="module" src="game.js"></script>
-
-    <script>
-        const muteBtn = document.getElementById('muteBtn');
-        let isMuted = false;
-        muteBtn.addEventListener('click', () => {
-            isMuted = !isMuted;
-            muteBtn.innerHTML = isMuted ? '🔇' : '🔊';
-            window.dispatchEvent(new CustomEvent('toggleMute', { detail: isMuted }));
-        });
-    </script>
+    <script src="game.js"></script>
 </body>
 </html>
