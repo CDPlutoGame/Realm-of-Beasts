@@ -6,29 +6,103 @@
     <title>Realm of Beasts</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0a0a0a; color: #e0e0e0; font-family: sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; }
-        #game-container { text-align: center; padding: 15px; max-width: 450px; width: 100%; background: #111; min-height: 100vh; border-left: 1px solid #222; border-right: 1px solid #222; box-sizing: border-box; }
+        body { background-color: #0a0a0a; color: #e0e0e0; font-family: sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; min-height: 100vh; }
+        
+        #game-container { 
+            text-align: center; 
+            padding: 15px; 
+            max-width: 450px; 
+            width: 100%; 
+            background: #111; 
+            border-left: 1px solid #222; 
+            border-right: 1px solid #222; 
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
         h1 { color: #d4af37; font-size: 24px; margin: 10px 0; text-transform: uppercase; letter-spacing: 2px; }
-        
-        /* Kampf-Arena Style */
-        #battle-arena { display: none; background: linear-gradient(180deg, #1a1a1a 0%, #000 100%); border: 2px solid #444; border-radius: 12px; margin: 15px 0; padding: 20px; box-sizing: border-box; }
-        #enemy-icon { font-size: 60px; margin-bottom: 10px; display: block; filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3)); }
-        #enemy-name { font-weight: bold; text-transform: uppercase; font-size: 18px; margin-bottom: 10px; }
-        .hp-bar-container { background: #333; height: 12px; border-radius: 6px; width: 80%; margin: 0 auto; border: 1px solid #555; overflow: hidden; }
+
+        /* Status Panel */
+        #statusPanel { margin-bottom: 10px; }
+
+        /* Kampf-Arena Style - Standardmäßig versteckt */
+        #battle-arena { 
+            display: none; 
+            background: linear-gradient(180deg, #1a1a1a 0%, #000 100%); 
+            border: 2px solid #d4af37; 
+            border-radius: 12px; 
+            margin: 10px 0; 
+            padding: 15px; 
+            box-sizing: border-box; 
+        }
+
+        #enemy-icon { font-size: 50px; margin-bottom: 5px; display: block; filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.5)); }
+        #enemy-name { font-weight: bold; text-transform: uppercase; font-size: 16px; margin-bottom: 8px; color: #ef4444; }
+
+        .hp-bar-container { background: #333; height: 14px; border-radius: 7px; width: 90%; margin: 0 auto; border: 1px solid #555; overflow: hidden; position: relative; }
         #enemy-hp-fill { background: #ef4444; height: 100%; width: 100%; transition: width 0.3s ease; }
+        #enemy-hp-text { position: absolute; width: 100%; top: 0; left: 0; font-size: 10px; line-height: 14px; color: white; font-weight: bold; text-shadow: 1px 1px 2px black; }
+
+        /* UI Elemente */
+        .game-btn { padding: 15px; cursor: pointer; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); font-weight: bold; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; color: white; text-transform: uppercase; margin: 5px 0; box-sizing: border-box; font-size: 14px; transition: transform 0.1s; }
+        .game-btn:active { transform: scale(0.98); }
+
+        #logContent { background: #000; color: #4ade80; padding: 10px; margin: 10px 0; border-radius: 8px; font-family: monospace; font-size: 11px; height: 70px; overflow-y: auto; border: 1px solid #333; text-align: left; }
         
-        /* Buttons & Log */
-        .game-btn { padding: 15px; cursor: pointer; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); font-weight: bold; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; color: white; text-transform: uppercase; margin: 5px 0; box-sizing: border-box; font-size: 14px; }
-        #logContent { background: #000; color: #4ade80; padding: 10px; margin: 10px 0; border-radius: 8px; font-family: monospace; font-size: 12px; height: 80px; overflow-y: auto; border: 1px solid #333; text-align: left; }
-        
-        /* Board */
-        #board { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-top: 15px; background: #000; padding: 8px; border-radius: 10px; border: 1px solid #333; }
+        #board { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-top: 10px; background: #000; padding: 8px; border-radius: 10px; border: 1px solid #333; }
         .cell { height: 35px; background: #1a1a1a; border: 1px solid #333; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 18px; }
+
+        #shopPanel { background: #1a1a1a; padding: 12px; border-radius: 12px; border: 2px solid #b91c1c; margin-top: auto; }
         
-        /* Shop & Stats */
-        #shopPanel { background: #1a1a1a; padding: 15px; border-radius: 12px; border: 2px solid #b91c1c; margin-top: 20px; }
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
-        .stat-box { background: #222; padding: 8px; border-radius: 5px; border: 1px solid #333; font-size: 11px; text-align: center; }
+        .stat-box { background: #222; padding: 6px; border-radius: 5px; border: 1px solid #333; font-size: 10px; }
+
+        /* Login Modal */
+        #loginModal { display:none; position:fixed; z-index:999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.95); align-items:center; justify-content:center; backdrop-filter: blur(5px); }
+        .modal-box { background:#1a1a1a; padding:25px; border:2px solid #d4af37; border-radius:15px; width:80%; max-width:320px; text-align:center; }
+        #heroNameInput { width:100%; padding:12px; margin:15px 0; background:#000; border:1px solid #444; color:white; border-radius:8px; text-align:center; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+    <div id="loginModal">
+        <div class="modal-box">
+            <h2 style="color:#d4af37; margin-top:0;"><i class="fas fa-dragon"></i> Realm-Name</h2>
+            <input type="text" id="heroNameInput" placeholder="Dein Helden-Name..." maxlength="12">
+            <button id="finalStartBtn" class="game-btn" style="background: #d4af37; color:black;">INS ABENTEUER</button>
+        </div>
+    </div>
+
+    <div id="game-container">
+        <h1><i class="fas fa-dragon"></i> Realm of Beasts</h1>
         
-        /* Modal */
-        #loginModal { display:none; position:fixed; z-index:999; left:0; top:0; width
+        <div id="statusPanel">
+            <button id="initBtn" class="game-btn" style="background:#4285F4;">SPIEL STARTEN</button>
+        </div>
+
+        <div id="battle-arena">
+            <div id="enemy-icon"></div>
+            <div id="enemy-name">Monster</div>
+            <div class="hp-bar-container">
+                <div id="enemy-hp-fill"></div>
+                <div id="enemy-hp-text">0 / 0 HP</div>
+            </div>
+        </div>
+
+        <div id="logContent">> Welt lädt...</div>
+        
+        <div id="board"></div>
+        
+        <div id="fightPanel" style="margin-top:10px;"></div>
+        
+        <div id="shopPanel">
+            <h3 style="color:#b91c1c; margin: 0 0 8px 0; font-size: 14px;">SCHWARZMARKT</h3>
+            <button id="btn-hp" class="game-btn" style="background: #166534; font-size: 12px;"></button>
+            <button id="btn-atk" class="game-btn" style="background: #991b1b; font-size: 12px;"></button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
