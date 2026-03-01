@@ -1,80 +1,55 @@
-// Prüfen, was nach der Rückkehr von Google passiert
-getRedirectResult(auth)
-    .then((result) => {
-        if (result) {
-            alert("✅ Login erkannt für: " + result.user.displayName);
-        } else {
-            console.log("Kein Resultat gefunden - normaler Seitenaufruf");
-        }
-    })
-    .catch((error) => {
-        // Das hier wird uns verraten, warum es am Handy hakt!
-        alert("❌ Firebase Fehler: " + error.code);
-    });
-
 import { auth } from "./firebase.js";
 import { 
     GoogleAuthProvider, 
     signInWithRedirect, 
-    getRedirectResult, 
     onAuthStateChanged,
     signOut 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const provider = new GoogleAuthProvider();
-const logContent = document.getElementById("logContent");
-const statusPanel = document.getElementById("statusPanel");
 
-// 1. Prüfen, ob der User gerade vom Login zurückkommt
-getRedirectResult(auth)
-    .then((result) => {
-        if (result) {
-            logContent.innerText = "✅ Login erfolgreich!";
-        }
-    })
-    .catch((error) => {
-        // Zeigt Fehler direkt am Handy-Bildschirm an
-        logContent.innerText = "❌ Fehler: " + error.code;
-        console.error("Redirect Fehler:", error);
-    });
-
-// 2. Automatisches Update, wenn sich der Login-Status ändert
+// 1. Die wichtigste Funktion am Handy: Beobachten des Login-Status
 onAuthStateChanged(auth, (user) => {
+    const statusPanel = document.getElementById("statusPanel");
+    const logContent = document.getElementById("logContent");
+
     if (user) {
-        // Wenn eingeloggt: Name zeigen und Logout-Button
+        // LOGIN ERFOLGREICH
         statusPanel.innerHTML = `
-            <span>👤 ${user.displayName}</span>
-            <button onclick="logout()" class="game-btn" style="background:#d93025; margin-left: 10px; padding: 5px 10px;">Logout</button>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span>👤 ${user.displayName}</span>
+                <button onclick="logout()" class="game-btn" style="background:#d93025; padding: 5px;">Logout</button>
+            </div>
         `;
-        logContent.innerText = "🎮 Willkommen zurück, " + user.displayName + "!";
+        logContent.innerText = "✅ Willkommen, " + user.displayName + "! Dein Abenteuer beginnt.";
+        
+        // HIER kannst du jetzt andere Funktionen starten, z.B. das Board zeigen
+        document.getElementById("board").style.display = "block";
     } else {
-        // Wenn nicht eingeloggt: Login-Button zeigen
+        // NICHT EINGELOGGT
         statusPanel.innerHTML = `
-            <button onclick="login()" class="game-btn" style="background:#4285F4;">🔑 Google Login</button>
+            <button onclick="login()" class="game-btn" style="background:#4285F4; width:100%;">🔑 Mit Google anmelden</button>
         `;
-        logContent.innerText = "🎮 Bitte einloggen zum Spielen.";
+        logContent.innerText = "🎮 Bitte logge dich ein.";
+        document.getElementById("board").style.display = "none";
     }
 });
 
-// 3. Funktionen für die Buttons (Export für das Spiel)
+// 2. Login-Funktion
 export const login = async () => {
-    logContent.innerText = "⏳ Verbinde mit Google...";
     try {
+        // Wir nutzen Redirect, weil Popups am Handy fast immer geblockt werden
         await signInWithRedirect(auth, provider);
     } catch (error) {
-        logContent.innerText = "❌ Login-Start Fehler: " + error.message;
+        alert("Fehler beim Login-Start: " + error.message);
     }
 };
 
+// 3. Logout-Funktion
 export const logout = async () => {
-    try {
-        await signOut(auth);
-        location.reload();
-    } catch (error) {
-        logContent.innerText = "❌ Logout Fehler";
-    }
+    await signOut(auth);
+    location.reload();
 };
 
-// Global machen, damit die onclick-Events im HTML funktionieren
 window.login = login;
 window.logout = logout;
