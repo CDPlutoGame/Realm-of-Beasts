@@ -1,59 +1,28 @@
-import { auth, db } from "./firebase.js";
+import { db, auth } from "./firebase.js";
 import { ref, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-/* =========================
-   META OBJEKT (GLOBAL)
-========================= */
-
 export let meta = {
-  gold: 0,
-  potions: 0,
-  maxHpBase: 30,
-  attackPower: 5,
-  maxHpPrice: 100,
-  attackPowerPrice: 100,
-  bossesDefeated: 0,
-  autoStage: 0,
-  prestigeLevel: 0
+    gold: 0, hp: 100, maxHpBase: 100, attackPower: 10,
+    atkPrice: 100, hpPrice: 100,
+    monstersKilled: 0, bossesKilled: 0,
+    autoUnlocked: false
 };
 
-/* =========================
-   META LADEN
-========================= */
-
 export async function loadMeta() {
-  const user = auth.currentUser;
-
-  if (!user) {
-    console.log("🚫 Kein User – Meta bleibt lokal");
-    return meta;
-  }
-
-  const snap = await get(ref(db, `users/${user.uid}/meta`));
-
-  if (snap.exists()) {
-    meta = snap.val();
-    console.log("📦 Meta vom Server geladen:", meta);
-  } else {
-    console.log("🆕 Kein Meta vorhanden – erstelle neu");
-    await saveMeta();
-  }
-
-  return meta;
+    if (!auth.currentUser) return;
+    const userRef = ref(db, 'users/' + auth.currentUser.uid);
+    try {
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+            meta = { ...meta, ...snapshot.val() };
+        }
+    } catch (e) { console.error("Load Error", e); }
 }
 
-/* =========================
-   META SPEICHERN
-========================= */
-
 export async function saveMeta() {
-  const user = auth.currentUser;
-
-  if (!user) {
-    console.log("🚫 Kein User – Speichern übersprungen");
-    return;
-  }
-
-  await set(ref(db, `users/${user.uid}/meta`), meta);
-  console.log("💾 Meta gespeichert");
+    if (!auth.currentUser) return;
+    const userRef = ref(db, 'users/' + auth.currentUser.uid);
+    try {
+        await set(userRef, meta);
+    } catch (e) { console.error("Save Error", e); }
 }
