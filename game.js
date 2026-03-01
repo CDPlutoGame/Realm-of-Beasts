@@ -1,5 +1,105 @@
-// ... (Rest des Codes bleibt gleich bis zur playerMove Funktion)
+// --- SPIEL-DATEN (Version 13) ---
+let meta = { 
+    hp: 20,              // Start-Leben auf 20
+    maxHpBase: 20, 
+    money: 0, 
+    attackPower: 5, 
+    currentKills: 0, 
+    currentRound: 1, 
+    hpBought: 0, 
+    atkBought: 0 
+};
 
+let highscore = { bestRound: 1, bestKills: 0 };
+let playerPos = 0;
+let inFight = false;
+let monster = null;
+let boardEvents = [];
+let shopOpen = false;
+
+// --- START-LOGIK ---
+window.onload = function() {
+    const initBtn = document.getElementById("initBtn");
+    const loginModal = document.getElementById("loginModal");
+    const finalStartBtn = document.getElementById("finalStartBtn");
+
+    if(initBtn) initBtn.onclick = () => { if(loginModal) loginModal.style.display = "flex"; };
+    
+    if(finalStartBtn) {
+        finalStartBtn.onclick = () => {
+            const nameInput = document.getElementById("heroNameInput");
+            const name = nameInput ? nameInput.value.trim() : "";
+            if(name) {
+                localStorage.setItem("playerName", name);
+                if(loginModal) loginModal.style.display = "none";
+                initGame();
+            }
+        };
+    }
+    if(localStorage.getItem("playerName")) initGame();
+};
+
+function initGame() {
+    loadData();
+    updateUI();
+    log("Willkommen im Realm!");
+}
+
+function loadData() {
+    const savedHighscore = localStorage.getItem("game_highscore");
+    if(savedHighscore) highscore = JSON.parse(savedHighscore);
+
+    const savedMeta = localStorage.getItem("game_meta_v13");
+    if(savedMeta) meta = JSON.parse(savedMeta);
+    
+    playerPos = parseInt(localStorage.getItem("game_pos_v13")) || 0;
+    const savedEvents = localStorage.getItem("game_events_v13");
+    if(savedEvents) boardEvents = JSON.parse(savedEvents); 
+    else generateBoardEvents();
+}
+
+function saveData() {
+    if(meta.currentRound > highscore.bestRound) highscore.bestRound = meta.currentRound;
+    if(meta.currentKills > highscore.bestKills) highscore.bestKills = meta.currentKills;
+    localStorage.setItem("game_highscore", JSON.stringify(highscore));
+    localStorage.setItem("game_meta_v13", JSON.stringify(meta));
+    localStorage.setItem("game_pos_v13", playerPos);
+    localStorage.setItem("game_events_v13", JSON.stringify(boardEvents));
+}
+
+function log(msg) {
+    const lc = document.getElementById("logContent");
+    if(lc) lc.innerHTML = "> " + msg + "<br>" + lc.innerHTML;
+}
+
+function getRandom(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// --- BOARD-GENERIERUNG ---
+function generateBoardEvents() {
+    let count = 0;
+    while (count < 10 || count > 18) {
+        boardEvents = new Array(30).fill(null);
+        count = 0;
+        for (let i = 1; i < 30; i++) {
+            if (Math.random() < 0.45) {
+                count++;
+                if (Math.random() < 0.75) {
+                    let p = [];
+                    if (meta.currentRound <= 15) p.push("frog");
+                    if (meta.currentRound >= 11) p.push("wolf");
+                    if (meta.currentRound >= 21) p.push("bear");
+                    boardEvents[i] = p.length > 0 ? p[Math.floor(Math.random() * p.length)] : "frog";
+                } else {
+                    boardEvents[i] = "money_coin";
+                }
+            }
+        }
+    }
+}
+
+// --- SPIEL-AKTIONEN ---
 window.playerMove = function() {
     if(inFight) return;
     if(shopOpen) { shopOpen = false; log("Neue Reise gestartet."); }
@@ -12,81 +112,4 @@ window.playerMove = function() {
         if (meta.currentRound % 10 === 0) {
             let lvl = meta.currentRound / 10;
             let bossGold = 250 * Math.pow(2, lvl - 1);
-            // Bosse skalieren extrem stark
-            monster = { 
-                name: "EPISCHER DRACHE", 
-                hp: lvl * 800, 
-                maxHp: lvl * 800, 
-                atk: 15 + (lvl * 5), 
-                money: bossGold, 
-                isBoss: true, 
-                icon: "🐲" 
-            };
-            inFight = true;
-            log("!!! BOSS ERSCHEINT !!!");
-        } else {
-            meta.currentRound++;
-            generateBoardEvents();
-            log("Runde " + meta.currentRound);
-        }
-    } else {
-        let ev = boardEvents[playerPos];
-        if (ev && ev !== "money_coin") {
-            
-            // --- NEU: SCALING LOGIK (Alle 2 Runden stärker) ---
-            // Berechnet, wie oft die Monster schon verstärkt wurden
-            let scaleLevel = Math.floor(meta.currentRound / 2); 
-            
-            if(ev === "frog") {
-                monster = {
-                    name: "Frosch",
-                    hp: 12 + (scaleLevel * 4),      // +4 HP alle 2 Runden
-                    maxHp: 12 + (scaleLevel * 4),
-                    atk: 2 + (scaleLevel * 1),      // +1 ATK alle 2 Runden
-                    money: getRandom(3, 8),
-                    icon: "🐸",
-                    isBoss: false
-                };
-            }
-            if(ev === "wolf") {
-                monster = {
-                    name: "Wolf",
-                    hp: 30 + (scaleLevel * 10),     // +10 HP alle 2 Runden
-                    maxHp: 30 + (scaleLevel * 10),
-                    atk: 7 + (scaleLevel * 2),      // +2 ATK alle 2 Runden
-                    money: getRandom(5, 10),
-                    icon: "🐺",
-                    isBoss: false
-                };
-            }
-            if(ev === "bear") {
-                monster = {
-                    name: "Bär",
-                    hp: 80 + (scaleLevel * 25),     // +25 HP alle 2 Runden
-                    maxHp: 80 + (scaleLevel * 25),
-                    atk: 15 + (scaleLevel * 3),     // +3 ATK alle 2 Runden
-                    money: getRandom(15, 20),
-                    icon: "🐻",
-                    isBoss: false
-                };
-            }
-            
-            inFight = true;
-            boardEvents[playerPos] = null;
-            log(monster.name + " greift an! (Stufe " + scaleLevel + ")");
-        } else if (ev === "money_coin") {
-            // Goldsack Balancing (bleibt wie besprochen)
-            let coinGold = 0;
-            if (meta.currentRound <= 10) coinGold = getRandom(10, 13);
-            else if (meta.currentRound <= 20) coinGold = getRandom(13, 15);
-            else coinGold = getRandom(15, 20);
-            
-            meta.money += coinGold;
-            boardEvents[playerPos] = null;
-            log("Goldsack gefunden: +" + coinGold + " €");
-        }
-    }
-    updateUI();
-};
-
-// ... (Rest der Funktionen wie gehabt)
+            monster = { name: "EPISCHER DRACHE", hp: lvl*1000, maxHp: lvl*500, atk: 15+(lvl*5), money
