@@ -2,7 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// Deine echten Daten aus den Projekteinstellungen
 const firebaseConfig = {
   apiKey: "AIzaSyD3Z_HFQ04XVsbAnL3XCqf_6bkX3Cc21oc",
   authDomain: "realm-of-beaasts.firebaseapp.com",
@@ -10,13 +9,9 @@ const firebaseConfig = {
   projectId: "realm-of-beaasts",
   storageBucket: "realm-of-beaasts.firebasestorage.app",
   messagingSenderId: "723138830522",
-  appId: "1:723138830522:web:b3ec8a3d8947c25ec66283",
-  measurementId: "G-084J12EZHN"
+  appId: "1:723138830522:web:b3ec8a3d8947c25ec66283"
 };
 
-// Firebase initialisieren
 const app = initializeApp(firebaseConfig);
-
-// Dienste für auth.js, profile.js und game.js bereitstellen
 export const db = getFirestore(app);
 export const auth = getAuth(app);
