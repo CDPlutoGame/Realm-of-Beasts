@@ -192,7 +192,6 @@ function updateUI() {
             arena.innerHTML = `<div style="padding:20px; color:#666;">${shopOpen ? "IM SHOP" : "WANDERN..."}</div>`;
         }
     }
-
     // Spielbrett
     const b = document.getElementById("board"); 
     if(b) {
