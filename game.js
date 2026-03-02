@@ -135,4 +135,111 @@ window.playerMove = function() {
             log("Runde " + meta.currentRound);
         }
     } else {
-        let ev =
+        let ev = boardEvents[playerPos];
+        if (ev && ev !== "money_coin") {
+            if(ev==="frog") monster={name:"Frosch", hp:20, maxHp:20, atk:3, money:10, img: "images/frosch.png", isBoss:false};
+            if(ev==="wolf") monster={name:"Wolf", hp:50, maxHp:50, atk:8, money:20, img: "images/wolf.png", isBoss:false};
+            if(ev==="bear") monster={name:"Bär", hp:120, maxHp:120, atk:15, money:40, img: "images/bär.png", isBoss:false};
+            inFight = true;
+            log("Ein " + monster.name + " greift an!");
+            boardEvents[playerPos] = null;
+        } else if (ev === "money_coin") {
+            meta.money += 20;
+            log("Gold gefunden! +20");
+            boardEvents[playerPos] = null;
+        }
+    }
+    updateUI();
+};
+
+window.attackMonster = function() {
+    if(!monster) return;
+    monster.hp -= meta.attackPower;
+    log("Du triffst für " + meta.attackPower);
+    
+    if (monster.hp <= 0) {
+        meta.money += monster.money;
+        inFight = false;
+        log("Sieg! +" + monster.money + " Gold");
+        if(monster.isBoss) { meta.currentRound++; generateBoardEvents(); }
+    } else {
+        meta.hp -= monster.atk;
+        log(monster.name + " schlägt zurück: -" + monster.atk + " HP");
+        if (meta.hp <= 0) {
+            log("Game Over! Zurück zum Shop.");
+            meta.hp = meta.maxHpBase;
+            meta.currentRound = 1;
+            playerPos = 0;
+            inFight = false;
+            shopOpen = true; 
+            generateBoardEvents();
+        }
+    }
+    updateUI();
+};
+
+window.buyItem = function(type) {
+    if(meta.money >= 100) {
+        meta.money -= 100;
+        if(type === 'hp') { meta.maxHpBase += 10; meta.hp = meta.maxHpBase; log("+10 Max HP!"); }
+        else { meta.attackPower += 5; log("+5 Angriff!"); }
+        updateUI();
+    } else { log("Zu wenig Gold!"); }
+};
+
+function updateUI() {
+    saveData();
+    const hero = HERO_DATA[currentHero];
+    const name = localStorage.getItem("playerName") || "Held";
+    
+    // Status Panel
+    const status = document.getElementById("statusPanel");
+    if(status) {
+        status.innerHTML = `
+            <div style="background:#1a1a1a; padding:10px; border:1px solid #444; display:flex; gap:10px; align-items:center; border-radius:8px;">
+                <img src="${hero.img}" style="width:50px; height:50px; border:1px solid gold;">
+                <div style="font-size:12px; color:white;">
+                    <b>${name}</b> | Gold: <span style="color:gold">${meta.money}</span><br>
+                    Runde: ${meta.currentRound} | HP: ${meta.hp}/${meta.maxHpBase}
+                </div>
+            </div>`;
+    }
+
+    // Arena
+    const arena = document.getElementById("battle-arena");
+    if(arena) {
+        if(inFight && monster) {
+            arena.innerHTML = `
+                <img src="${monster.img}" style="height:80px; margin-bottom:5px;">
+                <div style="font-weight:bold; color:red;">${monster.name}</div>
+                <div style="background:#333; width:100%; height:10px; border-radius:5px;">
+                    <div style="background:red; width:${(monster.hp/monster.maxHp)*100}%; height:100%; border-radius:5px;"></div>
+                </div>`;
+        } else {
+            arena.innerHTML = `<div style="padding:20px; color:#666;">${shopOpen ? "SHOP" : "WANDERN..."}</div>`;
+        }
+    }
+
+    // Brett
+    const b = document.getElementById("board"); 
+    if(b) {
+        b.innerHTML = "";
+        for (let i = 0; i < 30; i++) {
+            const c = document.createElement("div"); c.className = "cell";
+            if (i === playerPos) c.innerHTML = "🧙"; 
+            else if (boardEvents[i] === "frog") c.innerHTML = "🐸";
+            else if (boardEvents[i] === "wolf") c.innerHTML = "🐺";
+            else if (boardEvents[i] === "bear") c.innerHTML = "🐻";
+            else if (boardEvents[i] === "money_coin") c.innerHTML = "💰"; 
+            b.appendChild(c);
+        }
+    }
+
+    // Buttons
+    const fPanel = document.getElementById("fightPanel");
+    if(fPanel) {
+        fPanel.innerHTML = inFight ? 
+            `<button onclick="attackMonster()" style="background:red; color:white; padding:10px; width:100%;">ANGRIFF</button>` : 
+            `<button onclick="playerMove()" style="background:blue; color:white; padding:10px; width:100%;">${shopOpen ? 'SHOP VERLASSEN' : 'WÜRFELN'}</button>`;
+    }
+}
