@@ -1,4 +1,4 @@
-// --- BASIS FUNKTIONEN (Wichtig damit nichts abstürzt) ---
+// --- BASIS FUNKTIONEN ---
 function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function log(msg) { 
     const lc = document.getElementById("logContent"); 
@@ -8,37 +8,7 @@ function log(msg) {
     }
 }
 
-// --- MUSIK SYSTEM ---
-const playlist = ["sounds/music/bg1.mp3", "sounds/music/bg2.mp3", "sounds/music/bg3.mp3"];
-let currentTrackIndex = 0;
-let bgMusic = new Audio();
-let isMusicPlaying = false;
-
-function setupMusic() {
-    const toggleBtn = document.getElementById("toggleMusic");
-    const volControl = document.getElementById("volumeControl");
-    const songNameDisplay = document.getElementById("current-song-name");
-    if (!toggleBtn) return;
-
-    bgMusic.src = playlist[currentTrackIndex];
-    bgMusic.volume = 0.5;
-
-    toggleBtn.onclick = () => {
-        if (isMusicPlaying) {
-            bgMusic.pause();
-            toggleBtn.innerHTML = '▶';
-            if(songNameDisplay) songNameDisplay.innerText = "Pause";
-        } else {
-            bgMusic.play().then(() => {
-                toggleBtn.innerHTML = '⏸';
-                if(songNameDisplay) songNameDisplay.innerText = "Musik läuft";
-            }).catch(e => console.log("Musik-Start Fehler"));
-        }
-        isMusicPlaying = !isMusicPlaying;
-    };
-}
-
-// --- SPIEL DATEN & HELDEN ---
+// --- SPIEL DATEN & HELDEN (Deine Handy-Dateien) ---
 const HERO_DATA = {
     "Ben":     { class: "Abenteurer", hp: 30, atk: 10, img: "images/ben.png" },
     "Jeffrey": { class: "Ritter",     hp: 50, atk: 6,  img: "images/jeffry.png" },
@@ -57,34 +27,56 @@ let boardEvents = [];
 let shopOpen = false;
 let currentHero = "Ben";
 
+// --- INITIALISIERUNG (Login & Start) ---
 window.onload = function() {
-    setupMusic();
     loadData();
     
-    // Login-Button Logik
+    const loginModal = document.getElementById("loginModal");
+    const playerName = localStorage.getItem("playerName");
+
+    // Wenn kein Name da ist, zeige das Login-Fenster sofort
+    if (!playerName || playerName === "") {
+        if(loginModal) loginModal.style.display = "flex";
+    } else {
+        if(loginModal) loginModal.style.display = "none";
+        log("Willkommen zurück, " + playerName);
+    }
+
+    // Login Button Logik
     const finalStartBtn = document.getElementById("finalStartBtn");
     if(finalStartBtn) {
         finalStartBtn.onclick = function() {
             const nameInput = document.getElementById("heroNameInput");
             if(nameInput && nameInput.value.trim() !== "") {
                 localStorage.setItem("playerName", nameInput.value.trim());
-                document.getElementById("loginModal").style.display = "none";
+                if(loginModal) loginModal.style.display = "none";
                 updateUI();
-                log("Willkommen, " + nameInput.value);
+                log("Das Abenteuer beginnt, " + nameInput.value);
+            } else {
+                alert("Bitte gib einen Namen ein!");
             }
         };
     }
+    
+    // Musik Setup (Optional, falls Buttons da sind)
+    const toggleBtn = document.getElementById("toggleMusic");
+    if(toggleBtn) {
+        toggleBtn.onclick = function() {
+            log("Musik-System bereit.");
+        };
+    }
+
     updateUI();
 };
 
 function loadData() {
     try {
-        const m = localStorage.getItem("game_meta_v22");
+        const m = localStorage.getItem("game_meta_v23");
         if(m) meta = JSON.parse(m);
         const h = localStorage.getItem("game_highscore");
         if(h) highscore = JSON.parse(h);
-        playerPos = parseInt(localStorage.getItem("game_pos_v22")) || 0;
-        const e = localStorage.getItem("game_events_v22");
+        playerPos = parseInt(localStorage.getItem("game_pos_v23")) || 0;
+        const e = localStorage.getItem("game_events_v23");
         if(e) boardEvents = JSON.parse(e); else generateBoardEvents();
         const savedHero = localStorage.getItem("currentHero");
         if(savedHero) currentHero = savedHero;
@@ -92,19 +84,17 @@ function loadData() {
 }
 
 function saveData() {
-    if(meta.currentRound > highscore.bestRound) highscore.bestRound = meta.currentRound;
-    localStorage.setItem("game_meta_v22", JSON.stringify(meta));
+    localStorage.setItem("game_meta_v23", JSON.stringify(meta));
     localStorage.setItem("game_highscore", JSON.stringify(highscore));
-    localStorage.setItem("game_pos_v22", playerPos);
-    localStorage.setItem("game_events_v22", JSON.stringify(boardEvents));
+    localStorage.setItem("game_pos_v23", playerPos);
+    localStorage.setItem("game_events_v23", JSON.stringify(boardEvents));
     localStorage.setItem("currentHero", currentHero);
 }
 
 function generateBoardEvents() {
     boardEvents = new Array(30).fill(null);
     for (let i = 1; i < 30; i++) {
-        let r = Math.random();
-        if (r < 0.35) {
+        if (Math.random() < 0.35) {
             if (Math.random() < 0.7) {
                 let p = ["frog"];
                 if (meta.currentRound >= 5) p.push("wolf");
@@ -115,24 +105,22 @@ function generateBoardEvents() {
     }
 }
 
+// --- GAMEPLAY FUNKTIONEN ---
 window.playerMove = function() {
     if(inFight) return;
-    if(shopOpen) { shopOpen = false; log("Shop verlassen."); updateUI(); return; }
+    if(shopOpen) { shopOpen = false; updateUI(); return; }
     
     let steps = getRandom(1, 4);
     playerPos += steps;
-    log("Du gehst " + steps + " Schritte.");
 
     if (playerPos >= 30) {
         playerPos = 0;
         if (meta.currentRound % 10 === 0) {
             monster = { name: "BOSS DRACHE", hp: 500, maxHp: 500, atk: 20, money: 500, isBoss: true, img: "images/dragon 1.png" };
             inFight = true;
-            log("DER DRACHE ERSCHEINT!");
         } else {
             meta.currentRound++;
             generateBoardEvents();
-            log("Runde " + meta.currentRound);
         }
     } else {
         let ev = boardEvents[playerPos];
@@ -141,11 +129,9 @@ window.playerMove = function() {
             if(ev==="wolf") monster={name:"Wolf", hp:50, maxHp:50, atk:8, money:20, img: "images/wolf.png", isBoss:false};
             if(ev==="bear") monster={name:"Bär", hp:120, maxHp:120, atk:15, money:40, img: "images/bär.png", isBoss:false};
             inFight = true;
-            log("Ein " + monster.name + " greift an!");
             boardEvents[playerPos] = null;
         } else if (ev === "money_coin") {
             meta.money += 20;
-            log("Gold gefunden! +20");
             boardEvents[playerPos] = null;
         }
     }
@@ -155,18 +141,13 @@ window.playerMove = function() {
 window.attackMonster = function() {
     if(!monster) return;
     monster.hp -= meta.attackPower;
-    log("Du triffst für " + meta.attackPower);
-    
     if (monster.hp <= 0) {
         meta.money += monster.money;
         inFight = false;
-        log("Sieg! +" + monster.money + " Gold");
         if(monster.isBoss) { meta.currentRound++; generateBoardEvents(); }
     } else {
         meta.hp -= monster.atk;
-        log(monster.name + " schlägt zurück: -" + monster.atk + " HP");
         if (meta.hp <= 0) {
-            log("Game Over! Zurück zum Shop.");
             meta.hp = meta.maxHpBase;
             meta.currentRound = 1;
             playerPos = 0;
@@ -178,49 +159,41 @@ window.attackMonster = function() {
     updateUI();
 };
 
-window.buyItem = function(type) {
-    if(meta.money >= 100) {
-        meta.money -= 100;
-        if(type === 'hp') { meta.maxHpBase += 10; meta.hp = meta.maxHpBase; log("+10 Max HP!"); }
-        else { meta.attackPower += 5; log("+5 Angriff!"); }
-        updateUI();
-    } else { log("Zu wenig Gold!"); }
-};
-
+// --- UI UPDATE MIT DEINEN BILDERN ---
 function updateUI() {
     saveData();
     const hero = HERO_DATA[currentHero];
     const name = localStorage.getItem("playerName") || "Held";
     
-    // Status Panel
+    // Status Panel oben
     const status = document.getElementById("statusPanel");
     if(status) {
         status.innerHTML = `
-            <div style="background:#1a1a1a; padding:10px; border:1px solid #444; display:flex; gap:10px; align-items:center; border-radius:8px;">
-                <img src="${hero.img}" style="width:50px; height:50px; border:1px solid gold;">
-                <div style="font-size:12px; color:white;">
-                    <b>${name}</b> | Gold: <span style="color:gold">${meta.money}</span><br>
+            <div style="background:#1a1a1a; padding:10px; border:1px solid gold; display:flex; gap:10px; align-items:center; border-radius:8px; color:white;">
+                <img src="${hero.img}" style="width:40px; height:40px; border:1px solid white;">
+                <div style="font-size:11px;">
+                    <b>${name}</b> | Gold: ${meta.money}<br>
                     Runde: ${meta.currentRound} | HP: ${meta.hp}/${meta.maxHpBase}
                 </div>
             </div>`;
     }
 
-    // Arena
+    // Arena (Monster Bilder)
     const arena = document.getElementById("battle-arena");
     if(arena) {
         if(inFight && monster) {
             arena.innerHTML = `
-                <img src="${monster.img}" style="height:80px; margin-bottom:5px;">
-                <div style="font-weight:bold; color:red;">${monster.name}</div>
-                <div style="background:#333; width:100%; height:10px; border-radius:5px;">
-                    <div style="background:red; width:${(monster.hp/monster.maxHp)*100}%; height:100%; border-radius:5px;"></div>
+                <img src="${monster.img}" style="height:90px; object-fit:contain; margin-bottom:5px;">
+                <div style="font-weight:bold; color:red; font-size:14px;">${monster.name}</div>
+                <div style="background:#444; width:100%; height:8px; border-radius:4px; margin-top:5px;">
+                    <div style="background:red; width:${(monster.hp/monster.maxHp)*100}%; height:100%; border-radius:4px;"></div>
                 </div>`;
         } else {
-            arena.innerHTML = `<div style="padding:20px; color:#666;">${shopOpen ? "SHOP" : "WANDERN..."}</div>`;
+            arena.innerHTML = `<div style="padding:20px; color:#666;">${shopOpen ? "IM SHOP" : "WANDERN..."}</div>`;
         }
     }
 
-    // Brett
+    // Spielbrett
     const b = document.getElementById("board"); 
     if(b) {
         b.innerHTML = "";
@@ -235,11 +208,11 @@ function updateUI() {
         }
     }
 
-    // Buttons
+    // Kampf / Bewegungs Button
     const fPanel = document.getElementById("fightPanel");
     if(fPanel) {
         fPanel.innerHTML = inFight ? 
-            `<button onclick="attackMonster()" style="background:red; color:white; padding:10px; width:100%;">ANGRIFF</button>` : 
-            `<button onclick="playerMove()" style="background:blue; color:white; padding:10px; width:100%;">${shopOpen ? 'SHOP VERLASSEN' : 'WÜRFELN'}</button>`;
+            `<button onclick="attackMonster()" style="background:#b91c1c; color:white; padding:10px; width:100%; border:none; border-radius:5px;">ANGRIFF</button>` : 
+            `<button onclick="playerMove()" style="background:#1d4ed8; color:white; padding:10px; width:100%; border:none; border-radius:5px;">${shopOpen ? 'SHOP VERLASSEN' : 'WÜRFELN'}</button>`;
     }
 }
