@@ -24,16 +24,24 @@ const sounds = {
     win: new Audio('sounds/win.mp3')
 };
 
-// Hintergrundmusik Logik für deine Dateien bg1, bg2, bg3
 let bgMusic = null;
 const musicTracks = ['sounds/music/bg1.mp3', 'sounds/music/bg2.mp3', 'sounds/music/bg3.mp3'];
+
+// Funktion für den Lautstärkeregler
+window.changeVolume = function(val) {
+    if (bgMusic) {
+        bgMusic.volume = val / 100;
+    }
+};
 
 function playRandomMusic() {
     const randomTrack = musicTracks[Math.floor(Math.random() * musicTracks.length)];
     if (bgMusic) { bgMusic.pause(); }
     bgMusic = new Audio(randomTrack);
     bgMusic.loop = true;
-    bgMusic.volume = 0.5;
+    // Setzt die Lautstärke direkt auf den Wert des Sliders
+    let currentVol = document.getElementById("volumeSlider").value;
+    bgMusic.volume = currentVol / 100;
     bgMusic.play().catch(e => console.log("Musik-Fehler:", e));
 }
 
@@ -56,7 +64,6 @@ window.startGame = function() {
         meta.playerName = name ? name : "Spieler";
     }
     
-    // Zufällige Musik aus deinem Ordner starten
     playRandomMusic();
 
     gameStarted = true;
