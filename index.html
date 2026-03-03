@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CDPluto RPG</title>
+    <title>CDPluto RPG - Realm</title>
     <style>
         body { 
             background: #000 url('images/dungeon.png') no-repeat center center fixed; 
             background-size: cover;
             color: #fff; 
-            font-family: 'Georgia', serif; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             text-align: center; 
             margin: 0; 
             padding: 10px; 
-            padding-bottom: 200px; 
+            padding-bottom: 220px; 
             overflow-x: hidden;
         }
 
@@ -21,55 +21,21 @@
         #loginOverlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.9);
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 9999;
         }
 
         #loginBox {
             background: linear-gradient(135deg, #1a1a1a 0%, #000 100%);
             border: 3px solid #d4af37;
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
-            padding: 30px;
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
+            padding: 40px 20px;
             border-radius: 20px;
             width: 85%;
             max-width: 400px;
-            animation: fadeIn 0.5s ease-out;
         }
 
-        .realm-title {
-            color: #d4af37;
-            font-size: 28px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px #000, 0 0 15px rgba(212, 175, 55, 0.7);
-        }
-
-        .realm-subtitle {
-            color: #aaa;
-            font-size: 14px;
-            margin-bottom: 25px;
-            font-style: italic;
-        }
-
-        #playerNameInput {
-            width: 90%;
-            padding: 12px;
-            background: #222;
-            border: 1px solid #d4af37;
-            color: gold;
-            text-align: center;
-            font-size: 18px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            outline: none;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-
-        /* GAME UI */
-        #statusPanel { background: rgba(17, 17, 17, 0.9); border: 2px solid gold; border-radius: 10px; padding: 10px; margin-bottom: 5px; }
-        #musicControl { background: rgba(17, 17, 17, 0.85);
+        .realm-title
