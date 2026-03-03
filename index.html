@@ -21,7 +21,7 @@
         #loginOverlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -29,78 +29,31 @@
         }
 
         #loginBox {
-            background: #111;
-            border: 2px solid red;
-            box-shadow: 0 0 20px red;
-            padding: 30px 20px;
-            border-radius: 15px;
+            background: #000;
+            border: 2px solid #ff0000;
+            box-shadow: 0 0 30px #ff0000, inset 0 0 15px #8b0000;
+            padding: 40px 20px;
+            border-radius: 20px;
             width: 85%;
             max-width: 400px;
         }
 
         .realm-title {
-            color: red;
-            font-size: 24px;
+            color: #ff0000;
+            font-size: 32px;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            letter-spacing: 5px;
+            text-shadow: 0 0 20px #ff0000;
         }
 
         #playerNameInput {
-            width: 80%;
-            padding: 12px;
-            background: #222;
-            border: 1px solid red;
+            width: 85%;
+            padding: 15px;
+            background: #111;
+            border: 1px solid #ff0000;
             color: #fff;
             text-align: center;
-            font-size: 18px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            outline: none;
-        }
-
-        /* UI PANELS */
-        #statusPanel { background: rgba(0, 0, 0, 0.85); border: 1px solid red; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
-        #musicControl { background: rgba(0, 0, 0, 0.8); border: 1px solid #444; border-radius: 10px; padding: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        #volumeSlider { cursor: pointer; accent-color: red; width: 100px; }
-        #battle-arena { height: 130px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 15px; background: rgba(0, 0, 0, 0.7); border: 1px solid #444; border-radius: 10px; }
-        #board { max-width: 360px; margin: 0 auto; background: rgba(0, 0, 0, 0.6); padding: 8px; border-radius: 12px; line-height: 0; }
-        .cell { width: 34px; height: 34px; background: rgba(40, 40, 40, 0.8); display: inline-block; margin: 2px; line-height: 34px; text-align: center; border-radius: 5px; font-size: 18px; border: 1px solid #333; }
-        #schwarzmarkt { margin-top: 20px; padding: 15px; background: rgba(10, 10, 10, 0.95); border: 1px solid #444; border-radius: 12px; }
-        
-        #controls { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(0, 0, 0, 0.95); padding: 15px; box-sizing: border-box; border-top: 2px solid red; z-index: 500; }
-        
-        .main-btn { width: 100%; padding: 18px; border-radius: 12px; font-size: 20px; font-weight: bold; text-transform: uppercase; cursor: pointer; border: none; background: red; color: white; }
-        .buy-btn { padding: 8px; border-radius: 5px; margin: 3px; font-size: 11px; border: none; font-weight: bold; cursor: pointer; background: #444; color: white; }
-        .buy-btn:disabled { background: #222 !important; color: #555 !important; cursor: not-allowed; }
-    </style>
-</head>
-<body>
-
-    <div id="loginOverlay">
-        <div id="loginBox">
-            <div class="realm-title">CDPluto Realm</div>
-            <input type="text" id="playerNameInput" placeholder="Dein Name..." maxlength="12">
-            <button class="main-btn" onclick="startGame()">SPIEL STARTEN</button>
-        </div>
-    </div>
-
-    <div id="statusPanel">Warte auf Login...</div>
-
-    <div id="musicControl">
-        <span>🎵 Musik</span>
-        <input type="range" id="volumeSlider" min="0" max="100" value="50" oninput="changeVolume(this.value)">
-    </div>
-
-    <div id="battle-arena"></div>
-    <div id="board"></div>
-    <div id="schwarzmarkt"></div>
-
-    <div id="controls">
-        <button id="actionBtn" class="main-btn">Lade Spiel...</button>
-        <div id="autoRunArea"></div>
-    </div>
-
-    <script src="game.js"></script>
-</body>
-</html>
+            font-size: 20px;
+            border-radius: 10px;
