@@ -41,7 +41,7 @@ window.onload = function() {
 
 window.startGame = function() {
     const nameInput = document.getElementById("playerNameInput").value.trim();
-    if (nameInput === "") return alert("Bitte Name eingeben!");
+    if (nameInput === "") return alert("Held, nenne deinen Namen!");
 
     const savedMeta = localStorage.getItem("cdp_rpg_meta");
     if(savedMeta) meta = JSON.parse(savedMeta);
@@ -144,12 +144,12 @@ window.toggleAutoRun = function() {
 
 function updateUI() {
     localStorage.setItem("cdp_rpg_meta", JSON.stringify(meta));
-    document.getElementById("statusPanel").innerHTML = `👤 <b>${meta.playerName}</b> | Gold: ${meta.money} | R: ${meta.currentRound}<br>❤️ HP: ${Math.max(0, meta.hp)}/${meta.maxHpBase} | ⚔️ ATK: ${meta.attackPower}`;
+    document.getElementById("statusPanel").innerHTML = `<span style="color:red; text-shadow:0 0 5px red;">👤 <b>${meta.playerName}</b></span> | Gold: ${meta.money} | Runde: ${meta.currentRound}<br>❤️ HP: ${Math.max(0, meta.hp)}/${meta.maxHpBase} | ⚔️ ATK: ${meta.attackPower}`;
 
     const arena = document.getElementById("battle-arena");
-    if(isGameOver) arena.innerHTML = `<b style="color:red; font-size:24px;">GAME OVER</b>`;
-    else if(inFight) arena.innerHTML = `<img src="${monster.img}" style="height:60px;"><br><b style="color:red;">${monster.name} (HP: ${monster.hp})</b>`;
-    else arena.innerHTML = `<div style="color:gray;">Wandern...</div>`;
+    if(isGameOver) arena.innerHTML = `<b style="color:red; font-size:28px; text-shadow: 0 0 15px red;">GEFALLEN</b>`;
+    else if(inFight) arena.innerHTML = `<img src="${monster.img}" style="height:60px; filter:drop-shadow(0 0 10px red);"><br><b style="color:red; text-shadow: 0 0 5px red;">${monster.name} (HP: ${monster.hp})</b>`;
+    else arena.innerHTML = `<div style="color:#555;">Erkunde Realm...</div>`;
 
     const b = document.getElementById("board");
     b.innerHTML = "";
@@ -164,9 +164,9 @@ function updateUI() {
         <button class="buy-btn" ${!isGameOver ? 'disabled' : ''} onclick="buyItem('auto')">AUTO (Lvl ${meta.autoRunLevel+1})</button>`;
 
     const actionBtn = document.getElementById("actionBtn");
-    actionBtn.innerHTML = isGameOver ? "WEITERKÄMPFEN" : (inFight ? "ANGRIFF" : "LAUFEN");
-    actionBtn.style.background = isGameOver ? "darkred" : (inFight ? "red" : "#444");
+    actionBtn.innerHTML = isGameOver ? "AUFERSTEHEN" : (inFight ? "ANGRIFF" : "LAUFEN");
+    actionBtn.style.background = isGameOver ? "#400" : (inFight ? "#ff0000" : "#8b0000");
     actionBtn.onclick = isGameOver ? window.respawn : (inFight ? window.attackMonster : window.playerMove);
     
-    document.getElementById("autoRunArea").innerHTML = `<button onclick="toggleAutoRun()" style="width:100%; margin-top:10px; background:${autoRunActive ? 'red' : '#333'}; color:white; padding:10px; border-radius:10px; border:1px solid red;">AUTORUN: ${autoRunActive ? 'AN' : 'AUS'}</button>`;
+    document.getElementById("autoRunArea").innerHTML = `<button onclick="toggleAutoRun()" style="width:100%; margin-top:10px; background:${autoRunActive ? '#ff0000' : '#222'}; color:white; padding:10px; border-radius:10px; border:1px solid #ff0000; box-shadow: ${autoRunActive ? '0 0 15px #ff0000' : 'none'}; cursor:pointer;">AUTORUN: ${autoRunActive ? 'AKTIV' : 'AUS'}</button>`;
 }
