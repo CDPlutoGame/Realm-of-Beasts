@@ -1,3 +1,4 @@
+// --- SPIEL VARIABLEN ---
 let meta = { 
     playerName: "", hp: 20, maxHpBase: 20, money: 0, attackPower: 5, 
     currentRound: 1, bossesKilled: 0, autoRunLevel: 0,
@@ -13,7 +14,7 @@ let gameStarted = false;
 let autoRunActive = false;
 let autoRunInterval = null;
 
-// --- START & LOGIN ---
+// --- START FUNKTION ---
 window.startGame = function() {
     const savedMeta = localStorage.getItem("cdp_rpg_meta");
     const savedHigh = localStorage.getItem("cdp_rpg_high");
@@ -43,7 +44,7 @@ function generateBoardEvents() {
     }
 }
 
-// --- BEWEGUNG & KAMPF ---
+// --- LOGIK ---
 window.playerMove = function() {
     if(!gameStarted || inFight) return;
     playerPos += Math.floor(Math.random() * 4) + 1;
@@ -89,7 +90,7 @@ window.attackMonster = function() {
     updateUI();
 };
 
-// --- SHOP LOGIK (PREIS STEIGT UM 50) ---
+// --- SHOP (PREIS +50 STEIGERUNG) ---
 window.buyItem = function(type) {
     if (type === 'hp') {
         let cost = (meta.hpUpgrades + 1) * 50;
@@ -152,7 +153,6 @@ function updateUI() {
         b.innerHTML += `<div class="cell">${icon}</div>`;
     }
 
-    // Shop Preise berechnen
     let hpCost = (meta.hpUpgrades + 1) * 50;
     let atkCost = (meta.atkUpgrades + 1) * 50;
 
@@ -165,13 +165,15 @@ function updateUI() {
     const actionBtn = document.getElementById("actionBtn");
     if(!gameStarted) {
         actionBtn.innerHTML = "LOGIN";
-        actionBtn.className = "main-btn login-glow"; // Rotes Leuchten
+        actionBtn.className = "main-btn login-glow";
         actionBtn.onclick = window.startGame;
     } else {
         actionBtn.innerHTML = inFight ? "Angriff" : "Laufen";
-        actionBtn.className = "main-btn"; // Normales Rot im Spiel
+        actionBtn.className = "main-btn";
         actionBtn.style.background = "linear-gradient(#dc2626, #991b1b)";
         actionBtn.style.boxShadow = "none";
+        actionBtn.style.color = "white";
+        actionBtn.style.border = "2px solid gold";
         actionBtn.onclick = inFight ? window.attackMonster : window.playerMove;
         
         document.getElementById("autoRunArea").innerHTML = `
