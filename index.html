@@ -2,162 +2,17 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Realm of Beasts - Forest Edition</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        /* Grundlayout */
-        body { 
-            background-color: #0a0a0a; 
-            color: #e0e0e0; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            display: flex; 
-            justify-content: center; 
-            min-height: 100vh; 
-        }
-
-        #game-container { 
-            text-align: center; 
-            padding: 15px; 
-            max-width: 450px; 
-            width: 100%; 
-            background: #111; 
-            min-height: 100vh; 
-            border-left: 1px solid #222; 
-            border-right: 1px solid #222; 
-            box-sizing: border-box; 
-            display: flex; 
-            flex-direction: column; 
-        }
-
-        h1 { 
-            color: #d4af37; 
-            font-size: 24px; 
-            margin: 10px 0; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-        }
-
-        /* Musik Player */
-        #music-player { 
-            background: #1a1a1a; 
-            padding: 12px; 
-            border-radius: 12px; 
-            border: 1px solid #333; 
-            margin-bottom: 15px; 
-        }
-        .music-info { 
-            font-size: 10px; 
-            color: #d4af37; 
-            text-transform: uppercase; 
-            margin-bottom: 8px; 
-            letter-spacing: 1px; 
-        }
-        .music-controls { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-        }
-
-        /* Kampf-Arena */
-        #battle-arena { 
-            min-height: 200px; 
-            background: linear-gradient(180deg, #0a1a0a 0%, #000 100%); 
-            border: 2px solid #2d4c2d; 
-            border-radius: 15px; 
-            margin: 10px 0; 
-            padding: 15px; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            box-sizing: border-box;
-        }
-
-        .hp-bar-container { 
-            background: #333; 
-            height: 16px; 
-            border-radius: 8px; 
-            width: 90%; 
-            border: 1px solid #555; 
-            overflow: hidden; 
-            position: relative; 
-            margin: 10px auto; 
-        }
-        #enemy-hp-fill { background: #ef4444; height: 100%; width: 0%; transition: width 0.3s ease; }
-        #enemy-hp-text { position: absolute; width: 100%; top: 0; left: 0; font-size: 10px; line-height: 16px; color: white; font-weight: bold; text-align: center; }
-
-        .game-btn { 
-            padding: 15px; 
-            cursor: pointer; 
-            border-radius: 10px; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            font-weight: bold; 
-            width: 100%; 
-            color: white; 
-            text-transform: uppercase; 
-            margin: 5px 0; 
-            font-size: 14px; 
-        }
-
-        #logContent { 
-            background: #000; color: #4ade80; padding: 10px; margin: 10px 0; border-radius: 8px; 
-            font-family: monospace; font-size: 11px; height: 70px; overflow-y: auto; border: 1px solid #333; text-align: left; 
-        }
-
-        #board { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; background: #000; padding: 8px; border-radius: 10px; border: 1px solid #333; }
-        .cell { height: 35px; background: #1a1a1a; border: 1px solid #333; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 18px; }
-
-        #loginModal { 
-            display:none; position:fixed; z-index:999; left:0; top:0; width:100%; height:100%; 
-            background:rgba(0,0,0,0.95); align-items:center; justify-content:center; 
-        }
-        .modal-box { background:#1a1a1a; padding:25px; border:2px solid #d4af37; border-radius:15px; width:85%; max-width:320px; text-align:center; }
-        #heroNameInput { width:100%; padding:12px; margin:15px 0; background:#000; border:1px solid #444; color:white; border-radius:8px; text-align:center; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDPluto RPG</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body style="background-color: #000; color: white; font-family: sans-serif; text-align: center;">
 
-    <div id="loginModal">
-        <div class="modal-box">
-            <h2 style="color:#d4af37;">Helden-Login</h2>
-            <input type="text" id="heroNameInput" placeholder="Dein Name..." maxlength="12">
-            <button id="finalStartBtn" class="game-btn" style="background: #d4af37; color:black;">SPIEL STARTEN</button>
-        </div>
-    </div>
+    <button id="mainActionBtn" onclick="startGame()" style="background: #4285f4; color: white; padding: 15px 40px; border-radius: 10px; font-weight: bold; margin: 20px; font-size: 18px; cursor: pointer; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
+        SPIEL LADEN
+    </button>
 
-    <div id="game-container">
-        <h1><i class="fas fa-scroll"></i> REALM OF BEASTS</h1>
-
-        <div id="music-player">
-            <div class="music-info"><i class="fas fa-compact-disc fa-spin"></i> <span id="current-song-name">Musik pausiert</span></div>
-            <div class="music-controls">
-                <button id="toggleMusic" class="game-btn" style="width: auto; padding: 8px 18px; margin: 0; background: #333;"><i class="fas fa-play"></i></button>
-                <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="0.5" style="flex-grow: 1; accent-color: #d4af37;">
-            </div>
-        </div>
-        
-        <div id="statusPanel">
-            <button id="initBtn" class="game-btn" style="background:#4285F4;">SPIEL LADEN</button>
+    <div id="statusPanel" style="margin: 10px auto; max-width: 400px;">
         </div>
 
-        <div id="battle-arena"></div>
-        <div id="logContent">> Bereit für die Reise...</div>
-        <div id="board"></div>
-        <div id="fightPanel" style="margin-top: 10px;"></div>
-        
-        <div id="shop-container" style="background: #1a1a1a; padding: 12px; border-radius: 12px; border: 2px solid #b91c1c; margin-top: 15px;">
-            <h3 style="color:#ef4444; margin: 0 0 10px 0; font-size: 14px;">SCHWARZMARKT</h3>
-            <div style="display: flex; gap: 8px;">
-                <button id="btn-hp" class="game-btn" style="background: #166534; font-size: 11px;"></button>
-                <button id="btn-atk" class="game-btn" style="background: #991b1b; font-size: 11px;"></button>
-            </div>
-        </div>
-    </div>
-
-    <script src="game.js"></script>
-</body>
-</html>
+    <div id="battle-arena" style="background: #222; border: 2px solid #444; height: 150px; margin: 10px auto; max-width: 400px; border-radius: 10px; display: flex; flex-direction: column; justify-content: center
