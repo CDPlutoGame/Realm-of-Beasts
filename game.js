@@ -1,31 +1,28 @@
 // --- BASIS FUNKTIONEN ---
 function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-function log(msg) { 
-    const lc = document.getElementById("logContent"); 
-    if(lc) lc.innerHTML = "> " + msg + "<br>" + lc.innerHTML; 
-}
 
-// --- HELDEN DATEN ---
+// --- HELDEN & MONSTER BILDER ---
 const HERO_DATA = {
-    "Ben":     { class: "Abenteurer", img: "images/Ben.png" },
-    "Jeffrey": { class: "Ritter",      img: "images/jeffry.png" },
-    "Jamal":   { class: "Berserker",   img: "images/jamal.png" },
-    "Luna":    { class: "Waldläuferin", img: "images/luna.png" },
-    "Berta":   { class: "Magierin",    img: "images/berta.png" },
-    "Brutus":  { class: "Schläger",    img: "images/brutus.png" }
+    "Ben": { class: "Abenteurer", img: "images/Ben.png" }
 };
 
 // --- SPIEL WERTE ---
-let meta = { 
-    hp: 20, maxHpBase: 20, money: 0, attackPower: 5, 
-    currentRound: 1, bossesKilled: 0, autoRunLevel: 0 
-};
+let meta = { hp: 20, maxHpBase: 20, money: 20, attackPower: 5, currentRound: 1, bossesKilled: 0, autoRunLevel: 0 };
 let highscore = { bestRound: 1 };
 let playerPos = 0;
 let inFight = false;
 let monster = null;
 let boardEvents = [];
-let currentHero = "Ben";
+let gameStarted = false;
+
+// --- DIESE FUNKTION FIXT DEN "SPIEL LADEN" BUTTON ---
+window.startGame = function() {
+    console.log("Starte Spiel...");
+    gameStarted = true;
+    loadData();
+    generateBoardEvents();
+    updateUI();
+};
 
 // --- AUTORUN LOGIK ---
 let autoRunActive = false;
@@ -33,97 +30,52 @@ let autoRunInterval = null;
 
 window.toggleAutoRun = function() {
     if (meta.autoRunLevel === 0) {
-        log("Kauf erst Autorun im Schwarzmarkt!");
+        alert("Kauf erst Autorun im Schwarzmarkt!");
         return;
     }
     autoRunActive = !autoRunActive;
     if (autoRunActive) {
-        log("AUTORUN START");
-        autoRunInterval = setInterval(autoStep, 1000);
+        autoRunInterval = setInterval(() => {
+            if (inFight) window.attackMonster();
+            else window.playerMove();
+        }, 1000);
     } else {
-        log("AUTORUN STOPP");
         clearInterval(autoRunInterval);
     }
     updateUI();
 };
 
-function autoStep() {
-    let maxRound = meta.autoRunLevel * 10;
-    if (meta.currentRound > maxRound || (playerPos >= 26 && meta.currentRound % 10 === 0)) {
-        if(autoRunActive) window.toggleAutoRun();
-        return;
-    }
-    if (inFight) window.attackMonster();
-    else window.playerMove();
-}
-
-// --- LADEN & STARTEN (FIXED) ---
-window.onload = function() {
-    console.log("Spiel wird geladen...");
-    try {
-        loadData();
-    } catch (e) {
-        console.error("Ladefehler, starte neues Spiel:", e);
-        generateBoardEvents();
-    }
-    updateUI();
-};
-
 function loadData() {
-    const m = localStorage.getItem("game_meta_v27"); // Neuer Schlüssel für sauberen Start
+    const m = localStorage.getItem("game_meta_final");
     if(m) meta = JSON.parse(m);
-    
-    const h = localStorage.getItem("game_highscore");
-    if(h) highscore = JSON.parse(h);
-    
-    // Immer neue Events generieren, falls das Laden fehlschlägt
-    generateBoardEvents();
 }
 
 function saveData() {
-    if(meta.currentRound > highscore.bestRound) highscore.bestRound = meta.currentRound;
-    localStorage.setItem("game_meta_v27", JSON.stringify(meta));
-    localStorage.setItem("game_highscore", JSON.stringify(highscore));
+    localStorage.setItem("game_meta_final", JSON.stringify(meta));
 }
 
 function generateBoardEvents() {
     boardEvents = new Array(30).fill(null);
     for (let i = 1; i < 30; i++) {
-        if (Math.random() < 0.4) {
-            let p = [];
-            if (meta.currentRound <= 15) p.push("frog");
-            if (meta.currentRound >= 11 && meta.currentRound <= 23) p.push("wolf");
-            if (meta.currentRound >= 19) p.push("bear");
-            boardEvents[i] = p[Math.floor(Math.random() * p.length)] || "frog";
-        }
+        if (Math.random() < 0.3) boardEvents[i] = "frog";
+        else if (Math.random() < 0.1) boardEvents[i] = "money_coin";
     }
 }
 
 window.playerMove = function() {
-    if(inFight) return;
+    if(!gameStarted || inFight) return;
     playerPos += getRandom(1, 4);
-
     if (playerPos >= 30) {
         playerPos = 0;
-        if (meta.currentRound % 10 === 0) {
-            monster = { name: "BOSS DRACHE", hp: 150 + (meta.currentRound*2), maxHp: 150 + (meta.currentRound*2), atk: 15 + meta.currentRound, money: 500, isBoss: true, img: "images/dragon 1.png" };
-            inFight = true;
-        } else {
-            meta.currentRound++;
-            generateBoardEvents();
-        }
+        meta.currentRound++;
+        generateBoardEvents();
     } else {
         let ev = boardEvents[playerPos];
-        let scale = Math.floor(meta.currentRound / 2) * 3;
         if (ev === "frog") {
-            monster = { name: "Frosch", hp: 15+scale, maxHp: 15+scale, atk: 5+scale, money: 12, img: "images/frog.png" };
+            monster = { name: "Frosch", hp: 10, maxHp: 10, atk: 2, money: 10, img: "images/frog.png" };
             inFight = true;
-        } else if (ev === "wolf") {
-            monster = { name: "Wolf", hp: 40+scale, maxHp: 40+scale, atk: 12+scale, money: 25, img: "images/wolf.png" };
-            inFight = true;
-        } else if (ev === "bear") {
-            monster = { name: "Bär", hp: 100+scale, maxHp: 100+scale, atk: 20+scale, money: 50, img: "images/bär.png" };
-            inFight = true;
+        } else if (ev === "money_coin") {
+            meta.money += 15;
         }
         boardEvents[playerPos] = null;
     }
@@ -134,8 +86,65 @@ window.attackMonster = function() {
     if(!monster) return;
     monster.hp -= meta.attackPower;
     if (monster.hp <= 0) {
-        if (monster.isBoss) meta.bossesKilled++;
         meta.money += monster.money;
         inFight = false;
         monster = null;
+    } else {
+        meta.hp -= monster.atk;
+        if (meta.hp <= 0) {
+            meta.hp = meta.maxHpBase;
+            playerPos = 0;
+            inFight = false;
+            if(autoRunActive) window.toggleAutoRun();
+        }
     }
+    updateUI();
+};
+
+window.buyItem = function(type) {
+    if (type === 'hp' && meta.money >= 50) { meta.maxHpBase += 5; meta.hp = meta.maxHpBase; meta.money -= 50; }
+    else if (type === 'atk' && meta.money >= 50) { meta.attackPower += 2; meta.money -= 50; }
+    else if (type === 'auto') {
+        let cost = 1000 + (meta.autoRunLevel * 500);
+        if (meta.money >= cost) { meta.money -= cost; meta.autoRunLevel++; }
+    }
+    updateUI();
+};
+
+function updateUI() {
+    saveData();
+    
+    // SPIEL LADEN Button zu LAUFEN ändern wenn Spiel läuft
+    const topBtn = document.querySelector('button[style*="background: #4285f4"]'); 
+    if(topBtn && gameStarted) {
+        topBtn.innerHTML = inFight ? "ANGRIFF" : "LAUFEN";
+        topBtn.style.background = "linear-gradient(to bottom, #dc2626, #991b1b)";
+        topBtn.style.border = "2px solid gold";
+        topBtn.onclick = inFight ? window.attackMonster : window.playerMove;
+    } else if(topBtn) {
+        topBtn.onclick = window.startGame;
+    }
+
+    // Brett mit Icons
+    const b = document.getElementById("board"); 
+    if(b && gameStarted) {
+        b.innerHTML = "";
+        for (let i = 0; i < 30; i++) {
+            const c = document.createElement("div"); c.className = "cell";
+            if (i === playerPos) c.innerHTML = "🧙"; 
+            else if (boardEvents[i] === "frog") c.innerHTML = "🐸";
+            else if (boardEvents[i] === "money_coin") c.innerHTML = "💰"; 
+            b.appendChild(c);
+        }
+    }
+
+    // Autorun Button
+    const elFight = document.getElementById("fightPanel");
+    if(elFight && gameStarted) {
+        const runGlow = autoRunActive ? "box-shadow: 0 0 20px red; background: red;" : "background: #333;";
+        elFight.innerHTML = `
+            <button onclick="toggleAutoRun()" style="${runGlow} color:white; width:100%; padding:10px; border-radius:8px; font-weight:bold; margin-top:10px;">
+                AUTORUN: ${autoRunActive ? 'AN' : 'AUS'} (Lvl ${meta.autoRunLevel})
+            </button>`;
+    }
+}
