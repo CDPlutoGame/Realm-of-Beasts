@@ -1,46 +1,241 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CDPluto RPG</title>
-    <style>
-        body { background: #000; color: #fff; font-family: sans-serif; text-align: center; margin: 0; padding: 10px; padding-bottom: 200px; }
-        #statusPanel { background: #111; border: 1px solid gold; border-radius: 10px; padding: 10px; margin-bottom: 10px; font-size: 13px; }
-        #battle-arena { height: 130px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 15px; border: 1px solid #222; border-radius: 10px; }
-        #board { display: block; max-width: 360px; margin: 0 auto; line-height: 0; }
-        .cell { width: 34px; height: 34px; background: #222; display: inline-block; margin: 2px; line-height: 34px; text-align: center; border-radius: 5px; font-size: 20px; }
-        #schwarzmarkt { margin-top: 20px; padding: 10px; background: #0a0a0a; border: 1px solid #333; border-radius: 10px; }
-        #controls { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.9); padding: 15px; box-sizing: border-box; border-top: 2px solid #444; }
-        .main-btn { width: 100%; padding: 20px; border-radius: 10px; font-size: 20px; font-weight: bold; text-transform: uppercase; cursor: pointer; }
-        .buy-btn { padding: 8px; border-radius: 5px; margin: 3px; font-size: 11px; border: none; font-weight: bold; cursor: pointer; }
-        .buy-btn:disabled { background: #333 !important; color: #666 !important; cursor: not-allowed; }
-        
-        .login-glow {
-            background: #ff0000 !important;
-            box-shadow: 0 0 25px #ff0000, inset 0 0 10px #8b0000 !important;
-            color: white !important;
-            border: 2px solid #fff !important;
+let meta = { 
+    playerName: "", hp: 20, maxHpBase: 20, money: 0, attackPower: 5, 
+    currentRound: 1, bossesKilled: 0, autoRunLevel: 0,
+    hpUpgrades: 0,
+    atkUpgrades: 0
+};
+let highscore = { bestRound: 1, bestName: "Held" };
+let playerPos = 0;
+let inFight = false;
+let monster = null;
+let boardEvents = [];
+let gameStarted = false;
+let isGameOver = false;
+let autoRunActive = false;
+let autoRunInterval = null;
+
+// --- AUDIO SYSTEM ---
+const sounds = {
+    move: new Audio('sounds/move.mp3'),
+    hit: new Audio('sounds/hit.mp3'),
+    gold: new Audio('sounds/gold.mp3'),
+    death: new Audio('sounds/death.mp3'),
+    buy: new Audio('sounds/buy.mp3'),
+    win: new Audio('sounds/win.mp3')
+};
+
+// HINTERGRUNDMUSIK
+const bgMusic = new Audio('sounds/music.mp3');
+bgMusic.loop = true; // Musik wiederholt sich endlos
+bgMusic.volume = 0.5; // Lautstärke auf 50%
+
+function playSound(name) {
+    if (sounds[name]) {
+        sounds[name].currentTime = 0;
+        sounds[name].play().catch(() => {});
+    }
+}
+
+// --- START & LOGIN ---
+window.startGame = function() {
+    const savedMeta = localStorage.getItem("cdp_rpg_meta");
+    const savedHigh = localStorage.getItem("cdp_rpg_high");
+    if(savedMeta) meta = JSON.parse(savedMeta);
+    if(savedHigh) highscore = JSON.parse(savedHigh);
+
+    if (!meta.playerName) {
+        let name = prompt("Wie lautet dein Name?", "");
+        meta.playerName = name ? name : "Spieler";
+    }
+    
+    // Musik starten beim Login
+    bgMusic.play().catch(e => console.log("Musik-Autoplay blockiert:", e));
+
+    gameStarted = true;
+    isGameOver = false;
+    generateBoardEvents();
+    updateUI();
+};
+
+function generateBoardEvents() {
+    boardEvents = new Array(30).fill(null);
+    for (let i = 1; i < 30; i++) {
+        let r = Math.random();
+        if (r < 0.25) {
+            if (meta.currentRound <= 15) boardEvents[i] = "frog";
+            else if (meta.currentRound <= 25) boardEvents[i] = "wolf";
+            else boardEvents[i] = "bear";
+        } else if (r < 0.40) {
+            boardEvents[i] = "gold";
         }
-    </style>
-</head>
-<body>
+    }
+}
 
-    <div id="statusPanel">Bitte einloggen...</div>
+window.playerMove = function() {
+    if(!gameStarted || inFight || isGameOver) return;
+    
+    playSound('move');
+    playerPos += Math.floor(Math.random() * 4) + 1;
 
-    <div id="battle-arena">
-        <div style="color: #444;">Warte auf Login...</div>
-    </div>
+    if (playerPos >= 30) {
+        playerPos = 0;
+        if (meta.currentRound % 10 === 0) {
+            monster = { name: "BOSS DRACHE", hp: 150 + (meta.currentRound*2), atk: 15 + meta.currentRound, money: 500, img: "images/dragon 1.png" };
+            inFight = true;
+        } else {
+            meta.currentRound++;
+            generateBoardEvents();
+        }
+    } else {
+        let ev = boardEvents[playerPos];
+        let scale = Math.floor(meta.currentRound / 2) * 3;
+        if (ev === "frog") { monster = { name: "Frosch", hp: 15+scale, atk: 5+scale, money: 12, img: "images/frog.png" }; inFight = true; }
+        else if (ev === "wolf") { monster = { name: "Wolf", hp: 40+scale, atk: 12+scale, money: 25, img: "images/wolf.png" }; inFight = true; }
+        else if (ev === "bear") { monster = { name: "Bär", hp: 100+scale, atk: 20+scale, money: 50, img: "images/bär.png" }; inFight = true; }
+        else if (ev === "gold") { 
+            meta.money += 15; 
+            playSound('gold');
+        }
+        boardEvents[playerPos] = null;
+    }
+    updateUI();
+};
 
-    <div id="board"></div>
+window.attackMonster = function() {
+    if(!monster || isGameOver) return;
+    
+    playSound('hit');
+    monster.hp -= meta.attackPower;
+    
+    if (monster.hp <= 0) {
+        playSound('win');
+        meta.money += monster.money;
+        if (monster.name === "BOSS DRACHE") meta.bossesKilled++;
+        inFight = false;
+        monster = null;
+    } else {
+        meta.hp -= monster.atk;
+        if (meta.hp <= 0) {
+            playSound('death');
+            triggerGameOver();
+        }
+    }
+    updateUI();
+};
 
-    <div id="schwarzmarkt"></div>
+function triggerGameOver() {
+    isGameOver = true;
+    inFight = false;
+    monster = null;
+    playerPos = 0;
+    if(autoRunActive) window.toggleAutoRun();
+    generateBoardEvents();
+}
 
-    <div id="controls">
-        <button id="actionBtn" class="main-btn login-glow" onclick="startGame()">LOGIN</button>
-        <div id="autoRunArea"></div>
-    </div>
+window.respawn = function() {
+    meta.hp = meta.maxHpBase;
+    isGameOver = false;
+    updateUI();
+}
 
-    <script src="game.js"></script>
-</body>
-</html>
+window.buyItem = function(type) {
+    if (!isGameOver) return;
+
+    if (type === 'hp') {
+        let cost = (meta.hpUpgrades + 1) * 50;
+        if (meta.money >= cost) {
+            playSound('buy');
+            meta.maxHpBase += 5; 
+            meta.money -= cost;
+            meta.hpUpgrades++;
+        }
+    } else if (type === 'atk') {
+        let cost = (meta.atkUpgrades + 1) * 50;
+        if (meta.money >= cost) {
+            playSound('buy');
+            meta.attackPower += 5; 
+            meta.money -= cost;
+            meta.atkUpgrades++;
+        }
+    } else if (type === 'auto') {
+        let cost = 1000 + (meta.autoRunLevel * 500);
+        if (meta.money >= cost && meta.bossesKilled > meta.autoRunLevel) {
+            playSound('buy');
+            meta.money -= cost;
+            meta.autoRunLevel++;
+        }
+    }
+    updateUI();
+};
+
+window.toggleAutoRun = function() {
+    if (meta.autoRunLevel === 0 || isGameOver) return;
+    autoRunActive = !autoRunActive;
+    if (autoRunActive) {
+        autoRunInterval = setInterval(() => { if(inFight) attackMonster(); else playerMove(); }, 1000);
+    } else {
+        clearInterval(autoRunInterval);
+    }
+    updateUI();
+};
+
+function updateUI() {
+    if(meta.currentRound > highscore.bestRound) { highscore.bestRound = meta.currentRound; highscore.bestName = meta.playerName; }
+    localStorage.setItem("cdp_rpg_meta", JSON.stringify(meta));
+    localStorage.setItem("cdp_rpg_high", JSON.stringify(highscore));
+
+    document.getElementById("statusPanel").innerHTML = `
+        <b style="color:gold;">🏆 REKORD: ${highscore.bestName} (R${highscore.bestRound})</b><br>
+        👤 <b>${meta.playerName}</b> | Gold: ${meta.money} | R: ${meta.currentRound}<br>
+        ❤️ HP: ${Math.max(0, meta.hp)}/${meta.maxHpBase} | ⚔️ ATK: ${meta.attackPower}`;
+
+    const arena = document.getElementById("battle-arena");
+    if(isGameOver) {
+        arena.innerHTML = `<b style="color:red; font-size:20px;">GAME OVER</b><br><span style="font-size:12px;">Nutze den Schwarzmarkt oder starte neu!</span>`;
+    } else if(inFight && monster) {
+        arena.innerHTML = `<img src="${monster.img}" style="height:60px;"><br><b style="color:red;">${monster.name} (HP: ${monster.hp} | ATK: ${monster.atk})</b>`;
+    } else {
+        arena.innerHTML = `<div style="color:gray;">Wandern...</div>`;
+    }
+
+    const b = document.getElementById("board");
+    b.innerHTML = "";
+    for (let i = 0; i < 30; i++) {
+        let icon = i === playerPos ? "🧙" : (boardEvents[i] === "frog" ? "🐸" : (boardEvents[i] === "wolf" ? "🐺" : (boardEvents[i] === "bear" ? "🐻" : (boardEvents[i] === "gold" ? "💰" : ""))));
+        b.innerHTML += `<div class="cell">${icon}</div>`;
+    }
+
+    let hpCost = (meta.hpUpgrades + 1) * 50;
+    let atkCost = (meta.atkUpgrades + 1) * 50;
+
+    document.getElementById("schwarzmarkt").innerHTML = `
+        <div style="color:red; font-weight:bold; margin-bottom:5px; font-size:12px;">SCHWARZMARKT (Nur bei Game Over)</div>
+        <button class="buy-btn" ${!isGameOver ? 'disabled' : ''} style="background:green; color:white;" onclick="buyItem('hp')">+5 HP (${hpCost}G)</button>
+        <button class="buy-btn" ${!isGameOver ? 'disabled' : ''} style="background:orange; color:white;" onclick="buyItem('atk')">+5 ATK (${atkCost}G)</button>
+        <button class="buy-btn" ${!isGameOver ? 'disabled' : ''} style="background:purple; color:white;" onclick="buyItem('auto')">AUTO Lvl ${meta.autoRunLevel+1}</button>`;
+
+    const actionBtn = document.getElementById("actionBtn");
+    if(!gameStarted) {
+        actionBtn.innerHTML = "LOGIN";
+        actionBtn.className = "main-btn login-glow";
+        actionBtn.onclick = window.startGame;
+    } else if (isGameOver) {
+        actionBtn.innerHTML = "WEITERKÄMPFEN";
+        actionBtn.className = "main-btn";
+        actionBtn.style.background = "green";
+        actionBtn.onclick = window.respawn;
+    } else {
+        actionBtn.innerHTML = inFight ? "Angriff" : "Laufen";
+        actionBtn.className = "main-btn";
+        actionBtn.style.background = "linear-gradient(#dc2626, #991b1b)";
+        actionBtn.style.boxShadow = "none";
+        actionBtn.style.color = "white";
+        actionBtn.style.border = "2px solid gold";
+        actionBtn.onclick = inFight ? window.attackMonster : window.playerMove;
+        
+        document.getElementById("autoRunArea").innerHTML = `
+            <button onclick="toggleAutoRun()" style="width:100%; margin-top:8px; padding:10px; border-radius:10px; border:none; background:${autoRunActive ? 'red' : '#333'}; color:white; font-weight:bold;">
+                AUTORUN: ${autoRunActive ? 'AN' : 'AUS'} (Lvl ${meta.autoRunLevel})
+            </button>`;
+    }
+}
