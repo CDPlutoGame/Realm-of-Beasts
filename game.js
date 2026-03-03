@@ -9,23 +9,24 @@ let monster = null;
 let boardEvents = [];
 let gameStarted = false;
 
-// --- START FUNKTION ---
+// --- SPIEL STARTEN ---
 window.startGame = function() {
     gameStarted = true;
     generateBoardEvents();
     updateUI();
 };
 
-// --- EVENTS (GOLDSÄCKE WIEDER DABEI) ---
+// --- BRETT EVENTS (MONSTER & GOLDSÄCKE) ---
 function generateBoardEvents() {
     boardEvents = new Array(30).fill(null);
     for (let i = 1; i < 30; i++) {
         let r = Math.random();
-        if (r < 0.2) boardEvents[i] = "frog"; // Monster
-        else if (r < 0.35) boardEvents[i] = "money_coin"; // Goldsäcke 💰
+        if (r < 0.3) boardEvents[i] = "frog";      // 🐸
+        else if (r < 0.15) boardEvents[i] = "gold"; // 💰
     }
 }
 
+// --- LAUFEN ---
 window.playerMove = function() {
     if(!gameStarted || inFight) return;
     playerPos += getRandom(1, 4);
@@ -37,16 +38,17 @@ window.playerMove = function() {
     } else {
         let ev = boardEvents[playerPos];
         if (ev === "frog") {
-            monster = { name: "Frosch", hp: 15, maxHp: 15, atk: 5, money: 12, img: "images/frog.png" };
+            monster = { name: "Frosch", hp: 15, maxHp: 15, atk: 5, money: 12 };
             inFight = true;
-        } else if (ev === "money_coin") {
-            meta.money += 20; // Gold sammeln
+        } else if (ev === "gold") {
+            meta.money += 20;
         }
         boardEvents[playerPos] = null;
     }
     updateUI();
 };
 
+// --- KÄMPFEN ---
 window.attackMonster = function() {
     if(!monster) return;
     monster.hp -= meta.attackPower;
@@ -63,39 +65,44 @@ window.attackMonster = function() {
         }
     }
     updateUI();
-};
+}
 
+// --- UI UPDATE (ALTES DESIGN) ---
 function updateUI() {
-    // Status Panel
+    // Status oben
     const status = document.getElementById("statusPanel");
     if(status) {
-        status.innerHTML = `<div style="background:#1a1a1a; padding:10px; border:1px solid gold; border-radius:8px; color:white; font-size:12px;">
-            Gold: ${meta.money} | Runde: ${meta.currentRound} | HP: ${meta.hp}/${meta.maxHpBase}</div>`;
+        status.innerHTML = `<h2 style="color:white;">Gold: ${meta.money} | Runde: ${meta.currentRound}</h2>`;
     }
 
-    // Brett mit Goldsäcken
+    // Brett in der Mitte
     const b = document.getElementById("board"); 
     if(b) {
         b.innerHTML = "";
         for (let i = 0; i < 30; i++) {
-            const c = document.createElement("div"); c.className = "cell";
+            const c = document.createElement("div");
+            c.style = "width:40px; height:40px; background:#333; display:inline-block; margin:2px; vertical-align:top; line-height:40px; text-align:center; font-size:20px; border-radius:5px;";
             if (i === playerPos) c.innerHTML = "🧙"; 
             else if (boardEvents[i] === "frog") c.innerHTML = "🐸";
-            else if (boardEvents[i] === "money_coin") c.innerHTML = "💰"; 
+            else if (boardEvents[i] === "gold") c.innerHTML = "💰"; 
             b.appendChild(c);
         }
     }
 
-    // TASTE UNTEN (Steuerungs-Bereich)
-    const fightP = document.getElementById("fightPanel");
-    if(fightP) {
+    // Tasten UNTEN
+    const control = document.getElementById("controls");
+    if(control) {
         if(!gameStarted) {
-            fightP.innerHTML = `<button onclick="startGame()" style="background: #4285f4; color: white; width: 100%; padding: 20px; border-radius: 10px; font-weight: bold;">SPIEL LADEN</button>`;
+            control.innerHTML = `<button onclick="startGame()" style="width:100%; padding:25px; background:blue; color:white; font-weight:bold; font-size:20px; border:none; border-radius:10px;">SPIEL LADEN</button>`;
         } else {
-            fightP.innerHTML = `<button onclick="${inFight ? 'attackMonster()' : 'playerMove()'}" 
-                style="background: linear-gradient(to bottom, #dc2626, #991b1b); color:white; width:100%; padding:20px; border-radius:10px; font-weight:bold; border:2px solid gold;">
-                ${inFight ? 'ANGRIFF' : 'LAUFEN'}
-            </button>`;
+            control.innerHTML = `
+                <div style="background:#222; padding:15px; border-radius:10px; margin-bottom:10px;">
+                    ${inFight ? `<b style="color:red;">GEGNER: ${monster.name} (${monster.hp} HP)</b>` : `<b style="color:green;">WANDERN...</b>`}
+                </div>
+                <button onclick="${inFight ? 'attackMonster()' : 'playerMove()'}" 
+                    style="width:100%; padding:25px; background:red; color:white; font-weight:bold; font-size:20px; border:none; border-radius:10px; border:2px solid gold;">
+                    ${inFight ? 'ANGRIFF' : 'LAUFEN'}
+                </button>`;
         }
     }
 }
