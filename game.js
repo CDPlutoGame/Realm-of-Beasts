@@ -42,44 +42,68 @@ window.startGame = function() {
     document.getElementById("loginOverlay").style.display = "none";
     playRandomMusic();
     gameStarted = true;
-    generateBoardEvents(); // Erstes Board füllen
+    generateBoardEvents();
     updateUI();
 };
 
-// BALANCING: Mehr Gold, sanftere Monster
 function generateBoardEvents() {
     boardEvents = new Array(30).fill(null);
     for (let i = 1; i < 30; i++) {
         let r = Math.random();
-        if (r < 0.35) { // 35% Chance auf Monster
+        if (r < 0.35) {
             if (meta.currentRound <= 10) boardEvents[i] = "frog";
             else if (meta.currentRound <= 20) boardEvents[i] = "wolf";
             else boardEvents[i] = "bear";
-        } else if (r < 0.55) { // 20% Chance auf Gold (Erhöht!)
-            boardEvents[i] = "gold";
-        }
+        } else if (r < 0.55) { boardEvents[i] = "gold"; }
     }
 }
 
 window.playerMove = function() {
     if(!gameStarted || inFight || isGameOver) return;
     playerPos += Math.floor(Math.random() * 4) + 1;
+    
     if (playerPos >= 30) {
         playerPos = 0;
         if (meta.currentRound % 10 === 0) {
-            monster = { name: "BOSS DRACHE", hp: 100 + (meta.currentRound*5), atk: 10 + meta.currentRound, money: 300, img: "images/dragon 1.png" };
+            // DRACHE: Start 1000 LP / 25 ATK. Pro Boss +500 LP / +25 ATK
+            let bossBonus = meta.bossesKilled; 
+            monster = { 
+                name: "BOSS DRACHE", 
+                hp: 1000 + (bossBonus * 500), 
+                atk: 25 + (bossBonus * 25), 
+                money: 300, 
+                img: "images/dragon 1.png" 
+            };
             inFight = true;
         } else { 
             meta.currentRound++; 
-            generateBoardEvents(); // BOARD ERNEUERT SICH JEDE RUNDE
+            generateBoardEvents(); 
         }
     } else {
         let ev = boardEvents[playerPos];
-        let s = meta.currentRound;
-        if (ev === "frog") { monster = { name: "Frosch", hp: 10+s, atk: 3+s, money: 15, img: "images/frog.png" }; inFight = true; }
-        else if (ev === "wolf") { monster = { name: "Wolf", hp: 30+(s*2), atk: 8+s, money: 35, img: "images/wolf.png" }; inFight = true; }
-        else if (ev === "bear") { monster = { name: "Bär", hp: 70+(s*3), atk: 15+s, money: 60, img: "images/bär.png" }; inFight = true; }
-        else if (ev === "gold") { meta.money += (10 + meta.currentRound); }
+        let r = meta.currentRound;
+        
+        // Berechnung der Steigerung: Alle 2 Runden +3 (Mathe: Abgerundet(Runde/2) * 3)
+        let grow = Math.floor(r / 2) * 3;
+
+        // Gold Belohnung nach deinen Regeln
+        let mGold = (r <= 10) ? (Math.floor(Math.random()*3)+3) : ((r <= 20) ? (Math.floor(Math.random()*4)+5) : 10);
+
+        if (ev === "frog") { 
+            monster = { name: "Frosch", hp: 15 + grow, atk: 10 + grow, money: mGold, img: "images/frog.png" }; 
+            inFight = true; 
+        }
+        else if (ev === "wolf") { 
+            monster = { name: "Wolf", hp: 20 + grow, atk: 15 + grow, money: mGold, img: "images/wolf.png" }; 
+            inFight = true; 
+        }
+        else if (ev === "bear") { 
+            monster = { name: "Bär", hp: 25 + grow, atk: 25 + grow, money: mGold, img: "images/bär.png" }; 
+            inFight = true; 
+        }
+        else if (ev === "gold") { 
+            meta.money += (Math.floor(Math.random()*4)+6); // Sack: 6-9 Gold
+        }
         boardEvents[playerPos] = null;
     }
     updateUI();
@@ -103,7 +127,7 @@ window.respawn = function() {
     meta.hp = meta.maxHpBase;
     playerPos = 0;
     isGameOver = false;
-    generateBoardEvents(); // BOARD ERNEUERT SICH NACH TOD
+    generateBoardEvents();
     updateUI();
 };
 
@@ -129,11 +153,24 @@ window.toggleAutoRun = function() {
 
 function updateUI() {
     localStorage.setItem("cdp_rpg_meta", JSON.stringify(meta));
-    document.getElementById("statusPanel").innerHTML = `<b style="color:#f00; text-shadow:0 0 10px red;">${meta.playerName}</b> | Gold: ${meta.money} | Runde: ${meta.currentRound}<br>❤️ HP: ${Math.max(0, meta.hp)}/${meta.maxHpBase} | ⚔️ ATK: ${meta.attackPower}`;
+    if(document.getElementById("roundDisplay")) document.getElementById("roundDisplay").innerHTML = `RUNDE ${meta.currentRound}`;
+    
+    document.getElementById("statusPanel").innerHTML = `<b style="color:#f00; text-shadow:0 0 10px red;">${meta.playerName}</b> | Gold: ${meta.money} | R: ${meta.currentRound}<br>❤️ HP: ${Math.max(0, meta.hp)}/${meta.maxHpBase} | ⚔️ ATK: ${meta.attackPower}`;
+    
     const arena = document.getElementById("battle-arena");
+    // Wir stellen sicher, dass Monster-Werte im Kampf sichtbar sind
     if(isGameOver) arena.innerHTML = `<b style="color:red; font-size:26px; text-shadow:0 0 15px red;">GEFALLEN</b>`;
-    else if(inFight) arena.innerHTML = `<img src="${monster.img}" style="height:60px; filter:drop-shadow(0 0 10px red);"><br><b style="color:red;">${monster.name}</b>`;
-    else arena.innerHTML = `<div style="color:#444;">Wandere durch das Realm...</div>`;
+    else if(inFight) {
+        arena.innerHTML = `
+            <div style="color:red; font-size:14px;">RUNDE ${meta.currentRound}</div>
+            <img src="${monster.img}" style="height:50px; filter:drop-shadow(0 0 10px red);">
+            <div style="color:red; font-weight:bold;">${monster.name}</div>
+            <div style="font-size:12px;">❤️ ${monster.hp} | ⚔️ ${monster.atk}</div>
+        `;
+    } else {
+        arena.innerHTML = `<div style="color:red; font-size:14px;">RUNDE ${meta.currentRound}</div><div style="color:#444; margin-top:10px;">Suche Gegner...</div>`;
+    }
+
     const b = document.getElementById("board"); b.innerHTML = "";
     for (let i = 0; i < 30; i++) {
         let icon = i === playerPos ? "🧙" : (boardEvents[i] === "frog" ? "🐸" : (boardEvents[i] === "wolf" ? "🐺" : (boardEvents[i] === "bear" ? "🐻" : (boardEvents[i] === "gold" ? "💰" : ""))));
