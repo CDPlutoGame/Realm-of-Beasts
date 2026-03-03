@@ -10,37 +10,4 @@
         #battle-arena { height: 130px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 15px; border: 1px solid #222; border-radius: 10px; }
         #board { display: block; max-width: 360px; margin: 0 auto; line-height: 0; }
         .cell { width: 34px; height: 34px; background: #222; display: inline-block; margin: 2px; line-height: 34px; text-align: center; border-radius: 5px; font-size: 20px; }
-        #schwarzmarkt { margin-top: 20px; padding: 10px; background: #0a0a0a; border: 1px solid #333; border-radius: 10px; }
-        #controls { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.9); padding: 15px; box-sizing: border-box; border-top: 2px solid #444; }
-        .main-btn { width: 100%; padding: 20px; border-radius: 10px; font-size: 20px; font-weight: bold; text-transform: uppercase; cursor: pointer; }
-        .buy-btn { padding: 8px; border-radius: 5px; margin: 3px; font-size: 11px; border: none; font-weight: bold; cursor: pointer; }
-        
-        /* Die leuchtend rote Login-Taste */
-        .login-glow {
-            background: #ff0000 !important;
-            box-shadow: 0 0 25px #ff0000, inset 0 0 10px #8b0000 !important;
-            color: white !important;
-            border: 2px solid #fff !important;
-        }
-    </style>
-</head>
-<body>
-
-    <div id="statusPanel">Bitte einloggen...</div>
-
-    <div id="battle-arena">
-        <div style="color: #444;">Warte auf Login...</div>
-    </div>
-
-    <div id="board"></div>
-
-    <div id="schwarzmarkt"></div>
-
-    <div id="controls">
-        <button id="actionBtn" class="main-btn login-glow" onclick="startGame()">LOGIN</button>
-        <div id="autoRunArea"></div>
-    </div>
-
-    <script src="game.js"></script>
-</body>
-</html>
+        #schwarzmarkt { margin-top: 20
