@@ -27,7 +27,6 @@ const sounds = {
 let bgMusic = null;
 const musicTracks = ['sounds/music/bg1.mp3', 'sounds/music/bg2.mp3', 'sounds/music/bg3.mp3'];
 
-// Funktion für den Lautstärkeregler
 window.changeVolume = function(val) {
     if (bgMusic) {
         bgMusic.volume = val / 100;
@@ -39,7 +38,6 @@ function playRandomMusic() {
     if (bgMusic) { bgMusic.pause(); }
     bgMusic = new Audio(randomTrack);
     bgMusic.loop = true;
-    // Setzt die Lautstärke direkt auf den Wert des Sliders
     let currentVol = document.getElementById("volumeSlider").value;
     bgMusic.volume = currentVol / 100;
     bgMusic.play().catch(e => console.log("Musik-Fehler:", e));
