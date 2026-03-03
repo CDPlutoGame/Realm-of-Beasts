@@ -5,17 +5,17 @@ function log(msg) {
     if(lc) lc.innerHTML = "> " + msg + "<br>" + lc.innerHTML; 
 }
 
-// --- HELDEN DATEN ---
+// --- HELDEN DATEN (Bilder laut deiner Liste) ---
 const HERO_DATA = {
-    "Ben":     { class: "Abenteurer", img: "images/Ben.png" },
-    "Jeffrey": { class: "Ritter",      img: "images/jeffry.png" },
+    "Ben":     { class: "Abenteurer", img: "images/Ben.png" }, //
+    "Jeffrey": { class: "Ritter",      img: "images/jeffry.png" }, //
     "Jamal":   { class: "Berserker",   img: "images/jamal.png" },
     "Luna":    { class: "Waldläuferin", img: "images/luna.png" },
     "Berta":   { class: "Magierin",    img: "images/berta.png" },
     "Brutus":  { class: "Schläger",    img: "images/brutus.png" }
 };
 
-// --- SPIEL WERTE ---
+// --- DEINE SPIEL WERTE ---
 let meta = { 
     hp: 20, maxHpBase: 20, money: 0, attackPower: 5, 
     currentRound: 1, bossesKilled: 0, autoRunLevel: 0 
@@ -25,7 +25,6 @@ let playerPos = 0;
 let inFight = false;
 let monster = null;
 let boardEvents = [];
-let shopOpen = false;
 let currentHero = "Ben";
 
 // --- AUTORUN LOGIK ---
@@ -39,19 +38,20 @@ window.toggleAutoRun = function() {
     }
     autoRunActive = !autoRunActive;
     if (autoRunActive) {
+        log("Autorun AKTIVIERT");
         autoRunInterval = setInterval(autoStep, 1000);
     } else {
+        log("Autorun DEAKTIVIERT");
         clearInterval(autoRunInterval);
     }
     updateUI();
 };
 
 function autoStep() {
-    // Stopp-Bedingungen für Autorun
     let maxRound = meta.autoRunLevel * 10;
-    if (meta.currentRound > maxRound || (playerPos >= 25 && meta.currentRound % 10 === 0)) {
-        log("Autorun Ziel erreicht / Boss steht bevor!");
-        window.toggleAutoRun();
+    // Stoppt vor dem Boss oder am Ende der Stufe
+    if (meta.currentRound > maxRound || (playerPos >= 26 && meta.currentRound % 10 === 0)) {
+        if(autoRunActive) window.toggleAutoRun();
         return;
     }
     if (inFight) window.attackMonster();
@@ -68,7 +68,7 @@ function loadData() {
     if(m) meta = JSON.parse(m);
     const h = localStorage.getItem("game_highscore");
     if(h) highscore = JSON.parse(h);
-    generateBoardEvents();
+    if (!boardEvents.length) generateBoardEvents();
 }
 
 function saveData() {
@@ -97,7 +97,8 @@ window.playerMove = function() {
     if (playerPos >= 30) {
         playerPos = 0;
         if (meta.currentRound % 10 === 0) {
-            monster = { name: "BOSS", hp: 100 + (meta.currentRound * 5), maxHp: 100 + (meta.currentRound * 5), atk: 10 + meta.currentRound, money: 200, isBoss: true, img: "images/dragon 1.png" };
+            // Boss Drache
+            monster = { name: "BOSS DRACHE", hp: 150, maxHp: 150, atk: 15, money: 500, isBoss: true, img: "images/dragon 1.png" };
             inFight = true;
         } else {
             meta.currentRound++;
@@ -141,24 +142,17 @@ window.attackMonster = function() {
     updateUI();
 };
 
-// --- SCHWARZMARKT LOGIK ---
 window.buyItem = function(type) {
-    let cost = 50;
-    if (type === 'auto') cost = 1000 + (meta.autoRunLevel * 500);
-
-    if (meta.money >= cost) {
-        if (type === 'hp') { meta.maxHpBase += 5; meta.hp = meta.maxHpBase; meta.money -= 50; }
-        else if (type === 'atk') { meta.attackPower += 2; meta.money -= 50; }
-        else if (type === 'auto') {
-            if (meta.bossesKilled > meta.autoRunLevel) {
-                meta.autoRunLevel++;
-                meta.money -= cost;
-                log("Autorun Stufe " + meta.autoRunLevel + " freigeschaltet!");
-            } else {
-                log("Besiege erst den nächsten Boss!");
-            }
-        }
-    } else { log("Zu wenig Gold!"); }
+    let autoCost = 1000 + (meta.autoRunLevel * 500);
+    if (type === 'hp' && meta.money >= 50) { meta.maxHpBase += 5; meta.hp = meta.maxHpBase; meta.money -= 50; }
+    else if (type === 'atk' && meta.money >= 50) { meta.attackPower += 2; meta.money -= 50; }
+    else if (type === 'auto' && meta.money >= autoCost) {
+        if (meta.bossesKilled > meta.autoRunLevel) {
+            meta.autoRunLevel++;
+            meta.money -= autoCost;
+            log("Autorun Stufe " + meta.autoRunLevel + " gekauft!");
+        } else { log("Besiege erst den Boss!"); }
+    }
     updateUI();
 };
 
@@ -166,7 +160,7 @@ function updateUI() {
     saveData();
     const hero = HERO_DATA[currentHero];
     
-    // Top Panel
+    // Header
     document.getElementById("statusPanel").innerHTML = `
         <div style="background:#1a1a1a; padding:10px; border:1px solid gold; display:flex; gap:10px; align-items:center; border-radius:8px; color:white;">
             <img src="${hero.img}" style="width:40px; height:40px; border:1px solid white;">
@@ -176,42 +170,47 @@ function updateUI() {
             </div>
         </div>`;
 
-    // Kampffenster (Bleibt sauber!)
+    // Kampf-Bereich
     const arena = document.getElementById("battle-arena");
     if(inFight && monster) {
-        arena.innerHTML = `<img src="${monster.img}" style="height:80px;"><div style="color:red;">${monster.name} (${monster.hp} HP)</div>`;
+        arena.innerHTML = `<img src="${monster.img}" style="height:90px; filter: drop-shadow(0 0 10px red);"><div style="color:red; font-weight:bold; margin-top:5px;">${monster.name} (${monster.hp} HP)</div>`;
     } else {
-        arena.innerHTML = `<div style="padding:40px; color:gray;">WANDERN...</div>`;
+        arena.innerHTML = `<div style="padding:40px; color:gray; font-weight:bold;">WANDERN...</div>`;
     }
 
-    // Brett
+    // Brett (Wieder mit deinen Icons!)
     const b = document.getElementById("board"); 
     b.innerHTML = "";
     for (let i = 0; i < 30; i++) {
         const c = document.createElement("div"); c.className = "cell";
         if (i === playerPos) c.innerHTML = "🧙"; 
-        else if (boardEvents[i]) c.innerHTML = "👾";
+        else if (boardEvents[i] === "frog") c.innerHTML = "🐸";
+        else if (boardEvents[i] === "wolf") c.innerHTML = "🐺";
+        else if (boardEvents[i] === "bear") c.innerHTML = "🐻";
+        else if (boardEvents[i] === "money_coin") c.innerHTML = "💰"; 
         b.appendChild(c);
     }
 
-    // Buttons & Autorun (Rot leuchtend wenn an)
-    const runStyle = autoRunActive ? "background:red; box-shadow: 0 0 15px red; color:white;" : "background:#444; color:white;";
+    // Epic Buttons
+    const runGlow = autoRunActive ? "box-shadow: 0 0 20px #ff0000; background: #ff0000; border: 2px solid white;" : "background: #333; border: 1px solid #666;";
     document.getElementById("fightPanel").innerHTML = `
-        <button onclick="${inFight ? 'attackMonster()' : 'playerMove()'}" style="background:blue; color:white; width:100%; padding:15px; margin-bottom:5px; font-weight:bold;">
-            ${inFight ? 'ANGRIFF' : 'WEITER'}
+        <button onclick="${inFight ? 'attackMonster()' : 'playerMove()'}" 
+            style="background: linear-gradient(to bottom, #1d4ed8, #1e3a8a); color:white; width:100%; padding:15px; border-radius:8px; font-weight:bold; border:1px solid gold; box-shadow: 0 0 10px rgba(30,58,138,0.5); margin-bottom:10px; text-transform:uppercase;">
+            ${inFight ? 'ANGRIFF' : 'WÜRFELN'}
         </button>
-        <button onclick="toggleAutoRun()" style="${runStyle} width:100%; padding:10px; border-radius:5px; border:none; font-weight:bold;">
+        <button onclick="toggleAutoRun()" 
+            style="${runGlow} color:white; width:100%; padding:10px; border-radius:8px; font-weight:bold; transition: all 0.3s; text-transform:uppercase; font-size:12px;">
             AUTORUN: ${autoRunActive ? 'AN' : 'AUS'} (Stufe ${meta.autoRunLevel})
         </button>
     `;
 
-    // Schwarzmarkt (Hier sind die Käufe!)
+    // Schwarzmarkt Schrift & Buttons
     document.getElementById("schwarzmarkt").innerHTML = `
-        <div style="color:red; font-weight:bold; margin-bottom:5px;">SCHWARZMARKT</div>
-        <div style="display:flex; gap:5px; justify-content:center;">
-            <button onclick="buyItem('hp')" style="background:green; color:white; padding:5px; font-size:10px;">+5 HP (50G)</button>
-            <button onclick="buyItem('atk')" style="background:orange; color:white; padding:5px; font-size:10px;">+2 ATK (50G)</button>
-            <button onclick="buyItem('auto')" style="background:purple; color:white; padding:5px; font-size:10px;">Auto Lvl ${meta.autoRunLevel+1} (${1000+(meta.autoRunLevel*500)}G)</button>
+        <div style="color:#ff0000; font-weight:bold; text-align:center; letter-spacing:2px; margin-bottom:10px; text-shadow: 0 0 5px black;">SCHWARZMARKT</div>
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button onclick="buyItem('hp')" style="background:#057a1a; color:white; border:none; border-radius:5px; padding:8px 15px; font-weight:bold;">+5 HP (50G)</button>
+            <button onclick="buyItem('atk')" style="background:#b45309; color:white; border:none; border-radius:5px; padding:8px 15px; font-weight:bold;">+2 ATK (50G)</button>
+            <button onclick="buyItem('auto')" style="background:#6d28d9; color:white; border:none; border-radius:5px; padding:8px 15px; font-weight:bold;">AUTO Lvl ${meta.autoRunLevel+1}</button>
         </div>
     `;
 }
