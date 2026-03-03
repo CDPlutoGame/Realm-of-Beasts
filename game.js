@@ -24,10 +24,18 @@ const sounds = {
     win: new Audio('sounds/win.mp3')
 };
 
-// HINTERGRUNDMUSIK
-const bgMusic = new Audio('sounds/music.mp3');
-bgMusic.loop = true; // Musik wiederholt sich endlos
-bgMusic.volume = 0.5; // Lautstärke auf 50%
+// Hintergrundmusik Logik für deine Dateien bg1, bg2, bg3
+let bgMusic = null;
+const musicTracks = ['sounds/music/bg1.mp3', 'sounds/music/bg2.mp3', 'sounds/music/bg3.mp3'];
+
+function playRandomMusic() {
+    const randomTrack = musicTracks[Math.floor(Math.random() * musicTracks.length)];
+    if (bgMusic) { bgMusic.pause(); }
+    bgMusic = new Audio(randomTrack);
+    bgMusic.loop = true;
+    bgMusic.volume = 0.5;
+    bgMusic.play().catch(e => console.log("Musik-Fehler:", e));
+}
 
 function playSound(name) {
     if (sounds[name]) {
@@ -48,8 +56,8 @@ window.startGame = function() {
         meta.playerName = name ? name : "Spieler";
     }
     
-    // Musik starten beim Login
-    bgMusic.play().catch(e => console.log("Musik-Autoplay blockiert:", e));
+    // Zufällige Musik aus deinem Ordner starten
+    playRandomMusic();
 
     gameStarted = true;
     isGameOver = false;
