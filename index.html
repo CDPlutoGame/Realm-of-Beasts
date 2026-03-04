@@ -39,7 +39,7 @@ button{
     cursor:pointer;
 }
 
-#statusPanel,#battlePanel,#log,#shop{
+#statusPanel,#battlePanel,#log,#schwarzmarkt{
     max-width:420px;
     margin:10px auto;
     padding:10px;
@@ -74,6 +74,7 @@ button{
 }
 </style>
 </head>
+
 <body>
 
 <div id="loginOverlay">
@@ -93,14 +94,20 @@ button{
 </div>
 
 <div id="board"></div>
+
 <button onclick="handleAction()">VORWÄRTS / ANGRIFF</button>
-<div id="shop"></div>
+
+<div id="schwarzmarkt"></div>
+
 <div id="log"></div>
 
-<script src="game.js"></script>
-</body>
-    <div style="position:fixed;top:10px;left:10px;">
-<input type="range" min="0" max="100" value="50" 
-oninput="changeVolume(this.value)">
+<!-- Lautstärke oben links -->
+<div style="position:fixed;top:10px;left:10px;">
+    <input type="range" min="0" max="100" value="50"
+    oninput="changeVolume(this.value)">
 </div>
+
+<script src="game.js"></script>
+
+</body>
 </html>
