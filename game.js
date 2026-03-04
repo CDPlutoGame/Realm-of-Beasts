@@ -30,11 +30,15 @@ function log(msg){
 }
 
 function startGame(){
-    const name=document.getElementById("nameInput").value.trim();
+    const name = document.getElementById("nameInput").value.trim();
     if(!name) return alert("Name eingeben!");
-    meta.name=name;
-    document.getElementById("loginOverlay").style.display="none";
+
+    meta.name = name;
+
+    document.getElementById("loginOverlay").style.display = "none";
+
     bgMusic.play().catch(()=>{});
+
     generateBoard();
     updateUI();
 }
