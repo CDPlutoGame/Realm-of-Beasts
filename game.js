@@ -1,7 +1,7 @@
 let meta = {
     name:"",
-    hp:30,
-    maxHp:30,
+    hp:20,
+    maxHp:20,
     attack:5,
     gold:0,
     round:1,
