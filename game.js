@@ -5,7 +5,6 @@ let meta = {
     attack:5,
     gold:0,
     round:1,
-    autoRun:0,
     kills:0,
     bestRound:1
 };
@@ -13,18 +12,16 @@ let meta = {
 let board=[];
 let pos=0;
 let inFight=false;
-let monster=null;
+let monstersInFight=[];
 let autoInterval=null;
 
 let bgMusic = new Audio("sounds/music/bg1.mp3");
 bgMusic.loop = true;
 bgMusic.volume = 0.5;
 
-const monsters=[
-    {name:"frog",hp:10,atk:3,gold:5},
-    {name:"wolf",hp:15,atk:4,gold:8},
-    {name:"bear",hp:25,atk:6,gold:15}
-];
+function changeVolume(val){
+    bgMusic.volume = val/100;
+}
 
 function log(msg){
     const l=document.getElementById("log");
@@ -40,15 +37,24 @@ function startGame(){
     bgMusic.play().catch(()=>{});
     generateBoard();
     updateUI();
-    log("Willkommen im Realm...");
 }
 
 function generateBoard(){
     board=[];
-    for(let i=0;i<29;i++){
-        board.push(Math.random()<0.4?"monster":"empty");
+    for(let i=0;i<25;i++){
+
+        let roll=Math.random();
+
+        if(roll<0.4){
+            board.push("monster");
+        }
+        else if(roll<0.55){
+            board.push("gold");
+        }
+        else{
+            board.push("empty");
+        }
     }
-    board.push("boss");
     drawBoard();
 }
 
@@ -59,91 +65,181 @@ function drawBoard(){
         const d=document.createElement("div");
         d.className="cell";
 
-        if(i===pos){
-            d.innerText="🧙";
-        }else{
-            if(board[i]==="monster") d.innerText="👹";
-            else if(board[i]==="boss") d.innerText="👑";
-            else d.innerText="⬛";
+        if(i===pos) d.innerText="🧙";
+        else if(e==="gold") d.innerText="💰";
+        else if(e==="monster"){
+
+            if(meta.round<=15) d.innerText="🐸";
+            else if(meta.round<=25) d.innerText="🐺";
+            else d.innerText="🐻";
         }
+        else d.innerText="⬛";
 
         b.appendChild(d);
     });
 }
 
 function handleAction(){
+
     if(inFight){
         attack();
         return;
     }
 
-    pos++;
+    let steps = Math.floor(Math.random()*4)+1;
+    pos+=steps;
 
     if(pos>=board.length){
-        log("Runde geschafft!");
         meta.round++;
         pos=0;
         generateBoard();
+        log("Neue Runde beginnt!");
+        updateUI();
         return;
     }
 
-    if(board[pos]==="monster") startFight(false);
-    if(board[pos]==="boss") startFight(true);
+    if(board[pos]==="gold"){
+        let g=Math.floor(Math.random()*4)+6;
+        meta.gold+=g;
+        log("Gold gefunden: "+g);
+        board[pos]="empty";
+    }
+
+    if(board[pos]==="monster"){
+        startFight();
+    }
 
     drawBoard();
     updateUI();
 }
 
-function startFight(isBoss){
-    inFight=true;
+function createMonster(type){
 
-    if(isBoss){
-        monster={name:"boss",hp:40+meta.round*10,atk:8,gold:50};
-    }else{
-        const m=monsters[Math.floor(Math.random()*monsters.length)];
-        monster={...m};
-        monster.hp+=meta.round*3;
+    let baseHp=10;
+    let baseAtk=3;
+    let gold=5;
+
+    if(type==="frog"){
+        baseHp=10;
+        baseAtk=3;
+        gold=5;
+    }
+    if(type==="wolf"){
+        baseHp=20;
+        baseAtk=6;
+        gold=10;
+    }
+    if(type==="bear"){
+        baseHp=35;
+        baseAtk=10;
+        gold=15;
+    }
+
+    let scale = (meta.round-1)*2;
+
+    return {
+        type:type,
+        hp:baseHp+scale,
+        atk:baseAtk+scale,
+        gold:gold
+    };
+}
+
+function startFight(){
+
+    inFight=true;
+    monstersInFight=[];
+
+    if(meta.round<=15){
+
+        if(meta.round>=5){
+            monstersInFight.push(createMonster("frog"));
+            monstersInFight.push(createMonster("frog"));
+        }else{
+            monstersInFight.push(createMonster("frog"));
+        }
+
+    }
+    else if(meta.round<=25){
+
+        if(meta.round>=15){
+            monstersInFight.push(createMonster("wolf"));
+            monstersInFight.push(createMonster("wolf"));
+        }else{
+            if(Math.random()<0.5){
+                monstersInFight.push(createMonster("wolf"));
+            }else{
+                monstersInFight.push(createMonster("frog"));
+                monstersInFight.push(createMonster("frog"));
+            }
+        }
+
+    }
+    else{
+
+        if(meta.round>=22){
+            monstersInFight.push(createMonster("bear"));
+            monstersInFight.push(createMonster("bear"));
+        }else{
+            monstersInFight.push(createMonster("bear"));
+        }
     }
 
     renderFight();
-    log("Ein "+monster.name+" erscheint!");
 }
 
 function renderFight(){
-    const panel=document.getElementById("battlePanel");
-    panel.innerHTML=`
-        <h3>${monster.name.toUpperCase()}</h3>
-        <img src="images/${monster.name}.png">
-        <p>HP: ${monster.hp}</p>
-    `;
+
+    let html="";
+
+    monstersInFight.forEach(m=>{
+        html+=`
+        <div>
+        <img src="images/${m.type}.png" width="80">
+        <p>${m.type.toUpperCase()} HP: ${m.hp}</p>
+        </div>`;
+    });
+
+    document.getElementById("battlePanel").innerHTML=html;
 }
 
 function attack(){
-    monster.hp-=meta.attack;
-    log("Du triffst für "+meta.attack);
 
-    if(monster.hp<=0){
-        log("Monster besiegt!");
-        meta.gold+=monster.gold;
+    if(monstersInFight.length===0) return;
+
+    let target=monstersInFight[0];
+    target.hp-=meta.attack;
+    log("Du triffst "+target.type+" für "+meta.attack);
+
+    if(target.hp<=0){
+        log(target.type+" besiegt!");
+        meta.gold+=target.gold;
         meta.kills++;
+        monstersInFight.shift();
+    }
+
+    if(monstersInFight.length===0){
         inFight=false;
-        monster=null;
+        board[pos]="empty";
+        document.getElementById("battlePanel").innerHTML=
+        "<h3>Die Reise geht weiter...</h3>";
         updateUI();
         return;
     }
 
-    meta.hp-=monster.atk;
-    log(monster.name+" trifft dich für "+monster.atk);
+    monstersInFight.forEach(m=>{
+        meta.hp-=m.atk;
+        log(m.type+" trifft dich für "+m.atk);
+    });
 
     if(meta.hp<=0){
         log("Du bist gefallen... Neue Runde beginnt!");
-        meta.hp = meta.maxHp;
+        meta.hp=meta.maxHp;
         meta.round++;
-        pos = 0;
-        inFight = false;
-        monster = null;
+        pos=0;
+        inFight=false;
+        monstersInFight=[];
         generateBoard();
-        drawBoard();
         updateUI();
         return;
     }
@@ -154,8 +250,8 @@ function attack(){
 
 function updateUI(){
 
-    if(meta.round > meta.bestRound){
-        meta.bestRound = meta.round;
+    if(meta.round>meta.bestRound){
+        meta.bestRound=meta.round;
     }
 
     document.getElementById("statusPanel").innerHTML=`
@@ -168,44 +264,4 @@ function updateUI(){
 <span style="color:red">Kills: ${meta.kills}</span> |
 <span style="color:red">Best: ${meta.bestRound}</span>
 `;
-
-    renderShop();
-}
-
-function renderShop(){
-    document.getElementById("shop").innerHTML=`
-        <button onclick="buyHp()">+5 Max HP (50G)</button>
-        <button onclick="buyAtk()">+2 Angriff (50G)</button>
-        <button onclick="buyAuto()">AutoRun Upgrade (1000G)</button>
-    `;
-}
-
-function buyHp(){
-    if(meta.gold<50)return;
-    meta.gold-=50;
-    meta.maxHp+=5;
-    meta.hp+=5;
-    updateUI();
-}
-
-function buyAtk(){
-    if(meta.gold<50)return;
-    meta.gold-=50;
-    meta.attack+=2;
-    updateUI();
-}
-
-function buyAuto(){
-    if(meta.gold<1000)return;
-    meta.gold-=1000;
-    meta.autoRun++;
-    startAutoRun();
-    updateUI();
-}
-
-function startAutoRun(){
-    if(autoInterval) clearInterval(autoInterval);
-    autoInterval=setInterval(()=>{
-        handleAction();
-    },1000-Math.min(meta.autoRun*150,700));
 }
