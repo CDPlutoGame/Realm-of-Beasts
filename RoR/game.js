@@ -211,42 +211,42 @@ function renderFight(){
 }
 
 function attack(){
-
     if(monstersInFight.length===0) return;
 
-    let target=monstersInFight[0];
-    target.hp-=meta.attack;
-    log("Du triffst "+target.type+" für "+meta.attack);
+    let target = monstersInFight[0];
+    target.hp -= meta.attack;
+    log("Du triffst " + target.type + " für " + meta.attack);
 
-    if(target.hp<=0){
-        log(target.type+" besiegt!");
-        meta.gold+=target.gold;
+    if(target.hp <= 0){
+        log(target.type + " besiegt!");
+        meta.gold += target.gold;
         meta.kills++;
         monstersInFight.shift();
     }
 
-    if(monstersInFight.length===0){
-        inFight=false;
-        min-height:200px;
-        board[pos]="empty";
-        document.getElementById("battlePanel").innerHTML=
-        "<h3>Die Reise geht weiter...</h3>";
+    // 🔥 WENN ALLE MONSTER TOT SIND
+    if(monstersInFight.length === 0){
+        inFight = false;
+        board[pos] = "empty";
+        document.getElementById("battlePanel").innerHTML =
+            "<h3>Die Reise geht weiter...</h3>";
         updateUI();
         return;
     }
 
+    // Monster greifen zurück an
     monstersInFight.forEach(m=>{
-        meta.hp-=m.atk;
-        log(m.type+" trifft dich für "+m.atk);
+        meta.hp -= m.atk;
+        log(m.type + " trifft dich für " + m.atk);
     });
 
-    if(meta.hp<=0){
+    if(meta.hp <= 0){
         log("Du bist gefallen... Neue Runde beginnt!");
-        meta.hp=meta.maxHp;
+        meta.hp = meta.maxHp;
         meta.round++;
-        pos=0;
-        inFight=false;
-        monstersInFight=[];
+        pos = 0;
+        inFight = false;
+        monstersInFight = [];
         generateBoard();
         updateUI();
         return;
