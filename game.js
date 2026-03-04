@@ -87,6 +87,7 @@ function handleAction(){
     }
 
     let steps = Math.floor(Math.random()*4)+1;
+    log("Du bewegst dich "+steps+" Felder vorwärts.");
     pos+=steps;
 
     if(pos>=board.length){
@@ -195,9 +196,11 @@ function renderFight(){
     monstersInFight.forEach(m=>{
         html+=`
         <div>
-        <img src="images/${m.type}.png" width="80">
-        <p>${m.type.toUpperCase()} HP: ${m.hp}</p>
-        </div>`;
+            <img src="images/${m.type}.png" width="120">
+            <p>HP: ${m.hp}</p>
+            <p>Kraft: ${m.atk}</p>
+        </div>
+        `;
     });
 
     document.getElementById("battlePanel").innerHTML=html;
@@ -220,6 +223,7 @@ function attack(){
 
     if(monstersInFight.length===0){
         inFight=false;
+        min-height:200px;
         board[pos]="empty";
         document.getElementById("battlePanel").innerHTML=
         "<h3>Die Reise geht weiter...</h3>";
