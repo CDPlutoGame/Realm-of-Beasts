@@ -5,7 +5,9 @@ let meta = {
     attack:5,
     gold:0,
     round:1,
-    autoRun:0
+    autoRun:0,
+    kills:0,
+    bestRound:1
 };
 
 let board=[];
@@ -13,6 +15,10 @@ let pos=0;
 let inFight=false;
 let monster=null;
 let autoInterval=null;
+
+let bgMusic = new Audio("sounds/music/bg1.mp3");
+bgMusic.loop = true;
+bgMusic.volume = 0.5;
 
 const monsters=[
     {name:"frog",hp:10,atk:3,gold:5},
@@ -31,6 +37,7 @@ function startGame(){
     if(!name) return alert("Name eingeben!");
     meta.name=name;
     document.getElementById("loginOverlay").style.display="none";
+    bgMusic.play().catch(()=>{});
     generateBoard();
     updateUI();
     log("Willkommen im Realm...");
@@ -51,7 +58,15 @@ function drawBoard(){
     board.forEach((e,i)=>{
         const d=document.createElement("div");
         d.className="cell";
-        d.innerText=i===pos?"🧙":"?";
+
+        if(i===pos){
+            d.innerText="🧙";
+        }else{
+            if(board[i]==="monster") d.innerText="👹";
+            else if(board[i]==="boss") d.innerText="👑";
+            else d.innerText="⬛";
+        }
+
         b.appendChild(d);
     });
 }
@@ -63,6 +78,7 @@ function handleAction(){
     }
 
     pos++;
+
     if(pos>=board.length){
         log("Runde geschafft!");
         meta.round++;
@@ -109,9 +125,9 @@ function attack(){
     if(monster.hp<=0){
         log("Monster besiegt!");
         meta.gold+=monster.gold;
+        meta.kills++;
         inFight=false;
         monster=null;
-        document.getElementById("battlePanel").innerHTML="Sieg!";
         updateUI();
         return;
     }
@@ -120,8 +136,16 @@ function attack(){
     log(monster.name+" trifft dich für "+monster.atk);
 
     if(meta.hp<=0){
-        alert("Game Over!");
-        location.reload();
+        log("Du bist gefallen... Neue Runde beginnt!");
+        meta.hp = meta.maxHp;
+        meta.round++;
+        pos = 0;
+        inFight = false;
+        monster = null;
+        generateBoard();
+        drawBoard();
+        updateUI();
+        return;
     }
 
     renderFight();
@@ -129,42 +153,51 @@ function attack(){
 }
 
 function updateUI(){
-    document.getElementById("statusPanel").innerHTML=
-        meta.name+
-        " | HP: "+meta.hp+"/"+meta.maxHp+
-        " | Gold: "+meta.gold+
-        " | Angriff: "+meta.attack+
-        " | Runde: "+meta.round;
+
+    if(meta.round > meta.bestRound){
+        meta.bestRound = meta.round;
+    }
+
+    document.getElementById("statusPanel").innerHTML=`
+<b>STATUS</b><br>
+<span style="color:lime">${meta.name}</span> |
+<span style="color:red">HP: ${meta.hp}/${meta.maxHp}</span> |
+<span style="color:gold">Gold: ${meta.gold}</span> |
+<span style="color:red">Angriff: ${meta.attack}</span> |
+<span style="color:red">Runde: ${meta.round}</span> |
+<span style="color:red">Kills: ${meta.kills}</span> |
+<span style="color:red">Best: ${meta.bestRound}</span>
+`;
 
     renderShop();
 }
 
 function renderShop(){
     document.getElementById("shop").innerHTML=`
-        <button onclick="buyHp()">+5 Max HP (20G)</button>
-        <button onclick="buyAtk()">+2 Angriff (20G)</button>
-        <button onclick="buyAuto()">AutoRun Upgrade (50G)</button>
+        <button onclick="buyHp()">+5 Max HP (50G)</button>
+        <button onclick="buyAtk()">+2 Angriff (50G)</button>
+        <button onclick="buyAuto()">AutoRun Upgrade (1000G)</button>
     `;
 }
 
 function buyHp(){
-    if(meta.gold<20)return;
-    meta.gold-=20;
+    if(meta.gold<50)return;
+    meta.gold-=50;
     meta.maxHp+=5;
     meta.hp+=5;
     updateUI();
 }
 
 function buyAtk(){
-    if(meta.gold<20)return;
-    meta.gold-=20;
+    if(meta.gold<50)return;
+    meta.gold-=50;
     meta.attack+=2;
     updateUI();
 }
 
 function buyAuto(){
-    if(meta.gold<50)return;
-    meta.gold-=50;
+    if(meta.gold<1000)return;
+    meta.gold-=1000;
     meta.autoRun++;
     startAutoRun();
     updateUI();
