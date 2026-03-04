@@ -1,17 +1,7 @@
-// 1. Variablen & Status (Meta)
 let meta = { 
-    playerName: "", 
-    hp: 20, 
-    maxHpBase: 20, 
-    money: 0, 
-    attackPower: 5, 
-    currentRound: 1, 
-    bossesKilled: 0, 
-    autoRunLevel: 0, 
-    hpUpgrades: 0, 
-    atkUpgrades: 0
+    playerName: "", hp: 20, maxHpBase: 20, money: 0, attackPower: 5, 
+    currentRound: 1, bossesKilled: 0, autoRunLevel: 0, hpUpgrades: 0, atkUpgrades: 0
 };
-
 let playerPos = 0;
 let inFight = false;
 let monster = null;
@@ -24,58 +14,44 @@ let bgMusic = null;
 
 const musicTracks = ['sounds/music/bg1.mp3', 'sounds/music/bg2.mp3', 'sounds/music/bg3.mp3'];
 
-// 2. Musik-Steuerung (Global für HTML-Slider)
+// Lautstärke-Funktion (muss global sein für oninput im HTML)
 window.changeVolume = function(val) { 
     if (bgMusic) bgMusic.volume = val / 100; 
 };
 
 function playRandomMusic() {
-    try {
-        const track = musicTracks[Math.floor(Math.random() * musicTracks.length)];
-        if (bgMusic) bgMusic.pause();
-        bgMusic = new Audio(track);
-        bgMusic.loop = true;
-        bgMusic.volume = document.getElementById("volumeSlider").value / 100;
-        bgMusic.play().catch(e => console.log("Musik-Autoplay blockiert, warte auf Interaktion."));
-    } catch(e) {
-        console.error("Musik konnte nicht geladen werden:", e);
-    }
+    const track = musicTracks[Math.floor(Math.random() * musicTracks.length)];
+    if (bgMusic) bgMusic.pause();
+    bgMusic = new Audio(track);
+    bgMusic.loop = true;
+    // Sucht den Slider-Wert aus deinem HTML
+    const vol = document.getElementById("volumeSlider") ? document.getElementById("volumeSlider").value : 50;
+    bgMusic.volume = vol / 100;
+    bgMusic.play().catch(() => { console.log("Musik braucht Klick zum Starten"); });
 }
 
-// 3. Laden beim Starten der Seite
 window.onload = function() {
     const saved = localStorage.getItem("cdp_rpg_meta");
     if(saved) {
         const d = JSON.parse(saved);
-        if(d.playerName) {
-            document.getElementById("playerNameInput").value = d.playerName;
-        }
+        if(d.playerName) document.getElementById("playerNameInput").value = d.playerName;
     }
-    console.log("Seite geladen, bereit für Login.");
 };
 
-// 4. DIE START-FUNKTION (Wird vom Button gerufen)
+// DER START-BUTTON
 window.startGame = function() {
     const nameInput = document.getElementById("playerNameInput");
     const name = nameInput.value.trim();
     
-    if (name === "") {
-        alert("Nenne deinen Namen!");
-        return;
-    }
-
-    // Speicherstand laden falls vorhanden
+    if (name === "") return alert("Nenne deinen Namen!");
+    
     const saved = localStorage.getItem("cdp_rpg_meta");
-    if(saved) {
-        meta = JSON.parse(saved);
-    }
+    if(saved) meta = JSON.parse(saved);
     
     meta.playerName = name;
     
-    // UI ausblenden & Spiel starten
+    // Versteckt dein Login-Overlay
     document.getElementById("loginOverlay").style.display = "none";
-    
-    console.log("Spiel gestartet für: " + meta.playerName);
     
     playRandomMusic();
     gameStarted = true;
@@ -83,59 +59,79 @@ window.startGame = function() {
     updateUI();
 };
 
-// 5. Spiel-Logik (Events generieren)
+// DIE AKTION (VORWÄRTS) - Verknüpft mit deinem actionBtn
+window.handleAction = function() {
+    if (!gameStarted || isGameOver) return;
+
+    if (!inFight) {
+        if (playerPos < 29) {
+            playerPos++;
+            checkEvent();
+        } else {
+            // Neue Runde
+            playerPos = 0;
+            meta.currentRound++;
+            generateBoardEvents();
+        }
+    } else {
+        // Hier käme deine Kampf-Logik rein
+        console.log("Kampf läuft...");
+    }
+    updateUI();
+};
+
 function generateBoardEvents() {
     boardEvents = new Array(30).fill(null);
     for (let i = 1; i < 30; i++) {
         let r = Math.random();
         if (r < 0.35) {
+            // Deine Monster-Logik
             if (meta.currentRound <= 10) boardEvents[i] = "frog";
             else if (meta.currentRound <= 20) boardEvents[i] = "wolf";
             else boardEvents[i] = "bear";
         } else if (r < 0.50) {
-            boardEvents[i] = "item";
+            boardEvents[i] = "gold"; // Der Goldsack
         }
     }
-    console.log("Spielfeld generiert.");
 }
 
-// 6. UI Aktualisierung
+function checkEvent() {
+    const ev = boardEvents[playerPos];
+    if (ev === "gold") {
+        meta.money += 5;
+        boardEvents[playerPos] = null;
+    } else if (ev === "frog" || ev === "wolf" || ev === "bear") {
+        // Hier setzt du inFight = true für den Kampf
+    }
+}
+
 function updateUI() {
+    // Status Panel
     const status = document.getElementById("statusPanel");
     if (status) {
-        status.innerHTML = `
-            <strong>${meta.playerName}</strong> | 
-            HP: ${meta.hp}/${meta.maxHpBase} | 
-            Gold: ${meta.money} | 
-            Power: ${meta.attackPower} | 
-            Runde: ${meta.currentRound}
-        `;
+        status.innerHTML = `Held: ${meta.playerName} | HP: ${meta.hp}/${meta.maxHpBase} | Gold: ${meta.money} | Runde: ${meta.currentRound}`;
     }
-    
-    // Board zeichnen
+
+    // Spielfeld (Board)
     const board = document.getElementById("board");
-    if(board) {
+    if (board) {
         board.innerHTML = "";
         boardEvents.forEach((event, index) => {
             const cell = document.createElement("div");
             cell.className = "cell";
-            if(index === playerPos) cell.innerHTML = "👤";
-            else if(event === "frog") cell.innerHTML = "🐸";
-            else if(event === "wolf") cell.innerHTML = "🐺";
-            else if(event === "bear") cell.innerHTML = "🐻";
-            else if(event === "item") cell.innerHTML = "💰";
+            if (index === playerPos) cell.innerHTML = "👤";
+            else if (event === "frog") cell.innerHTML = "🐸";
+            else if (event === "wolf") cell.innerHTML = "🐺";
+            else if (event === "bear") cell.innerHTML = "🐻";
+            else if (event === "gold") cell.innerHTML = "💰"; // Sack bleibt Sack
             else cell.innerHTML = "·";
             board.appendChild(cell);
         });
     }
 
-    const actionBtn = document.getElementById("actionBtn");
-    if(actionBtn) {
-        actionBtn.innerText = inFight ? "ANGREIFEN!" : "VORWÄRTS GEHEN";
+    // Button Text anpassen
+    const btn = document.getElementById("actionBtn");
+    if (btn) {
+        btn.innerText = inFight ? "ANGREIFEN" : "VORWÄRTS";
     }
-}
-
-// Speichern-Funktion (kannst du regelmäßig aufrufen)
-function saveGame() {
-    localStorage.setItem("cdp_rpg_meta", JSON.stringify(meta));
 }
