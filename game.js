@@ -1,137 +1,33 @@
-let meta = { 
-    playerName: "", hp: 20, maxHpBase: 20, money: 0, attackPower: 5, 
-    currentRound: 1, bossesKilled: 0, autoRunLevel: 0, hpUpgrades: 0, atkUpgrades: 0
-};
-let playerPos = 0;
-let inFight = false;
-let monster = null;
-let boardEvents = [];
-let gameStarted = false;
-let isGameOver = false;
-let autoRunActive = false;
-let autoRunInterval = null;
-let bgMusic = null;
-
-const musicTracks = ['sounds/music/bg1.mp3', 'sounds/music/bg2.mp3', 'sounds/music/bg3.mp3'];
-
-// Lautstärke-Funktion (muss global sein für oninput im HTML)
-window.changeVolume = function(val) { 
-    if (bgMusic) bgMusic.volume = val / 100; 
-};
-
-function playRandomMusic() {
-    const track = musicTracks[Math.floor(Math.random() * musicTracks.length)];
-    if (bgMusic) bgMusic.pause();
-    bgMusic = new Audio(track);
-    bgMusic.loop = true;
-    // Sucht den Slider-Wert aus deinem HTML
-    const vol = document.getElementById("volumeSlider") ? document.getElementById("volumeSlider").value : 50;
-    bgMusic.volume = vol / 100;
-    bgMusic.play().catch(() => { console.log("Musik braucht Klick zum Starten"); });
-}
-
-window.onload = function() {
-    const saved = localStorage.getItem("cdp_rpg_meta");
-    if(saved) {
-        const d = JSON.parse(saved);
-        if(d.playerName) document.getElementById("playerNameInput").value = d.playerName;
-    }
-};
-
-// DER START-BUTTON
-window.startGame = function() {
-    const nameInput = document.getElementById("playerNameInput");
-    const name = nameInput.value.trim();
-    
-    if (name === "") return alert("Nenne deinen Namen!");
-    
-    const saved = localStorage.getItem("cdp_rpg_meta");
-    if(saved) meta = JSON.parse(saved);
-    
-    meta.playerName = name;
-    
-    // Versteckt dein Login-Overlay
-    document.getElementById("loginOverlay").style.display = "none";
-    
-    playRandomMusic();
-    gameStarted = true;
-    generateBoardEvents();
-    updateUI();
-};
-
-// DIE AKTION (VORWÄRTS) - Verknüpft mit deinem actionBtn
-window.handleAction = function() {
-    if (!gameStarted || isGameOver) return;
-
-    if (!inFight) {
-        if (playerPos < 29) {
-            playerPos++;
-            checkEvent();
-        } else {
-            // Neue Runde
-            playerPos = 0;
-            meta.currentRound++;
-            generateBoardEvents();
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CDPluto RPG - Realm</title>
+    <style>
+        body { 
+            background: #000 url('images/dungeon.png') no-repeat center center fixed; 
+            background-size: cover; color: #fff; font-family: 'Segoe UI', Arial, sans-serif; 
+            text-align: center; margin: 0; padding: 10px; padding-bottom: 220px; overflow-x: hidden;
         }
-    } else {
-        // Hier käme deine Kampf-Logik rein
-        console.log("Kampf läuft...");
-    }
-    updateUI();
-};
-
-function generateBoardEvents() {
-    boardEvents = new Array(30).fill(null);
-    for (let i = 1; i < 30; i++) {
-        let r = Math.random();
-        if (r < 0.35) {
-            // Deine Monster-Logik
-            if (meta.currentRound <= 10) boardEvents[i] = "frog";
-            else if (meta.currentRound <= 20) boardEvents[i] = "wolf";
-            else boardEvents[i] = "bear";
-        } else if (r < 0.50) {
-            boardEvents[i] = "gold"; // Der Goldsack
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95); display: flex; justify-content: center; align-items: center; z-index: 10000;
         }
-    }
-}
-
-function checkEvent() {
-    const ev = boardEvents[playerPos];
-    if (ev === "gold") {
-        meta.money += 5;
-        boardEvents[playerPos] = null;
-    } else if (ev === "frog" || ev === "wolf" || ev === "bear") {
-        // Hier setzt du inFight = true für den Kampf
-    }
-}
-
-function updateUI() {
-    // Status Panel
-    const status = document.getElementById("statusPanel");
-    if (status) {
-        status.innerHTML = `Held: ${meta.playerName} | HP: ${meta.hp}/${meta.maxHpBase} | Gold: ${meta.money} | Runde: ${meta.currentRound}`;
-    }
-
-    // Spielfeld (Board)
-    const board = document.getElementById("board");
-    if (board) {
-        board.innerHTML = "";
-        boardEvents.forEach((event, index) => {
-            const cell = document.createElement("div");
-            cell.className = "cell";
-            if (index === playerPos) cell.innerHTML = "👤";
-            else if (event === "frog") cell.innerHTML = "🐸";
-            else if (event === "wolf") cell.innerHTML = "🐺";
-            else if (event === "bear") cell.innerHTML = "🐻";
-            else if (event === "gold") cell.innerHTML = "💰"; // Sack bleibt Sack
-            else cell.innerHTML = "·";
-            board.appendChild(cell);
-        });
-    }
-
-    // Button Text anpassen
-    const btn = document.getElementById("actionBtn");
-    if (btn) {
-        btn.innerText = inFight ? "ANGREIFEN" : "VORWÄRTS";
-    }
-}
+        #loginBox {
+            background: #000; border: 3px solid #ff0000; border-radius: 20px;
+            box-shadow: 0 0 40px #ff0000, inset 0 0 20px #ff0000; padding: 40px 20px; width: 85%; max-width: 400px;
+        }
+        .realm-title {
+            color: #ff0000; font-size: 32px; font-weight: bold; text-transform: uppercase;
+            margin-bottom: 25px; letter-spacing: 5px; text-shadow: 0 0 20px #ff0000;
+        }
+        #playerNameInput {
+            width: 85%; padding: 15px; background: #111; border: 2px solid #ff0000;
+            color: #fff; text-align: center; font-size: 20px; border-radius: 10px; margin-bottom: 25px; outline: none;
+        }
+        #statusPanel { 
+            background: rgba(0, 0, 0, 0.85); border: 2px solid #ff0000; border-radius: 12px; 
+            padding: 12px; margin-bottom: 10px; box-shadow: 0 0 15px #ff0000;
+        }
+        #musicControl { background: rgba(0, 0, 0, 0.8); border: 1px solid #444; border-radius: 10px; padding: 8px; margin-bottom: 10px; display: flex; align-items:
