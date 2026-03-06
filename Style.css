@@ -1,0 +1,17 @@
+:root {
+  --gold: #f0c040; --gold2: #c8960c; --red: #cc2200; --darkred: #7a0000;
+  --bg: #0a0507; --panel: rgba(10,3,3,0.88); --border: #6b2020;
+  --green: #22dd66; --blue: #4488ff; --text: #e8d5b0; --diamond: #44ddff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { 
+  background: var(--bg); 
+  color: var(--text); 
+  font-family: 'Cinzel', serif; 
+  min-height: 100vh; 
+  overflow-x: hidden; 
+}
+
+/* ... hier den restlichen CSS-Code einfügen ... */
