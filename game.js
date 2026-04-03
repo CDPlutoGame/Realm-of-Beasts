@@ -411,7 +411,7 @@ function randomDrop(rates,pool){
 // GAME STATE
 // ============================================================
 
-let G={keys:3,rankIdx:0,winStreak:0,lossStreak:0,inventory:null,totalFights:0,totalWins:0,selectedDame:'v',
+let G={keys:0,rankIdx:0,winStreak:0,lossStreak:0,inventory:null,totalFights:0,totalWins:0,selectedDame:'v',
   questStats:null, questDone:{}, coins:0, shopOwned:{dragon:false,jungle:false,ocean_p:false,space:false}
 };
 
@@ -563,10 +563,10 @@ function removeDrawEvents(c){
   c.removeEventListener('touchend',onDrawEnd);
 }
 
-function save(){localStorage.setItem('cw_v4',JSON.stringify(G));}
+function save(){localStorage.setItem('cw_v5',JSON.stringify(G));}
 function load(){
   try{
-    const d=localStorage.getItem('cw_v4')||localStorage.getItem('cw_v3');
+    const d=localStorage.getItem('cw_v5');
     if(d){G=JSON.parse(d);if(G.collection&&!G.inventory){G.inventory=defaultInventory();}delete G.collection;if(!G.selectedDame)G.selectedDame='v';}
   }catch(e){}
   initQuestStats();
